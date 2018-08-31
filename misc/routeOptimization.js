@@ -63,7 +63,7 @@ module.exports = {
                        return body.routes[0].duration
                    })
                    .catch(function (err) {
-                       throw new Error(err);
+                       return failCB(err);
                    })
                 );
             }
@@ -108,7 +108,6 @@ module.exports = {
                             //no results were found 
                         }, function (error) {
                             return failCB(error);
-                            //an error occurred (defined as var "error")
                         });
                     };
 
@@ -130,7 +129,7 @@ module.exports = {
                                     return body.routes[0].duration
                                 })
                                 .catch(function (err) {
-                                    throw new Error(err);
+                                    return failCB(err);
                                 })
                             );
                         }
@@ -167,7 +166,7 @@ module.exports = {
                                     return body.routes[0].duration
                                 })
                                 .catch(function (err) {
-                                    throw new Error(err);
+                                    return failCB(err);
                                 })
                         );
                     }

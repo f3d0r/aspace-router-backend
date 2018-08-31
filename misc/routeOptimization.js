@@ -194,7 +194,9 @@ module.exports = {
                         successCB(best_spots);
                     });
                 }
-            })
+            }).catch(function(error) {
+                failCB(error);
+            });
         }, function () {
             // No parking spots were found.
         }, function (error) {

@@ -1,0 +1,13 @@
+name: aspace-backend
+
+parsers:
+  - es7
+
+skills:
+  - optic:express-js@0.3.0
+  - optic:rest@0.3.0
+  - optic:requestjs@0.3.0
+
+exclude:
+  - "node_modules"
+  - "LICENSES"

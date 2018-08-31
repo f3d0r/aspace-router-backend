@@ -160,7 +160,7 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp('https://api.trya.space/v1/routing/engine/route/v1/foot/' + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() +';'+ destination[0].toString() + ',' + destination[1].toString())
+                            rp('http://localhost:5000/route/v1/foot/' + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() +';'+ destination[0].toString() + ',' + destination[1].toString())
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration

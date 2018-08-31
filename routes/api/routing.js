@@ -15,8 +15,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
             routeOptionsResponse['segments'] = [];
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
         }, function (error) {
-            console.log("ERROR: ");
-            console.log(error);
+            console.log(JSON.stringify(error));
         });
     });
 });
@@ -48,11 +47,14 @@ router.post('/get_drive_walk_route', function (req, res, next) {
 
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        routeOptimization.optimalSpot([-122.45, 46.91], [-122.3208, 47.613874], constants.optimize.PARK_WALK, function (results) {
-            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', results));
+        routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
+            routeOptionsResponse = {};
+            routeOptionsResponse['waypoint_info'] = bestSpots;
+            routeOptionsResponse['segments'] = [];
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
         }, function (error) {
-            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
-        })
+            console.log(JSON.stringify(error));
+        });
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
     //     getDriveBikeWaypoints(req, function (waypointSet) {
@@ -85,10 +87,10 @@ router.post('/get_drive_direct_route', function (req, res, next) {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.DRIVE_PARK, function (bestSpots) {
             routeOptionsResponse = {};
             routeOptionsResponse['waypoint_info'] = bestSpots;
-            routeOptionResponse['segments'] = [];
+            routeOptionsResponse['segments'] = [];
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
         }, function (error) {
-            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', 'Route could not be calculated.'));
+            console.log(JSON.stringify(error));
         });
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {

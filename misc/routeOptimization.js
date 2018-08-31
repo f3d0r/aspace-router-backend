@@ -189,8 +189,8 @@ module.exports = {
                             parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
                             best_spots.push(parking_spot_data[best_walk_indices[i]])
                         }
-                        print('Best walking spots: ')
-                        print(best_spots)
+                        // print('Best walking spots: ')
+                        // print(best_spots)
                         successCB(best_spots);
                     });
                 }

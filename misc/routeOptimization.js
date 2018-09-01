@@ -58,14 +58,12 @@ module.exports = {
 
                 // 3. Acquire driving times
                 var driving_reqs = []
-                const orig_s = origin[0].toString() + ',' + origin[1].toString()
                 for (var i = 0; i < parking_spot_data.length; i++) {
-                    var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
                     driving_reqs.push(
                         promisify(osrm.route({
                             coordinates: [
-                                orig_s,
-                                dest_s
+                                origin,
+                                [parking_spot_data[i].lng, parking_spot_data[i].lat]
                             ]
                         }))
                         .then(function (body) {
@@ -127,7 +125,7 @@ module.exports = {
                             bike_coords.push([])
                             // Add coordinate
                             bike_coords[i].push(
-                                parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString()
+                                [parking_spot_data[i].lng, parking_spot_data[i].lat]
                             )
                         }
                         for (var i = 0; i < results.length; i++) {
@@ -135,7 +133,7 @@ module.exports = {
                                 bike_reqs.push(
                                     promisify(osrm.route({
                                         coordinates: [
-                                            bikecoords[i][j],
+                                            bike_coords[i][j],
                                             destination
                                         ]
                                     }))

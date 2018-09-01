@@ -8,6 +8,11 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var path = require('path');
+
+var OSRM = require('osrm');
+
+var osrm = new OSRM(path.join(__dirname, '/osrm_data_extracted/us-west-latest.osrm'));
 
 const {
     IncomingWebhook
@@ -93,6 +98,20 @@ cluster(function (worker) {
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
+        });
+        var query = {
+            coordinates: [
+                [13.414307, 52.521835],
+                [13.402290, 52.523728]
+            ],
+            alternateRoute: req.query.alternatives !== 'false'
+        };
+        osrm.route(query, function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(result);
+            }
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");

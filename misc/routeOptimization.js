@@ -64,8 +64,8 @@ module.exports = {
                     driving_reqs.push(
                         promisify(osrm.route({
                             coordinates: [
-                                [orig_s],
-                                [dest_s]
+                                orig_s,
+                                dest_s
                             ]
                         }))
                         .then(function (body) {

@@ -1,14 +1,10 @@
 const constants = require('@config');
 var sql = require('@sql');
+var dnode = require('dnode');
 const math = require('mathjs');
-var path = require('path');
-var OSRM = require('osrm');
 const {
     promisify
 } = require('util');
-
-var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
-
 
 module.exports = {
     /* Algorithm:
@@ -23,6 +19,8 @@ module.exports = {
         7. Return minima as routing choices to user 
     */
     optimalSpot: function (origin, destination, code, successCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
+        var d = dnode.connect(5004);
+
         // number_options : number of routing options to provide user for specific last-mile transport choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk (0,1,2 have been encoded
         // into random strings)
@@ -62,12 +60,18 @@ module.exports = {
                 var driving_reqs = []
                 for (var i = 0; i < parking_spot_data.length; i++) {
                     driving_reqs.push(
-                        promisify(osrm.route({
-                            coordinates: [
-                                origin,
-                                [parking_spot_data[i].lng, parking_spot_data[i].lat]
-                            ]
-                        }))
+                        promisify(
+                            d.on('remote', function (remote) {
+                                remote.getOsrm(function (osrm) {
+                                    osrm.route({
+                                        coordinates: [
+                                            origin,
+                                            [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                                        ]
+                                    })
+                                    d.end();
+                                })
+                            }))
                         .then(function (body) {
                             body = JSON.parse(body)
                             return body.routes[0].duration
@@ -133,20 +137,26 @@ module.exports = {
                         for (var i = 0; i < results.length; i++) {
                             for (var j = 0; j < bike_coords[i].length; j++) {
                                 bike_reqs.push(
-                                    promisify(osrm.route({
-                                        coordinates: [
-                                            bike_coords[i][j],
-                                            destination
-                                        ]
-                                    }))
-                                    .then(function (body) {
-                                        body = JSON.parse(body)
-                                        return body.routes[0].duration
-                                    })
-                                    .catch(function (err) {
-                                        return failCB(err);
-                                    })
-                                );
+                                    promisify(
+                                        d.on('remote', function (remote) {
+                                            remote.getOsrm(function (osrm) {
+                                                osrm.route({
+                                                    coordinates: [
+                                                        bike_coords[i][j],
+                                                        destination
+                                                    ]
+                                                })
+                                                d.end();
+                                            })
+                                        })
+                                        .then(function (body) {
+                                            body = JSON.parse(body)
+                                            return body.routes[0].duration
+                                        })
+                                        .catch(function (err) {
+                                            return failCB(err);
+                                        })
+                                    ));
                             }
                         }
                         Promise.all(bike_reqs).then(function (results) {
@@ -175,20 +185,26 @@ module.exports = {
                         var walk_time_reqs = []
                         for (var i = 0; i < parking_spot_data.length; i++) {
                             walk_time_reqs.push(
-                                promisify(osrm.route({
-                                    coordinates: [
-                                        [parking_spot_data[i].lng, parking_spot_data[i].lat],
-                                        destination
-                                    ]
-                                }))
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
-                                })
-                                .catch(function (err) {
-                                    return failCB(err);
-                                })
-                            );
+                                promisify(
+                                    d.on('remote', function (remote) {
+                                        remote.getOsrm(function (osrm) {
+                                            osrm.route({
+                                                coordinates: [
+                                                    [parking_spot_data[i].lng, parking_spot_data[i].lat],
+                                                    destination
+                                                ]
+                                            })
+                                            d.end();
+                                        })
+                                    })
+                                    .then(function (body) {
+                                        body = JSON.parse(body)
+                                        return body.routes[0].duration
+                                    })
+                                    .catch(function (err) {
+                                        return failCB(err);
+                                    })
+                                ));
                         }
                         Promise.all(walk_time_reqs).then(function (results) {
                             var X_walk = Object.assign([], X);

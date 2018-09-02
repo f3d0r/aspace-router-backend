@@ -4,11 +4,11 @@ require('module-alias/register');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+var dnode = require('dnode');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-var path = require('path');
 
 const {
     IncomingWebhook
@@ -24,6 +24,8 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 
 // EXPRESS SET UP
 var app = express();
+
+var d = dnode.connect(5004);
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));

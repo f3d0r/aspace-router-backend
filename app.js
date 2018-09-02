@@ -105,4 +105,8 @@ cluster(function (worker) {
     count: cpuCount
 })
 
-module.exports = osrm;
+module.exports = {
+    osrm: function() {
+        return osrm;
+    }
+}

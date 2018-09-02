@@ -1,7 +1,7 @@
 const constants = require('@config');
 var sql = require('@sql');
-const math = require('mathjs');
 var osrm = require('@osrm');
+const math = require('mathjs');
 const {
     promisify
 } = require('util');

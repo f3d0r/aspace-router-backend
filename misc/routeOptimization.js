@@ -231,7 +231,7 @@ module.exports = {
                 console.log("NO PARKING SPOTS FOUND");
             },
             function (error) {
-                console.log("LINE 235 ERROR : " + JSON.stringify(err));
+                console.log("LINE 235 ERROR : " + JSON.stringify(error));
                 return failCB(error);
             });
     }

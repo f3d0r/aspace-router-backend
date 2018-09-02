@@ -8,7 +8,7 @@ var osrmRoute = function (query) {
         osrm.route(query, function (err, result) {
             if (err) {
                 console.log("SOME ERROR : " + err);
-                reject(err);
+                reject(new Error(err.message));
             } else {
                 resolve(result);
             }

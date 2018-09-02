@@ -1,9 +1,6 @@
 const constants = require('@config');
 var sql = require('@sql');
-var path = require('path');
-var appRoot = require('app-root-path');
-console.log("ROUTE OPTIMIZATION PATH : " + path.join(appRoot.toString(), '/us-west-latest.osrm'));
-var osrm = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'));
+var osrm = require('@osrm');
 
 const math = require('mathjs');
 const {
@@ -23,6 +20,21 @@ module.exports = {
         7. Return minima as routing choices to user 
     */
     optimalSpot: function (origin, destination, code, successCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
+        var query = {
+            coordinates: [
+                [13.414307, 52.521835],
+                [13.402290, 52.523728]
+            ],
+            alternateRoute: req.query.alternatives !== 'false'
+        };
+        osrm.route(query, function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(result);
+            }
+        });
+
         // number_options : number of routing options to provide user for specific last-mile transport choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk (0,1,2 have been encoded
         // into random strings)

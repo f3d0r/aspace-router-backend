@@ -8,6 +8,8 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var appRoot = require('app-root-path');
+module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'));
 
 const {
     IncomingWebhook

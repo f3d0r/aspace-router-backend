@@ -4,7 +4,7 @@ var osrm = require('@osrm');
 const math = require('mathjs');
 
 var osrmRoute = function (query) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         osrm.route(query, function (err, result) {
             if (err) {
                 reject(err);
@@ -82,70 +82,114 @@ module.exports = {
                         })
                     );
                 }
-                Promise.all(driving_reqs).then(function (results) {
-                    var times = [].concat.apply([], results);
+                Promise.all(driving_reqs)
+                    .then(function (results) {
+                        var times = [].concat.apply([], results);
 
-                    // 4. Acquire remaining cost function parameters
-                    var X = [sub_least(times)]
-                    var arr = []
-                    for (i in params) {
-                        arr = []
-                        for (d in parking_spot_data) {
-                            arr.push(parking_spot_data[d][params[i]])
+                        // 4. Acquire remaining cost function parameters
+                        var X = [sub_least(times)]
+                        var arr = []
+                        for (i in params) {
+                            arr = []
+                            for (d in parking_spot_data) {
+                                arr.push(parking_spot_data[d][params[i]])
+                            }
+                            arr = center(arr)
+                            X = X.concat([arr["_data"]])
                         }
-                        arr = center(arr)
-                        X = X.concat([arr["_data"]])
-                    }
-                    // Parking spot parameters now held in X
+                        // Parking spot parameters now held in X
 
-                    // Final drive & park optimization
-                    var fX = math.multiply(math.matrix(param_weights), X);
-                    const best_car_indices = top_n(fX["_data"], number_options)
-                    var best_spots = []
-                    for (i in best_car_indices) {
-                        parking_spot_data[best_car_indices[i]]["driving_time"] = times[best_car_indices[i]]
-                        best_spots.push(
-                            parking_spot_data[best_car_indices[i]]
-                        )
-                    }
-                    if (code == constants.optimize.DRIVE_PARK) {
-                        /* print('Best drive & park spots:')
-                        print(best_spots) */
-                        successCB(best_spots)
-                    } else if (code == constants.optimize.PARK_BIKE) {
-                        // Biking optimization
-                        // Acquire available bikes:
-                        var bike_data = []
-                        for (i in parking_spot_data) {
-                            sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
-                                bike_data.push(results)
-                            }, function () {
-                                console.log("LINE 124 NO RESULT FOUND");
-                            }, function (error) {
-                                console.log("LINE 126 ERROR : " + JSON.stringify(error));
-                                return failCB(error);
-                            });
-                        };
-
-                        var bike_coords = []
-                        var bike_reqs = []
-                        for (i in results) {
-                            bike_coords.push([])
-                            // Add coordinate
-                            bike_coords[i].push(
-                                [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                        // Final drive & park optimization
+                        var fX = math.multiply(math.matrix(param_weights), X);
+                        const best_car_indices = top_n(fX["_data"], number_options)
+                        var best_spots = []
+                        for (i in best_car_indices) {
+                            parking_spot_data[best_car_indices[i]]["driving_time"] = times[best_car_indices[i]]
+                            best_spots.push(
+                                parking_spot_data[best_car_indices[i]]
                             )
                         }
-                        for (var i = 0; i < results.length; i++) {
-                            for (var j = 0; j < bike_coords[i].length; j++) {
-                                bike_reqs.push(
+                        if (code == constants.optimize.DRIVE_PARK) {
+                            /* print('Best drive & park spots:')
+                            print(best_spots) */
+                            successCB(best_spots)
+                        } else if (code == constants.optimize.PARK_BIKE) {
+                            // Biking optimization
+                            // Acquire available bikes:
+                            var bike_data = []
+                            for (i in parking_spot_data) {
+                                sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
+                                    bike_data.push(results)
+                                }, function () {
+                                    console.log("LINE 124 NO RESULT FOUND");
+                                }, function (error) {
+                                    console.log("LINE 126 ERROR : " + JSON.stringify(error));
+                                    return failCB(error);
+                                });
+                            };
+
+                            var bike_coords = []
+                            var bike_reqs = []
+                            for (i in results) {
+                                bike_coords.push([])
+                                // Add coordinate
+                                bike_coords[i].push(
+                                    [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                                )
+                            }
+                            for (var i = 0; i < results.length; i++) {
+                                for (var j = 0; j < bike_coords[i].length; j++) {
+                                    bike_reqs.push(
+                                        osrmRoute({
+                                            coordinates: [
+                                                [parseFloat(bike_coords[i][j][0]), parseFloat(bike_coords[i][j][1])],
+                                                [parseFloat(destination[0]), parseFloat(destination[1])]
+                                            ]
+                                        }).catch(function (err) {
+                                            console.log("LINE 153 ERROR : " + JSON.stringify(err));
+                                            return failCB(err);
+                                        })
+                                        .then(function (body) {
+                                            body = JSON.parse(body)
+                                            return body.routes[0].duration
+                                        })
+                                    );
+                                }
+                            }
+                            Promise.all(bike_reqs).then(function (results) {
+                                // Concatenate these biking times to X and re-optimize!
+                                X.push(sub_least(results))
+                                param_weights.push(1e-1)
+                                fX = math.multiply(math.matrix(param_weights), X);
+                                const best_bike_indices = top_n(fX["_data"], number_options)
+                                /* print('bike fX: ' + fX)
+                                // print('best bike spots: ' + best_bike_indices) */
+                                best_spots = []
+                                for (i in best_bike_indices) {
+                                    parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
+                                    best_spots.push({
+                                        parking_spot: parking_spot_data[best_bike_indices[i]],
+                                        bike_locs: bike_data[i],
+                                        approx_biking_time: results[best_bike_indices[i]]
+                                    })
+                                }
+                                /* print('Best park & bike spots: ')
+                                print(best_spots) */
+                                successCB(best_spots);
+                            });
+                        } else if (code == constants.optimize.PARK_WALK) {
+                            // Walking time optimization
+                            var walk_time_reqs = []
+                            for (var i = 0; i < parking_spot_data.length; i++) {
+                                walk_time_reqs.push(
                                     osrmRoute({
                                         coordinates: [
-                                            [parseFloat(bike_coords[i][j][0]), parseFloat(bike_coords[i][j][1])],
+                                            [parseFloat(parking_spot_data[i].lng), parseFloat(parking_spot_data[i].lat)],
                                             [parseFloat(destination[0]), parseFloat(destination[1])]
                                         ]
-                                    }).catch(function (err) {
-                                        console.log("LINE 153 ERROR : " + JSON.stringify(err));
+                                    })
+                                    .catch(function (err) {
+                                        console.log("LINE 196 ERROR : " + JSON.stringify(err));
                                         return failCB(err);
                                     })
                                     .then(function (body) {
@@ -154,77 +198,34 @@ module.exports = {
                                     })
                                 );
                             }
+                            Promise.all(walk_time_reqs).then(function (results) {
+                                var X_walk = Object.assign([], X);
+                                var walk_weights = Object.assign([], param_weights)
+                                var walk_times = Object.assign([], results)
+                                results = sub_least(results)
+                                results = results["_data"]
+                                X_walk.push(results)
+                                walk_weights.push(1e-2)
+                                fX = math.multiply(math.matrix(walk_weights), X_walk);
+                                const best_walk_indices = top_n(fX["_data"], number_options);
+                                /* print('walk fX: ' + fX["_data"])
+                                print(fX)
+                                print('best walking spots: ' + best_walk_indices) */
+                                best_spots = []
+                                for (i in best_car_indices) {
+                                    parking_spot_data[best_walk_indices[i]]["driving_time"] = times[best_walk_indices[i]]
+                                    parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
+                                    best_spots.push(parking_spot_data[best_walk_indices[i]])
+                                }
+                                // print('Best walking spots: ')
+                                // print(best_spots)
+                                successCB(best_spots);
+                            });
                         }
-                        Promise.all(bike_reqs).then(function (results) {
-                            // Concatenate these biking times to X and re-optimize!
-                            X.push(sub_least(results))
-                            param_weights.push(1e-1)
-                            fX = math.multiply(math.matrix(param_weights), X);
-                            const best_bike_indices = top_n(fX["_data"], number_options)
-                            /* print('bike fX: ' + fX)
-                            // print('best bike spots: ' + best_bike_indices) */
-                            best_spots = []
-                            for (i in best_bike_indices) {
-                                parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
-                                best_spots.push({
-                                    parking_spot: parking_spot_data[best_bike_indices[i]],
-                                    bike_locs: bike_data[i],
-                                    approx_biking_time: results[best_bike_indices[i]]
-                                })
-                            }
-                            /* print('Best park & bike spots: ')
-                            print(best_spots) */
-                            successCB(best_spots);
-                        });
-                    } else if (code == constants.optimize.PARK_WALK) {
-                        // Walking time optimization
-                        var walk_time_reqs = []
-                        for (var i = 0; i < parking_spot_data.length; i++) {
-                            walk_time_reqs.push(
-                                osrmRoute({
-                                    coordinates: [
-                                        [parseFloat(parking_spot_data[i].lng), parseFloat(parking_spot_data[i].lat)],
-                                        [parseFloat(destination[0]), parseFloat(destination[1])]
-                                    ]
-                                })
-                                .catch(function (err) {
-                                    console.log("LINE 196 ERROR : " + JSON.stringify(err));
-                                    return failCB(err);
-                                })
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
-                                })
-                            );
-                        }
-                        Promise.all(walk_time_reqs).then(function (results) {
-                            var X_walk = Object.assign([], X);
-                            var walk_weights = Object.assign([], param_weights)
-                            var walk_times = Object.assign([], results)
-                            results = sub_least(results)
-                            results = results["_data"]
-                            X_walk.push(results)
-                            walk_weights.push(1e-2)
-                            fX = math.multiply(math.matrix(walk_weights), X_walk);
-                            const best_walk_indices = top_n(fX["_data"], number_options);
-                            /* print('walk fX: ' + fX["_data"])
-                            print(fX)
-                            print('best walking spots: ' + best_walk_indices) */
-                            best_spots = []
-                            for (i in best_car_indices) {
-                                parking_spot_data[best_walk_indices[i]]["driving_time"] = times[best_walk_indices[i]]
-                                parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
-                                best_spots.push(parking_spot_data[best_walk_indices[i]])
-                            }
-                            // print('Best walking spots: ')
-                            // print(best_spots)
-                            successCB(best_spots);
-                        });
-                    }
-                }).catch(function (error) {
-                    console.log("LINE 227 ERROR : " + JSON.stringify(error));
-                    failCB(error);
-                });
+                    }).catch(function (error) {
+                        console.log("LINE 227 ERROR : " + JSON.stringify(error));
+                        failCB(error);
+                    });
             },
             function () {
                 console.log("NO PARKING SPOTS FOUND");

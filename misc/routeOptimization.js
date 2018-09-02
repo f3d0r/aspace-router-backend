@@ -1,7 +1,5 @@
 const constants = require('@config');
 var sql = require('@sql');
-var osrm = require('@osrm');
-var path = require('path');
 var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
 const math = require('mathjs');
 const {

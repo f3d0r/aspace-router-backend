@@ -9,9 +9,7 @@ var osrmRoute = promisify(function (query, cb) {
         if (err) {
             throw new Error(err);
         } else {
-            console.log("RESULT: ");
-            console.log(result);
-            // cb(result);
+            cb(result);
         }
     });
 }, 1);

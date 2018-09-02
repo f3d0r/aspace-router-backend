@@ -7,7 +7,7 @@ var promisify = require('promisify-any');
 osrmRoute = function (query, cb) {
     osrm.route(query, function (err, result) {
         if (err) {
-            return cb(new Error("ERROR : " + JSON.stringify(err)));
+            return cb(new Error("LINE 10 ERROR : " + JSON.stringify(err)));
         } else {
             return cb(result);
         }
@@ -78,6 +78,7 @@ module.exports = {
                             return body.routes[0].duration
                         })
                         .catch(function (err) {
+                            console.log("LINE 81 ERROR : " + err);
                             return failCB(err);
                         })
                     );
@@ -120,8 +121,9 @@ module.exports = {
                             sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                                 bike_data.push(results)
                             }, function () {
-                                //no results were found 
+                                console.log("LINE 124 NO RESULT FOUND");
                             }, function (error) {
+                                console.log("LINE 126 ERROR : " + error);
                                 return failCB(error);
                             });
                         };
@@ -149,6 +151,7 @@ module.exports = {
                                         return body.routes[0].duration
                                     })
                                     .catch(function (err) {
+                                        console.log("LINE 153 ERROR : " + err);
                                         return failCB(err);
                                     })
                                 );
@@ -191,6 +194,7 @@ module.exports = {
                                     return body.routes[0].duration
                                 })
                                 .catch(function (err) {
+                                    console.log("LINE 196 ERROR : " + err);
                                     return failCB(err);
                                 })
                             );
@@ -220,13 +224,15 @@ module.exports = {
                         });
                     }
                 }).catch(function (error) {
+                    console.log("LINE 227 ERROR : " + error);
                     failCB(error);
                 });
             },
             function () {
-                // No parking spots were found.
+                console.log("NO PARKING SPOTS FOUND");
             },
             function (error) {
+                console.log("LINE 235 ERROR : " + err);
                 return failCB(error);
             });
     }

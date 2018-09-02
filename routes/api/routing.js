@@ -19,9 +19,9 @@ router.post('/get_drive_walk_route', function (req, res, next) {
     };
     osrm.route(query, function (err, result) {
         if (err) {
-            console.log(err);
+            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', err));
         } else {
-            console.log(result);
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', result));
         }
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
@@ -71,9 +71,9 @@ router.post('/get_drive_bike_route', function (req, res, next) {
     };
     osrm.route(query, function (err, result) {
         if (err) {
-            console.log(err);
+            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', err));
         } else {
-            console.log(result);
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', result));
         }
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
@@ -122,9 +122,9 @@ router.post('/get_drive_direct_route', function (req, res, next) {
     };
     osrm.route(query, function (err, result) {
         if (err) {
-            console.log(err);
+            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', err));
         } else {
-            console.log(result);
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', result));
         }
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {

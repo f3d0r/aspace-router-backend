@@ -16,20 +16,7 @@ const {
 
 if (cluster.isMaster) {
     var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
-    var query = {
-        coordinates: [
-            [13.414307, 52.521835],
-            [13.402290, 52.523728]
-        ],
-        alternateRoute: false
-    };
-    osrm.route(query, function (err, result) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(result);
-        }
-    });
+
     for (var workerNum = 0; workerNum < require('os').cpus().length; workerNum++) {
         cluster.fork();
     }
@@ -112,7 +99,22 @@ if (cluster.isMaster) {
     // Start server
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
-            console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
+            console.log('Listening on port ' + server.address().port + ', thread #' + cluster.worker.id);
+        });
+
+        var query = {
+            coordinates: [
+                [13.414307, 52.521835],
+                [13.402290, 52.523728]
+            ],
+            alternateRoute: false
+        };
+        osrm.route(query, function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(result);
+            }
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");

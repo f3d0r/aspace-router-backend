@@ -3,22 +3,18 @@ require('module-alias/register');
 // PACKAGE IMPORTS
 const express = require('express');
 const bodyParser = require('body-parser');
+var dnode = require('dnode');
 const cors = require('cors');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-var path = require('path');
-var OSRM = require('osrm');
+
 const {
     IncomingWebhook
 } = require('@slack/client');
 
-var osrm = null;
-
 if (cluster.isMaster) {
-    osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
-
     for (var workerNum = 0; workerNum < require('os').cpus().length; workerNum++)
         cluster.fork();
 } else {
@@ -28,6 +24,7 @@ if (cluster.isMaster) {
     var errorCodes = require("@error-codes");
 
     var webhook = new IncomingWebhook(constants.slack.webhook);
+    var d = dnode.connect(5004);
 
     // EXPRESS SET UP
     var app = express();
@@ -109,13 +106,20 @@ if (cluster.isMaster) {
             ],
             alternateRoute: false
         };
-        osrm.route(query, function (err, result) {
-            if (err) {
-                console.log(err);
-            } else {
-                console.log(result);
-            }
+
+        d.on('remote', function (remote) {
+            remote.getOsrm(function (osrm) {
+                osrm.route(query, function (err, result) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(result);
+                    }
+                });
+                d.end();
+            });
         });
+
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }

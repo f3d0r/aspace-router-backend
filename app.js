@@ -8,10 +8,6 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-var path = require('path');
-var OSRM = require('osrm');
-
-var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
 
 const {
     IncomingWebhook
@@ -104,9 +100,3 @@ cluster(function (worker) {
 }, {
     count: cpuCount
 })
-
-module.exports = {
-    osrm: function() {
-        return osrm;
-    }
-}

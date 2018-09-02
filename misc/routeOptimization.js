@@ -68,6 +68,7 @@ module.exports = {
                                         [parking_spot_data[i].lng, parking_spot_data[i].lat]
                                     ]
                                 }, function (results) {
+                                    console.log("RESULTS: " + results);
                                     d.end();
                                 })
                             }))
@@ -144,6 +145,7 @@ module.exports = {
                                                     destination
                                                 ]
                                             }, function (results) {
+                                                console.log("RESULTS: " + results);
                                                 d.end();
                                             })
                                         })
@@ -191,6 +193,7 @@ module.exports = {
                                                 destination
                                             ]
                                         }, function (results) {
+                                            console.log("RESULTS: " + results);
                                             d.end();
                                         })
                                     })

@@ -7,8 +7,7 @@ var osrmRoute = function (query) {
     return new Promise((resolve, reject) => {
         osrm.route(query, function (err, result) {
             if (err) {
-                console.log("SOME ERROR : " + err);
-                reject(new Error(err.message));
+                reject(err);
             } else {
                 resolve(result);
             }
@@ -75,11 +74,9 @@ module.exports = {
                             ]
                         })
                         .then(function (body) {
-                            body = JSON.parse(body)
                             return body.routes[0].duration
                         })
                         .catch(function (err) {
-                            console.log("LINE 81 ERROR : " + JSON.stringify(err));
                             return failCB(err);
                         })
                     );
@@ -123,9 +120,7 @@ module.exports = {
                                 sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                                     bike_data.push(results)
                                 }, function () {
-                                    console.log("LINE 124 NO RESULT FOUND");
                                 }, function (error) {
-                                    console.log("LINE 126 ERROR : " + JSON.stringify(error));
                                     return failCB(error);
                                 });
                             };
@@ -149,11 +144,9 @@ module.exports = {
                                             ]
                                         })
                                         .then(function (body) {
-                                            body = JSON.parse(body)
                                             return body.routes[0].duration
                                         })
                                         .catch(function (err) {
-                                            console.log("LINE 153 ERROR : " + JSON.stringify(err));
                                             return failCB(err);
                                         })
                                     );
@@ -193,11 +186,9 @@ module.exports = {
                                         ]
                                     })
                                     .then(function (body) {
-                                        body = JSON.parse(body)
                                         return body.routes[0].duration
                                     })
                                     .catch(function (err) {
-                                        console.log("LINE 196 ERROR : " + JSON.stringify(err));
                                         return failCB(err);
                                     })
                                 );
@@ -228,15 +219,12 @@ module.exports = {
                                 });
                         }
                     }).catch(function (error) {
-                        console.log("LINE 227 ERROR : " + JSON.stringify(error));
                         failCB(error);
                     });
             },
             function () {
-                console.log("NO PARKING SPOTS FOUND");
             },
             function (error) {
-                console.log("LINE 235 ERROR : " + JSON.stringify(error));
                 return failCB(error);
             });
     }
@@ -274,7 +262,6 @@ function top_n(list, n) {
  * @param {*} value
  */
 function print(value) {
-    console.log("THROUGH PRINT FUNCTION: ");
     if (typeof (value) === 'string') {
         console.log(value)
     } else { // assume value is a mathematical structure

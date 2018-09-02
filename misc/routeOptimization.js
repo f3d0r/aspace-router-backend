@@ -7,6 +7,7 @@ var osrmRoute = function (query) {
     return new Promise((resolve, reject) => {
         osrm.route(query, function (err, result) {
             if (err) {
+                console.log("SOME ERROR : " + err);
                 reject(err);
             } else {
                 resolve(result);

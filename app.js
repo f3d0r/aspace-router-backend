@@ -3,32 +3,29 @@ require('module-alias/register');
 // PACKAGE IMPORTS
 const express = require('express');
 const bodyParser = require('body-parser');
-var dnode = require('dnode');
 const cors = require('cors');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var path = require('path');
 
 const {
     IncomingWebhook
 } = require('@slack/client');
+const cpuCount = require('os').cpus().length;
 
-if (cluster.isMaster) {
-    for (var workerNum = 0; workerNum < require('os').cpus().length; workerNum++)
-        cluster.fork();
-} else {
-    // LOCAL IMPORTS
-    const constants = require('@config');
-    var errors = require('@errors');
-    var errorCodes = require("@error-codes");
+// LOCAL IMPORTS
+const constants = require('@config');
+const errors = require('@errors');
+const errorCodes = require("@error-codes");
 
-    var webhook = new IncomingWebhook(constants.slack.webhook);
-    var d = dnode.connect(5004);
+const webhook = new IncomingWebhook(constants.slack.webhook);
 
-    // EXPRESS SET UP
-    var app = express();
+// EXPRESS SET UP
+var app = express();
 
+cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
     app.use(bodyParser.urlencoded({
@@ -96,7 +93,7 @@ if (cluster.isMaster) {
     // Start server
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
-            console.log('Listening on port ' + server.address().port + ', thread #' + cluster.worker.id);
+            console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
         });
 
         var query = {
@@ -119,8 +116,9 @@ if (cluster.isMaster) {
                 d.end();
             });
         });
-
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
-}
+}, {
+    count: cpuCount
+})

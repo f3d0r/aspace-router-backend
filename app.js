@@ -8,6 +8,7 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var path = require('path');
 var appRoot = require('app-root-path');
 var OSRM = require('osrm');
 module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'));

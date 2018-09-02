@@ -134,7 +134,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
             routeOptionsResponse['segments'] = [];
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
         }, function (error) {
-            console.log(JSON.stringify(error));
+            console.log("RET ERROR: " + JSON.stringify(error));
         });
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {

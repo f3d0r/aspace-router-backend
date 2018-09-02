@@ -7,9 +7,10 @@ var promisify = require('promisify-any');
 var osrmRoute = promisify(function (query, cb) {
     osrm.route(query, function (err, result) {
         if (err) {
-            return cb(new Error(err));
+            cb(new Error(err));
+        } else {
+            cb(result);
         }
-        return cb(null, result);
     });
 }, 1);
 
@@ -268,6 +269,7 @@ function top_n(list, n) {
  * @param {*} value
  */
 function print(value) {
+    console.log("THROUGH PRINT FUNCTION: ");
     if (typeof (value) === 'string') {
         console.log(value)
     } else { // assume value is a mathematical structure

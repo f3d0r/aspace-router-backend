@@ -97,25 +97,6 @@ cluster(function (worker) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
         });
-
-        var query = {
-            coordinates: [
-                [13.414307, 52.521835],
-                [13.402290, 52.523728]
-            ],
-            alternateRoute: false
-        };
-
-        d.on('remote', function (remote) {
-            remote.osrmRoute(query, function (err, result) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log(result);
-                }
-                d.end();
-            });
-        });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }

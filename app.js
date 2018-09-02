@@ -12,6 +12,7 @@ var path = require('path');
 var OSRM = require('osrm');
 
 var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
+console.log(path.join(__dirname, '/us-west-latest.osrm'));
 
 const {
     IncomingWebhook
@@ -116,5 +117,5 @@ cluster(function (worker) {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
-    count: cpuCount
+    count: 1
 })

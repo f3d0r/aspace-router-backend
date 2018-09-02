@@ -14,13 +14,13 @@ const {
     IncomingWebhook
 } = require('@slack/client');
 
+var osrm = null;
+
 if (cluster.isMaster) {
-    var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
+    osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
 
-    for (var workerNum = 0; workerNum < require('os').cpus().length; workerNum++) {
+    for (var workerNum = 0; workerNum < require('os').cpus().length; workerNum++)
         cluster.fork();
-    }
-
 } else {
     // LOCAL IMPORTS
     const constants = require('@config');

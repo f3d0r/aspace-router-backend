@@ -7,9 +7,11 @@ var promisify = require('promisify-any');
 var osrmRoute = promisify(function (query, cb) {
     osrm.route(query, function (err, result) {
         if (err) {
-            cb(new Error(err));
+            throw new Error(err);
         } else {
-            cb(result);
+            console.log("RESULT: ");
+            console.log(result);
+            // cb(result);
         }
     });
 }, 1);

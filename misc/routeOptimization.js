@@ -71,14 +71,13 @@ module.exports = {
                                 [parseFloat(origin[0]), parseFloat(origin[1])],
                                 [parseFloat(parking_spot_data[i].lng), parseFloat(parking_spot_data[i].lat)]
                             ]
+                        }).catch(function (err) {
+                            console.log("LINE 81 ERROR : " + JSON.stringify(err));
+                            return failCB(err);
                         })
                         .then(function (body) {
                             body = JSON.parse(body)
                             return body.routes[0].duration
-                        })
-                        .catch(function (err) {
-                            console.log("LINE 81 ERROR : " + JSON.stringify(err));
-                            return failCB(err);
                         })
                     );
                 }
@@ -144,14 +143,13 @@ module.exports = {
                                             [parseFloat(bike_coords[i][j][0]), parseFloat(bike_coords[i][j][1])],
                                             [parseFloat(destination[0]), parseFloat(destination[1])]
                                         ]
+                                    }).catch(function (err) {
+                                        console.log("LINE 153 ERROR : " + JSON.stringify(err));
+                                        return failCB(err);
                                     })
                                     .then(function (body) {
                                         body = JSON.parse(body)
                                         return body.routes[0].duration
-                                    })
-                                    .catch(function (err) {
-                                        console.log("LINE 153 ERROR : " + JSON.stringify(err));
-                                        return failCB(err);
                                     })
                                 );
                             }
@@ -188,13 +186,13 @@ module.exports = {
                                         [parseFloat(destination[0]), parseFloat(destination[1])]
                                     ]
                                 })
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
-                                })
                                 .catch(function (err) {
                                     console.log("LINE 196 ERROR : " + JSON.stringify(err));
                                     return failCB(err);
+                                })
+                                .then(function (body) {
+                                    body = JSON.parse(body)
+                                    return body.routes[0].duration
                                 })
                             );
                         }

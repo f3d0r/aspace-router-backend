@@ -69,8 +69,8 @@ module.exports = {
                     driving_reqs.push(
                         osrmRoute({
                             coordinates: [
-                                origin,
-                                [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                                [parseFloat(origin[0]), parseFloat(origin[1])],
+                                [parseFloat(parking_spot_data[i].lng), parseFloat(parking_spot_data[i].lat)]
                             ]
                         })
                         .then(function (body) {
@@ -142,8 +142,8 @@ module.exports = {
                                 bike_reqs.push(
                                     osrmRoute({
                                         coordinates: [
-                                            bike_coords[i][j],
-                                            destination
+                                            [parseFloat(bike_coords[i][j][0]), parseFloat(bike_coords[i][j][1])],
+                                            [parseFloat(destination[0]), parseFloat(destination[1])]
                                         ]
                                     })
                                     .then(function (body) {
@@ -185,8 +185,8 @@ module.exports = {
                             walk_time_reqs.push(
                                 osrmRoute({
                                     coordinates: [
-                                        [parking_spot_data[i].lng, parking_spot_data[i].lat],
-                                        destination
+                                        [parseFloat(parking_spot_data[i].lng), parseFloat(parking_spot_data[i].lat)],
+                                        [parseFloat(destination[0]), parseFloat(destination[1])]
                                     ]
                                 })
                                 .then(function (body) {

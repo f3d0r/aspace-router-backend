@@ -13,21 +13,6 @@ var OSRM = require('osrm');
 
 var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
 
-var query = {
-    coordinates: [
-        [13.414307, 52.521835],
-        [13.402290, 52.523728]
-    ],
-    alternateRoute: false
-};
-osrm.route(query, function (err, result) {
-    if (err) {
-        console.log(err);
-    } else {
-        console.log(result);
-    }
-});
-
 const {
     IncomingWebhook
 } = require('@slack/client');
@@ -119,3 +104,5 @@ cluster(function (worker) {
 }, {
     count: cpuCount
 })
+
+module.exports = osrm;

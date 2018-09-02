@@ -1,6 +1,7 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
+var osrm = require('@osrm');
 const {
     promisify
 } = require('util');
@@ -18,8 +19,6 @@ module.exports = {
         7. Return minima as routing choices to user 
     */
     optimalSpot: function (origin, destination, code, successCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
-        var d = dnode.connect(5004);
-
         // number_options : number of routing options to provide user for specific last-mile transport choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk (0,1,2 have been encoded
         // into random strings)
@@ -174,12 +173,13 @@ module.exports = {
                         var walk_time_reqs = []
                         for (var i = 0; i < parking_spot_data.length; i++) {
                             walk_time_reqs.push(
-                                osrm.route({
-                                    coordinates: [
-                                        [parking_spot_data[i].lng, parking_spot_data[i].lat],
-                                        destination
-                                    ]
-                                })
+                                promisify(
+                                    osrm.route({
+                                        coordinates: [
+                                            [parking_spot_data[i].lng, parking_spot_data[i].lat],
+                                            destination
+                                        ]
+                                    }))
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration

@@ -4,11 +4,29 @@ require('module-alias/register');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-var dnode = require('dnode');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var path = require('path');
+var OSRM = require('osrm');
+
+var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
+
+var query = {
+    coordinates: [
+        [13.414307, 52.521835],
+        [13.402290, 52.523728]
+    ],
+    alternateRoute: false
+};
+osrm.route(query, function (err, result) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(result);
+    }
+});
 
 const {
     IncomingWebhook
@@ -24,8 +42,6 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 
 // EXPRESS SET UP
 var app = express();
-
-var d = dnode.connect(5004);
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));

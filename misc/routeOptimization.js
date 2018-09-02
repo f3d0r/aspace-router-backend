@@ -1,6 +1,5 @@
 const constants = require('@config');
 var sql = require('@sql');
-var dnode = require('dnode');
 const math = require('mathjs');
 const {
     promisify
@@ -61,16 +60,11 @@ module.exports = {
                 for (var i = 0; i < parking_spot_data.length; i++) {
                     driving_reqs.push(
                         promisify(
-                            d.on('remote', function (remote) {
-                                remote.osrmRoute({
-                                    coordinates: [
-                                        origin,
-                                        [parking_spot_data[i].lng, parking_spot_data[i].lat]
-                                    ]
-                                }, function (results) {
-                                    console.log("RESULTS: " + results);
-                                    d.end();
-                                })
+                            osrm.route({
+                                coordinates: [
+                                    origin,
+                                    [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                                ]
                             }))
                         .then(function (body) {
                             body = JSON.parse(body)
@@ -138,25 +132,20 @@ module.exports = {
                             for (var j = 0; j < bike_coords[i].length; j++) {
                                 bike_reqs.push(
                                     promisify(
-                                        d.on('remote', function (remote) {
-                                            remote.osrmRoute({
-                                                coordinates: [
-                                                    bike_coords[i][j],
-                                                    destination
-                                                ]
-                                            }, function (results) {
-                                                console.log("RESULTS: " + results);
-                                                d.end();
-                                            })
-                                        })
-                                        .then(function (body) {
-                                            body = JSON.parse(body)
-                                            return body.routes[0].duration
-                                        })
-                                        .catch(function (err) {
-                                            return failCB(err);
-                                        })
-                                    ));
+                                        osrm.route({
+                                            coordinates: [
+                                                bike_coords[i][j],
+                                                destination
+                                            ]
+                                        }))
+                                    .then(function (body) {
+                                        body = JSON.parse(body)
+                                        return body.routes[0].duration
+                                    })
+                                    .catch(function (err) {
+                                        return failCB(err);
+                                    })
+                                );
                             }
                         }
                         Promise.all(bike_reqs).then(function (results) {
@@ -185,26 +174,20 @@ module.exports = {
                         var walk_time_reqs = []
                         for (var i = 0; i < parking_spot_data.length; i++) {
                             walk_time_reqs.push(
-                                promisify(
-                                    d.on('remote', function (remote) {
-                                        remote.osrmRoute({
-                                            coordinates: [
-                                                [parking_spot_data[i].lng, parking_spot_data[i].lat],
-                                                destination
-                                            ]
-                                        }, function (results) {
-                                            console.log("RESULTS: " + results);
-                                            d.end();
-                                        })
-                                    })
-                                    .then(function (body) {
-                                        body = JSON.parse(body)
-                                        return body.routes[0].duration
-                                    })
-                                    .catch(function (err) {
-                                        return failCB(err);
-                                    })
-                                ));
+                                osrm.route({
+                                    coordinates: [
+                                        [parking_spot_data[i].lng, parking_spot_data[i].lat],
+                                        destination
+                                    ]
+                                })
+                                .then(function (body) {
+                                    body = JSON.parse(body)
+                                    return body.routes[0].duration
+                                })
+                                .catch(function (err) {
+                                    return failCB(err);
+                                })
+                            );
                         }
                         Promise.all(walk_time_reqs).then(function (results) {
                             var X_walk = Object.assign([], X);

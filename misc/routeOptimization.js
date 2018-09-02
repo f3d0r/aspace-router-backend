@@ -7,7 +7,7 @@ var promisify = require('promisify-any');
 osrmRoute = function (query, cb) {
     osrm.route(query, function (err, result) {
         if (err) {
-            return cb(err);
+            return cb(new Error("ERROR : " + JSON.stringify(err)));
         } else {
             return cb(result);
         }

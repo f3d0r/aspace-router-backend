@@ -10,41 +10,41 @@ var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
 var path = require('path');
 var OSRM = require('osrm');
-
-var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
-console.log(path.join(__dirname, '/us-west-latest.osrm'));
-
-var query = {
-    coordinates: [
-        [13.414307, 52.521835],
-        [13.402290, 52.523728]
-    ],
-    alternateRoute: false
-};
-osrm.route(query, function (err, result) {
-    if (err) {
-        console.log(err);
-    } else {
-        console.log(result);
-    }
-});
-
 const {
     IncomingWebhook
 } = require('@slack/client');
-const cpuCount = require('os').cpus().length;
 
-// LOCAL IMPORTS
-const constants = require('@config');
-const errors = require('@errors');
-const errorCodes = require("@error-codes");
+if (cluster.isMaster) {
+    var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
+    var query = {
+        coordinates: [
+            [13.414307, 52.521835],
+            [13.402290, 52.523728]
+        ],
+        alternateRoute: false
+    };
+    osrm.route(query, function (err, result) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(result);
+        }
+    });
+    for (var workerNum = 0; workerNum < require('os').cpus().length; workerNum++) {
+        cluster.fork();
+    }
 
-const webhook = new IncomingWebhook(constants.slack.webhook);
+} else {
+    // LOCAL IMPORTS
+    const constants = require('@config');
+    var errors = require('@errors');
+    var errorCodes = require("@error-codes");
 
-// EXPRESS SET UP
-var app = express();
+    var webhook = new IncomingWebhook(constants.slack.webhook);
 
-cluster(function (worker) {
+    // EXPRESS SET UP
+    var app = express();
+
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
     app.use(bodyParser.urlencoded({
@@ -117,6 +117,4 @@ cluster(function (worker) {
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
-}, {
-    count: cpuCount
-})
+}

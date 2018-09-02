@@ -116,5 +116,5 @@ cluster(function (worker) {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
-    count: 1 //MAKE SURE TO UPDATE!
+    count: cpuCount
 })

@@ -26,7 +26,7 @@
         "start": "node app.js",
         "dev": "PORT=3001 node app.js",
         "prod": "PORT=3000 node app.js",
-        "deploy": "pm2 start app.js --watch",
+        "deploy": "pm2 start app.js --watch"
     },
     "repository": {
         "type": "git",

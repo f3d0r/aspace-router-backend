@@ -4,17 +4,14 @@ var osrm = require('@osrm');
 const math = require('mathjs');
 var promisify = require('promisify-any');
 
-osrmRoute = function (query, cb) {
+var osrmRoute = promisify(function (query, cb) {
     osrm.route(query, function (err, result) {
         if (err) {
-            console.log("SOME ERROR!");
-            return cb(new Error("LINE 10 ERROR : " + JSON.stringify(err)));
-        } else {
-            return cb(null, result);
+            return cb(new Error(err));
         }
+        return cb(null, result);
     });
-};
-osrmRoute = promisify(osrmRoute, 1);
+}, 1);
 
 module.exports = {
     /* Algorithm:

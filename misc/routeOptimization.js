@@ -78,7 +78,7 @@ module.exports = {
                             return body.routes[0].duration
                         })
                         .catch(function (err) {
-                            console.log("LINE 81 ERROR : " + err);
+                            console.log("LINE 81 ERROR : " + JSON.stringify(err));
                             return failCB(err);
                         })
                     );
@@ -123,7 +123,7 @@ module.exports = {
                             }, function () {
                                 console.log("LINE 124 NO RESULT FOUND");
                             }, function (error) {
-                                console.log("LINE 126 ERROR : " + error);
+                                console.log("LINE 126 ERROR : " + JSON.stringify(error));
                                 return failCB(error);
                             });
                         };
@@ -151,7 +151,7 @@ module.exports = {
                                         return body.routes[0].duration
                                     })
                                     .catch(function (err) {
-                                        console.log("LINE 153 ERROR : " + err);
+                                        console.log("LINE 153 ERROR : " + JSON.stringify(err));
                                         return failCB(err);
                                     })
                                 );
@@ -194,7 +194,7 @@ module.exports = {
                                     return body.routes[0].duration
                                 })
                                 .catch(function (err) {
-                                    console.log("LINE 196 ERROR : " + err);
+                                    console.log("LINE 196 ERROR : " + JSON.stringify(err));
                                     return failCB(err);
                                 })
                             );
@@ -224,7 +224,7 @@ module.exports = {
                         });
                     }
                 }).catch(function (error) {
-                    console.log("LINE 227 ERROR : " + error);
+                    console.log("LINE 227 ERROR : " + JSON.stringify(error));
                     failCB(error);
                 });
             },
@@ -232,7 +232,7 @@ module.exports = {
                 console.log("NO PARKING SPOTS FOUND");
             },
             function (error) {
-                console.log("LINE 235 ERROR : " + err);
+                console.log("LINE 235 ERROR : " + JSON.stringify(err));
                 return failCB(error);
             });
     }

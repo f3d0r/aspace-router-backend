@@ -107,14 +107,12 @@ cluster(function (worker) {
         };
 
         d.on('remote', function (remote) {
-            remote.getOsrm(function (osrm) {
-                osrm.route(query, function (err, result) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log(result);
-                    }
-                });
+            remote.osrmRoute(query, function (err, result) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(result);
+                }
                 d.end();
             });
         });

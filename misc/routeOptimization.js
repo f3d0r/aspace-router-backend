@@ -62,13 +62,12 @@ module.exports = {
                     driving_reqs.push(
                         promisify(
                             d.on('remote', function (remote) {
-                                remote.getOsrm(function (osrm) {
-                                    osrm.route({
-                                        coordinates: [
-                                            origin,
-                                            [parking_spot_data[i].lng, parking_spot_data[i].lat]
-                                        ]
-                                    })
+                                remote.osrmRoute({
+                                    coordinates: [
+                                        origin,
+                                        [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                                    ]
+                                }, function (results) {
                                     d.end();
                                 })
                             }))
@@ -139,13 +138,12 @@ module.exports = {
                                 bike_reqs.push(
                                     promisify(
                                         d.on('remote', function (remote) {
-                                            remote.getOsrm(function (osrm) {
-                                                osrm.route({
-                                                    coordinates: [
-                                                        bike_coords[i][j],
-                                                        destination
-                                                    ]
-                                                })
+                                            remote.osrmRoute({
+                                                coordinates: [
+                                                    bike_coords[i][j],
+                                                    destination
+                                                ]
+                                            }, function (results) {
                                                 d.end();
                                             })
                                         })
@@ -187,13 +185,12 @@ module.exports = {
                             walk_time_reqs.push(
                                 promisify(
                                     d.on('remote', function (remote) {
-                                        remote.getOsrm(function (osrm) {
-                                            osrm.route({
-                                                coordinates: [
-                                                    [parking_spot_data[i].lng, parking_spot_data[i].lat],
-                                                    destination
-                                                ]
-                                            })
+                                        remote.osrmRoute({
+                                            coordinates: [
+                                                [parking_spot_data[i].lng, parking_spot_data[i].lat],
+                                                destination
+                                            ]
+                                        }, function (results) {
                                             d.end();
                                         })
                                     })

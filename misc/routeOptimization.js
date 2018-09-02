@@ -3,12 +3,11 @@ var sql = require('@sql');
 const math = require('mathjs');
 var path = require('path');
 var OSRM = require('osrm');
-var rp = require("request-promise");
 const {
     promisify
 } = require('util');
 
-var osrm = new OSRM(path.join(__dirname, '/osrm_ch_data_extracted/us-west-latest.osrm'));
+var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
 
 
 module.exports = {

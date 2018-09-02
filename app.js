@@ -9,10 +9,9 @@ var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
 var path = require('path');
-
 var OSRM = require('osrm');
 
-var osrm = new OSRM(path.join(__dirname, '/osrm_ch_data_extracted/us-west-latest.osrm'));
+var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
 
 const {
     IncomingWebhook
@@ -104,7 +103,7 @@ cluster(function (worker) {
                 [13.414307, 52.521835],
                 [13.402290, 52.523728]
             ],
-            alternateRoute: req.query.alternatives !== 'false'
+            alternateRoute: false
         };
         osrm.route(query, function (err, result) {
             if (err) {

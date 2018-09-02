@@ -2,17 +2,18 @@ const constants = require('@config');
 var sql = require('@sql');
 var osrm = require('@osrm');
 const math = require('mathjs');
-var promisify = require('promisify-any');
 
-var osrmRoute = promisify(function (query, cb) {
-    osrm.route(query, function (err, result) {
-        if (err) {
-            throw new Error(err);
-        } else {
-            cb(result);
-        }
-    });
-}, 1);
+var osrmRoute = function (query) {
+    return new Promise(function (resolve, reject) {
+        osrm.route(query, function (err, result) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result);
+            }
+        })
+    })
+}
 
 module.exports = {
     /* Algorithm:

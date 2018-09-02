@@ -2,9 +2,9 @@ const constants = require('@config');
 var sql = require('@sql');
 var path = require('path');
 var appRoot = require('app-root-path');
-console.log("APP ROOT: " + appRoot);
-console.log("ROUTE OPTIMIZATION PATH : " + path.join(__dirname, '/us-west-latest.osrm'));
-var osrm = new OSRM(path.join(__dirname, '/us-west-latest.osrm'));
+console.log("ROUTE OPTIMIZATION PATH : " + path.join(appRoot, '/us-west-latest.osrm'));
+var osrm = new OSRM(path.join(appRoot, '/us-west-latest.osrm'));
+
 const math = require('mathjs');
 const {
     promisify

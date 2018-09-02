@@ -1,11 +1,19 @@
 const constants = require('@config');
 var sql = require('@sql');
 var osrm = require('@osrm');
-
 const math = require('mathjs');
-const {
-    promisify
-} = require('util');
+var promisify = require('promisify-any');
+
+osrmRoute = function (query, cb) {
+    osrm.route(query, function (err, result) {
+        if (err) {
+            return cb(err);
+        } else {
+            return cb(result);
+        }
+    });
+};
+osrmRoute = promisify(osrmRoute, 1);
 
 module.exports = {
     /* Algorithm:
@@ -59,13 +67,12 @@ module.exports = {
                 var driving_reqs = []
                 for (var i = 0; i < parking_spot_data.length; i++) {
                     driving_reqs.push(
-                        promisify(
-                            osrm.route({
-                                coordinates: [
-                                    origin,
-                                    [parking_spot_data[i].lng, parking_spot_data[i].lat]
-                                ]
-                            }))
+                        osrmRoute({
+                            coordinates: [
+                                origin,
+                                [parking_spot_data[i].lng, parking_spot_data[i].lat]
+                            ]
+                        })
                         .then(function (body) {
                             body = JSON.parse(body)
                             return body.routes[0].duration
@@ -131,13 +138,12 @@ module.exports = {
                         for (var i = 0; i < results.length; i++) {
                             for (var j = 0; j < bike_coords[i].length; j++) {
                                 bike_reqs.push(
-                                    promisify(
-                                        osrm.route({
-                                            coordinates: [
-                                                bike_coords[i][j],
-                                                destination
-                                            ]
-                                        }))
+                                    osrmRoute({
+                                        coordinates: [
+                                            bike_coords[i][j],
+                                            destination
+                                        ]
+                                    })
                                     .then(function (body) {
                                         body = JSON.parse(body)
                                         return body.routes[0].duration
@@ -174,13 +180,12 @@ module.exports = {
                         var walk_time_reqs = []
                         for (var i = 0; i < parking_spot_data.length; i++) {
                             walk_time_reqs.push(
-                                promisify(
-                                    osrm.route({
-                                        coordinates: [
-                                            [parking_spot_data[i].lng, parking_spot_data[i].lat],
-                                            destination
-                                        ]
-                                    }))
+                                osrmRoute({
+                                    coordinates: [
+                                        [parking_spot_data[i].lng, parking_spot_data[i].lat],
+                                        destination
+                                    ]
+                                })
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration

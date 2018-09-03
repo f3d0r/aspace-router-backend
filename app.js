@@ -16,7 +16,7 @@ module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'))
 const {
     IncomingWebhook
 } = require('@slack/client');
-const workerCount = Math.ceil(require('os').cpus().length * 1.5);
+const workerCount = Math.ceil(require('os').cpus().length * 1.25);
 
 // LOCAL IMPORTS
 const constants = require('@config');

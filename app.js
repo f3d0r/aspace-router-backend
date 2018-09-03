@@ -16,7 +16,7 @@ module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'))
 const {
     IncomingWebhook
 } = require('@slack/client');
-const cpuCount = require('os').cpus().length;
+const workerCount = Math.ceil(require('os').cpus().length * 1.5);
 
 // LOCAL IMPORTS
 const constants = require('@config');
@@ -102,5 +102,5 @@ cluster(function (worker) {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
-    count: cpuCount
+    count: workerCount
 })

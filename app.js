@@ -7,7 +7,6 @@ const cors = require('cors');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
-// var toobusy = require('express-toobusy')();
 var path = require('path');
 var appRoot = require('app-root-path');
 var OSRM = require('osrm');
@@ -30,7 +29,6 @@ var app = express();
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
-    // app.use(toobusy);
     app.use(bodyParser.urlencoded({
         extended: false
     }));
@@ -54,6 +52,7 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
 
     function errorHandler(error, req, res, next) {
+        console.log(error.message);
         if (error.message == "Response timeout") {
             res.status(500).send("Response timeout, please check API status at <a href=\"https://status.api.trya.space\">status.trya.space</a>");
             sendSlackError(error, req);

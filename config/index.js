@@ -6,7 +6,7 @@ const secretKey = '***REMOVED***';
 
 module.exports = {
     express: {
-        RESPONSE_TIMEOUT_MILLI: 30000
+        RESPONSE_TIMEOUT_MILLI: 10000
     },
     twilio: {
         TWILIO_ACCOUNT_SID: 'twilio_sid',

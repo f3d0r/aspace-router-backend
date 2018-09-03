@@ -132,6 +132,7 @@ module.exports = {
                                     }
                                     for (var i = 0; i < results.length; i++) {
                                         for (var j = 0; j < bike_coords[i].length; j++) {
+                                            cnsole.log("PUSHING BIKE REQS");
                                             bike_reqs.push(
                                                 osrmRoute({
                                                     coordinates: [
@@ -140,9 +141,11 @@ module.exports = {
                                                     ]
                                                 })
                                                 .then(function (body) {
+                                                    console.log("IN 143 RETURN!");
                                                     return body.routes[0].duration
                                                 })
                                                 .catch(function (err) {
+                                                    console.log("IN 147 ERROR!");
                                                     return failCB(err);
                                                 })
                                             );
@@ -165,7 +168,9 @@ module.exports = {
                                                     bike_locs: bike_data[i],
                                                     approx_biking_time: results[best_bike_indices[i]]
                                                 })
+                                                console.log("PUSHING RESULTS 170")
                                             }
+                                            console.log("DONE PUSHING")
                                             /* print('Best park & bike spots: ')
                                             print(best_spots) */
                                             successCB(best_spots);

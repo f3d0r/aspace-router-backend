@@ -10,7 +10,6 @@ var cluster = require('express-cluster');
 var path = require('path');
 var appRoot = require('app-root-path');
 var OSRM = require('osrm');
-var pm2 = require('pm2');
 module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'));
 
 const {
@@ -57,9 +56,6 @@ cluster(function (worker) {
         if (error.message == "Response timeout") {
             res.status(500).send("Response timeout, please check API status at <a href=\"https://status.api.trya.space\">status.trya.space</a>");
             sendSlackError(error, req);
-            pm2.connect(function (err) {
-                pm2.restart('aspace-routing', function () {});
-            });
         } else if (error == 'INVALID_BASIC_AUTH') {
             res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
             res.status(401).send("Authorization Required");

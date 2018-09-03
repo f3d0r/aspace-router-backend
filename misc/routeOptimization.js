@@ -38,7 +38,7 @@ module.exports = {
             car_radius = 11000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 500;
+            bike_radius = 750; //increased bike radius from 500 to 750
         }
         if (spot_size === undefined) {
             spot_size = 10;
@@ -175,8 +175,6 @@ module.exports = {
                                             print(best_spots) */
                                             successCB(best_spots);
                                         });
-                                    
-
                                 }, function () {
                                     console.log("NO RESULTS");
                                 }, function (error) {
@@ -231,8 +229,7 @@ module.exports = {
                         failCB(error);
                     });
             },
-            function () {
-            },
+            function () {},
             function (error) {
                 return failCB(error);
             });

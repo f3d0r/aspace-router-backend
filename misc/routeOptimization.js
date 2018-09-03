@@ -118,8 +118,11 @@ module.exports = {
                             var bike_data = []
                             for (i in parking_spot_data) {
                                 sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
+                                    console.log("RESULTS: ");
+                                    console.log(results);
                                     bike_data.push(results)
                                 }, function () {
+                                    console.log("NO RESULTS");
                                 }, function (error) {
                                     return failCB(error);
                                 });

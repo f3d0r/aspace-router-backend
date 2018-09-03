@@ -132,7 +132,7 @@ module.exports = {
                                     }
                                     for (var i = 0; i < results.length; i++) {
                                         for (var j = 0; j < bike_coords[i].length; j++) {
-                                            cnsole.log("PUSHING BIKE REQS");
+                                            console.log("PUSHING BIKE REQS");
                                             bike_reqs.push(
                                                 osrmRoute({
                                                     coordinates: [

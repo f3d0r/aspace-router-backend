@@ -26,7 +26,7 @@ module.exports = {
             car_radius = 11000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 5000;
+            bike_radius = 750;
         }
         if (spot_size === undefined) {
             spot_size = 10;

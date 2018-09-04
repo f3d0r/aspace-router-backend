@@ -124,7 +124,7 @@ function getRequests(formattedRoutes) {
     var reqs = [];
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            url = constants.route_engine[getMode(currentSegment.name)];
+            url = constants.routing_engine[getMode(currentSegment.name)];
             queryExtras = "?steps=true&annotations=true&geometries=geojson&overview=full";
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {

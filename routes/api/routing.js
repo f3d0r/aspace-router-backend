@@ -181,7 +181,7 @@ function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
             'origin': origin,
             'dest': metaFormat(parkingSpot)
         });
-        if (currentWaypointSet.bike_locs.length > 0) {
+        if (typeof currentWaypointSet.bike_locs == 'undefined' || currentWaypointSet.bike_locs == null) {
             var bikeSpot = currentWaypointSet.bike_locs[0];
             currentSegments.push({
                 'name': segmentNames[1],

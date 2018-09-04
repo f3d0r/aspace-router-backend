@@ -133,8 +133,8 @@ function getRequests(formattedRoutes) {
                     body = addInstructions(body);
                     return body;
                 })
-                .catch(function (err) {
-                    return err;
+                .catch(function (error) {
+                    return error;
                 }));
         });
     });
@@ -229,7 +229,7 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
     return formattedSegments;
 }
 
-function addInstructions(routesResponse) {
+function addInstructions(routesResponse, successCB) {
     for (var currentLeg = 0; currentLeg < routesResponse.legs.length; currentLeg++) {
         var currentLeg = routesResponse.legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
@@ -239,6 +239,7 @@ function addInstructions(routesResponse) {
             });
         }
     }
+    return routeResponse;
 }
 
 function metaFormat(toFormat) {

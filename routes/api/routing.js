@@ -175,6 +175,12 @@ function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
     waypointSets.forEach(function (currentWaypointSet) {
         currentSegments = [];
         var parkingSpot = currentWaypointSet.parking_spot;
+        console.log("WAYPOINT SET:");
+        console.log(currentWaypointSet);
+        console.log("BIKE LOCS: ");
+        console.log(currentWaypointSet.bike_locs);
+        console.log("BIKE LOCS LENGTH: ")
+        console.log(currentWaypointSet.bike_locs.length);
         var bikeSpot = currentWaypointSet.bike_locs[0];
         currentSegments.push({
             'name': segmentNames[0],

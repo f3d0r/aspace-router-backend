@@ -1,4 +1,5 @@
 var router = require('express').Router();
+var rp = require('request-promise');
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');

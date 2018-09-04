@@ -1,7 +1,7 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-var rp = require("request-promise");
+var rp = require('request-promise');
 
 module.exports = {
     /* Algorithm:

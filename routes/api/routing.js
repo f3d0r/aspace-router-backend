@@ -51,35 +51,32 @@ router.post('/get_drive_bike_route', function (req, res, next) {
             routeOptionsResponse = {};
             routeOptionsResponse['waypoint_info'] = bestSpots;
             routeOptionsResponse['segments'] = [];
+            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
+            console.log(formattedRoutes);
+            reqs = [];
+            formattedRoutes.forEach(function (currentRouteOption) {
+                currentRouteOption.forEach(function (currentSegment) {
+                    reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
+                });
+            });
+            Promise.all(reqs)
+                .then(data => {
+                    currentIndex = 0;
+                    formattedRoutes.forEach(function (currentRouteOption) {
+                        currentRouteOption.forEach(function (currentSegment) {
+                            currentSegment['directions'] = data[currentIndex].body.routes;
+                            currentIndex++;
+                        });
+                    });
+                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
+                }).catch(function (error) {
+                    console.log(error);
+                });
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
         }, function (error) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
     });
-    // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-    //     getDriveBikeWaypoints(req, function (waypointSet) {
-    //         formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
-    //         reqs = [];
-    //         formattedRoutes.forEach(function (currentRouteOption) {
-    //             currentRouteOption.forEach(function (currentSegment) {
-    //                 reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-    //             });
-    //         });
-    //         Promise.all(reqs)
-    //             .then(data => {
-    //                 currentIndex = 0;
-    //                 formattedRoutes.forEach(function (currentRouteOption) {
-    //                     currentRouteOption.forEach(function (currentSegment) {
-    //                         currentSegment['directions'] = data[currentIndex].body.routes;
-    //                         currentIndex++;
-    //                     });
-    //                 });
-    //                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-    //             }).catch(function (error) {
-    //                 console.log(error);
-    //             });
-    //     });
-    // });
 });
 
 router.post('/get_drive_direct_route', function (req, res, next) {

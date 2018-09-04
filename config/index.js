@@ -37,8 +37,10 @@ module.exports = {
         DATABASE_PORT: 'db_port'
     },
     routing_engine: {
-        PORT: 5000,
-        HOST: 'localhost'
+        HOST: 'localhost',
+        PORT_CAR: 5000,
+        PORT_BIKE: 5001,
+        PORT_WALK: 5002
     },
     digitalocean: {
         BUCKET_NAME: 'aspace',

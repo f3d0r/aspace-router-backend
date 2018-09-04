@@ -55,16 +55,16 @@ module.exports = {
             var driving_reqs = []
             const orig_s = origin[0].toString() + ',' + origin[1].toString()
             for (var i = 0; i < parking_spot_data.length; i++) {
-                var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
+                var dest_s = parking_spot_data[i].lng.toString() + ',' +parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    rp('http://localhost:5000/route/v1/drive/' + orig_s + ';' + dest_s)
+                    rp('http://localhost:5000/route/v1/drive/' + orig_s +';'+ dest_s)
                     .then(function (body) {
-                        body = JSON.parse(body)
-                        return body.routes[0].duration
-                    })
-                    .catch(function (err) {
-                        return failCB(err);
-                    })
+                       body = JSON.parse(body)
+                       return body.routes[0].duration
+                   })
+                   .catch(function (err) {
+                       return failCB(err);
+                   })
                 );
             }
             Promise.all(driving_reqs).then(function (results) {
@@ -123,7 +123,7 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                rp('http://localhost:5001/route/v1/bike/' + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
+                                rp('http://localhost:5000/route/v1/bike/' + bike_coords[i][j] +';'+ destination[0].toString() + ',' + destination[1].toString())
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration
@@ -160,14 +160,14 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp('http://localhost:5002/route/v1/foot/' + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
-                            .then(function (body) {
-                                body = JSON.parse(body)
-                                return body.routes[0].duration
-                            })
-                            .catch(function (err) {
-                                return failCB(err);
-                            })
+                            rp('https://api.trya.space/v1/routing/engine/route/v1/foot/' + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() +';'+ destination[0].toString() + ',' + destination[1].toString())
+                                .then(function (body) {
+                                    body = JSON.parse(body)
+                                    return body.routes[0].duration
+                                })
+                                .catch(function (err) {
+                                    return failCB(err);
+                                })
                         );
                     }
                     Promise.all(walk_time_reqs).then(function (results) {
@@ -194,7 +194,7 @@ module.exports = {
                         successCB(best_spots);
                     });
                 }
-            }).catch(function (error) {
+            }).catch(function(error) {
                 failCB(error);
             });
         }, function () {

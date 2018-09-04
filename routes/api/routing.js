@@ -232,7 +232,7 @@ function metaFormat(toFormat) {
     for (var key in toFormat) {
         if (toFormat.hasOwnProperty(key)) {
             if (key != 'lat' && key != 'lng') {
-                formatted['meta'].key = toFormat[key];
+                formatted['meta'][key] = toFormat[key];
             } else {
                 formatted[key] = toFormat[key];
             }

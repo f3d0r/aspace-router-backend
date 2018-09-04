@@ -153,7 +153,7 @@ module.exports = {
                         }
                         /* print('Best park & bike spots: ')
                         print(best_spots) */
-                        successCB([best_spots, bike_data);
+                        successCB([best_spots, bike_data]);
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
                     // Walking time optimization

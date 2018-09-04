@@ -145,11 +145,18 @@ module.exports = {
                         best_spots = []
                         for (i in best_bike_indices) {
                             parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
-                            best_spots.push({
-                                parking_spot: parking_spot_data[best_bike_indices[i]],
-                                bike_locs: bike_data[i],
-                                approx_biking_time: results[best_bike_indices[i]]
-                            })
+                            if (bike_data[i].length < 1) {
+                                best_spots.push({
+                                    parking_spot: parking_spot_data[best_bike_indices[i]],
+                                })
+                            } else {
+                                best_spots.push({
+                                    parking_spot: parking_spot_data[best_bike_indices[i]],
+                                    bike_locs: bike_data[i],
+                                    approx_biking_time: results[best_bike_indices[i]]
+                                })
+                            }
+                            
                         }
                         /* print('Best park & bike spots: ')
                         print(best_spots) */

@@ -6,6 +6,8 @@ var routeOptimization = require('@route-optimization');
 var version = 'v5';
 var osrmTextInstructions = require('osrm-text-instructions')(version);
 
+const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
+
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
@@ -171,18 +173,18 @@ function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
             'name': segmentNames[0],
             'pretty_name': getSegmentPrettyName(segmentNames[0]),
             'origin': origin,
-            'dest': parkingSpot
+            'dest': metaFormat(parkingSpot)
         });
         currentSegments.push({
             'name': segmentNames[1],
             'pretty_name': getSegmentPrettyName(segmentNames[1]),
-            'origin': parkingSpot,
-            'dest': bikeSpot
+            'origin': metaFormat(parkingSpot),
+            'dest': metaFormat(bikeSpot)
         })
         currentSegments.push({
             'name': segmentNames[0],
             'pretty_name': getSegmentPrettyName(segmentNames[2]),
-            'origin': bikeSpot,
+            'origin': metaFormat(bikeSpot),
             'dest': dest
         })
         formattedSegments.push(currentSegments);
@@ -199,12 +201,12 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
             'name': segmentNames[0],
             'pretty_name': getSegmentPrettyName(segmentNames[0]),
             'origin': origin,
-            'dest': parkingSpot
+            'dest': metaFormat(parkingSpot)
         });
         currentSegments.push({
             'name': segmentNames[1],
             'pretty_name': getSegmentPrettyName(segmentNames[1]),
-            'origin': parkingSpot,
+            'origin': metaFormat(parkingSpot),
             'dest': dest
         })
         formattedSegments.push(currentSegments);
@@ -222,6 +224,21 @@ function addTextInstructions(routesResponse) {
             });
         }
     }
+}
+
+function metaFormat(toFormat) {
+    var formatted = {};
+    formatted['meta'] = {};
+    for (var key in toFormat) {
+        if (toFormat.hasOwnProperty(key)) {
+            if (key != 'lat' && key != 'lng') {
+                formatted['meta'].key = toFormat[key];
+            } else {
+                formatted[key] = toFormat[key];
+            }
+        }
+    }
+    return formatted;
 }
 
 module.exports = router;

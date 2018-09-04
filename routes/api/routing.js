@@ -52,7 +52,6 @@ router.post('/get_drive_bike_route', function (req, res, next) {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
             routeOptionsResponse = {};
             routeOptionsResponse['waypoint_info'] = bestSpots;
-            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
             formattedSegments = formatBikeSegments({
                     'lng': req.query.origin_lng,
                     'lat': req.query.origin_lat

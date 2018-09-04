@@ -55,16 +55,16 @@ module.exports = {
             var driving_reqs = []
             const orig_s = origin[0].toString() + ',' + origin[1].toString()
             for (var i = 0; i < parking_spot_data.length; i++) {
-                var dest_s = parking_spot_data[i].lng.toString() + ',' +parking_spot_data[i].lat.toString().toString()
+                var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    rp('http://' +constants.routing_engine.HOST + ':' + constants.routing_engine.PORT_CAR + '/route/v1/car/' + orig_s +';'+ dest_s)
+                    rp(constants.routing_engine.car_route + orig_s + ';' + dest_s)
                     .then(function (body) {
-                       body = JSON.parse(body)
-                       return body.routes[0].duration
-                   })
-                   .catch(function (err) {
-                       return failCB(err);
-                   })
+                        body = JSON.parse(body)
+                        return body.routes[0].duration
+                    })
+                    .catch(function (err) {
+                        return failCB(err);
+                    })
                 );
             }
             Promise.all(driving_reqs).then(function (results) {
@@ -123,7 +123,7 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                rp('http://' +constants.routing_engine.HOST + ':' + constants.routing_engine.PORT_BIKE + '/route/v1/bike/' + bike_coords[i][j] +';'+ destination[0].toString() + ',' + destination[1].toString())
+                                rp(constants.routing_engine.bike_route + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration
@@ -156,7 +156,7 @@ module.exports = {
                                     parking_spot: parking_spot_data[best_bike_indices[i]]
                                 })
                             }
-                            
+
                         }
                         /* print('Best park & bike spots: ')
                         print(best_spots) */
@@ -167,14 +167,14 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp('http://' +constants.routing_engine.HOST + ':' + constants.routing_engine.PORT_WALK + '/route/v1/walk/' + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() +';'+ destination[0].toString() + ',' + destination[1].toString())
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
-                                })
-                                .catch(function (err) {
-                                    return failCB(err);
-                                })
+                            rp(constants.routing_engine.walk_route + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
+                            .then(function (body) {
+                                body = JSON.parse(body)
+                                return body.routes[0].duration
+                            })
+                            .catch(function (err) {
+                                return failCB(err);
+                            })
                         );
                     }
                     Promise.all(walk_time_reqs).then(function (results) {
@@ -201,7 +201,7 @@ module.exports = {
                         successCB(best_spots);
                     });
                 }
-            }).catch(function(error) {
+            }).catch(function (error) {
                 failCB(error);
             });
         }, function () {

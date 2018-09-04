@@ -2,10 +2,9 @@ var router = require('express').Router();
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');
-const mbxDirections = require('@mapbox/mapbox-sdk/services/directions');
-const directionsClient = mbxDirections({
-    accessToken: constants.mapbox.API_KEY
-});
+
+var version = 'v5';
+var osrmTextInstructions = require('osrm-text-instructions')(version);
 
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
@@ -50,12 +49,15 @@ router.post('/get_drive_bike_route', function (req, res, next) {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
             routeOptionsResponse = {};
             routeOptionsResponse['waypoint_info'] = bestSpots;
-            routeOptionsResponse['segments'] = [];
-            console.log("BEST SPOTS:");
-            console.log(bestSpots);
-            
-            // formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
-            
+            formattedRoutes = formatSegments({
+                    'lng': req.query.origin_lng,
+                    'lat': req.query.origin_lat
+                }, {
+                    'lng': req.query.dest_lng,
+                    'lat': req.query.dest_lat
+                },
+                bestSpots, ["drive_park", "walk_bike", "bike_dest"]);
+            routeOptionsResponse['segments'] = formattedRoutes;
             // reqs = [];
             // formattedRoutes.forEach(function (currentRouteOption) {
             //     currentRouteOption.forEach(function (currentSegment) {
@@ -120,38 +122,15 @@ router.post('/get_drive_direct_route', function (req, res, next) {
 });
 
 function getDirectionsRequest(profile, origin, dest) {
-    return directionsClient
-        .getDirections({
-            profile: profile,
-            waypoints: [{
-                    coordinates: [origin.lng, origin.lat]
-                },
-                {
-                    coordinates: [dest.lng, dest.lat],
-                }
-            ],
-            annotations: ["duration", "distance", "speed", "congestion"],
-            bannerInstructions: true,
-            geometries: "geojson",
-            overview: "full",
-            roundaboutExits: true,
-            steps: true,
-            voiceInstructions: true
-        }).send();
-}
-
-function getProfile(segmentName) {
-    if (segmentName == "drive_park") {
-        return "driving-traffic";
-    } else if (segmentName == "walk_bike") {
-        return "walking";
-    } else if (segmentName == "bike_dest") {
-        return "cycling";
-    } else if (segmentName == "walk_dest") {
-        return "walking";
-    } else {
-        return "driving-traffic";
-    }
+    const url = constants.route_engine[profile];
+    return rp(url + origin[0] + ',' + origin[1] + ';' + dest[0] + ',' + dest[1])
+        .then(function (body) {
+            body = JSON.parse(body)
+            return body.routes[0].duration
+        })
+        .catch(function (err) {
+            return err;
+        })
 }
 
 function getSegmentPrettyName(name) {
@@ -168,71 +147,81 @@ function getSegmentPrettyName(name) {
     }
 }
 
-function formatSegments(waypointSets, segmentNames) {
+function getMode(name) {
+    if (name == "drive_park") {
+        return "car_route";
+    } else if (name == "walk_bike") {
+        return "walk_route";
+    } else if (name == "bike_dest") {
+        return "bike_route";
+    } else if (name == "walk_dest") {
+        return "walk_route";
+    } else {
+        return "car_route";
+    }
+}
+
+function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
     formattedSegments = [];
     waypointSets.forEach(function (currentWaypointSet) {
         currentSegments = [];
-        for (var index = 0; index < currentWaypointSet.length - 1; index++) {
-            tempSegment = {};
-            tempSegment['name'] = segmentNames[index];
-            tempSegment['pretty_name'] = getSegmentPrettyName(segmentNames[index]);
-            tempSegment['origin'] = currentWaypointSet[index];
-            tempSegment['dest'] = currentWaypointSet[index + 1];
-            currentSegments.push(tempSegment);
-        }
+        var parkingSpot = currentWaypointSet.parking_spot;
+        var bikeSpot = currentWaypointSet.bike_locs[0];
+        currentSegments.push({
+            'name': segmentNames[0],
+            'pretty_name': getSegmentPrettyName(segmentNames[0]),
+            'origin': origin,
+            'dest': parkingSpot
+        });
+        currentSegments.push({
+            'name': segmentNames[1],
+            'pretty_name': getSegmentPrettyName(segmentNames[1]),
+            'origin': parkingSpot,
+            'dest': bikeSpot
+        })
+        currentSegments.push({
+            'name': segmentNames[0],
+            'pretty_name': getSegmentPrettyName(segmentNames[2]),
+            'origin': bikeSpot,
+            'dest': dest
+        })
         formattedSegments.push(currentSegments);
     });
     return formattedSegments;
 }
 
-function getDriveBikeWaypoints(req, cb) {
-    waypointReturn = [];
-    waypointReturn.push([{
-        lng: parseFloat(req.query.origin_lng),
-        lat: parseFloat(req.query.origin_lat)
-    }, {
-        lng: -122.3118,
-        lat: 47.6182
-    }, {
-        lng: -122.3133,
-        lat: 47.6168,
-    }, {
-        lng: parseFloat(req.query.dest_lng),
-        lat: parseFloat(req.query.dest_lat)
-    }]);
-    cb(waypointReturn);
+function formatRegSegments(origin, dest, waypointSets, segmentNames) {
+    formattedSegments = [];
+    waypointSets.forEach(function (currentWaypointSet) {
+        currentSegments = [];
+        var parkingSpot = currentWaypointSet.parking_spot;
+        currentSegments.push({
+            'name': segmentNames[0],
+            'pretty_name': getSegmentPrettyName(segmentNames[0]),
+            'origin': origin,
+            'dest': parkingSpot
+        });
+        currentSegments.push({
+            'name': segmentNames[1],
+            'pretty_name': getSegmentPrettyName(segmentNames[1]),
+            'origin': parkingSpot,
+            'dest': dest
+        })
+        formattedSegments.push(currentSegments);
+    });
+    return formattedSegments;
 }
 
-function getDriveWalkWaypoints(req, cb) {
-    waypointReturn = [];
-    waypointReturn.push([{
-        lng: parseFloat(req.query.origin_lng),
-        lat: parseFloat(req.query.origin_lat)
-    }, {
-        lng: -122.3344,
-        lat: 47.6091
-    }, {
-        lng: parseFloat(req.query.dest_lng),
-        lat: parseFloat(req.query.dest_lat)
-    }]);
-    cb(waypointReturn);
-}
-
-function getDriveDirectWaypoints(req, cb) {
-    waypointReturn = [];
-    waypointReturn.push([{
-            lng: parseFloat(req.query.origin_lng),
-            lat: parseFloat(req.query.origin_lat)
-        }, {
-            lng: -122.3336,
-            lat: 47.6057,
-        },
-        {
-            lng: parseFloat(req.query.dest_lng),
-            lat: parseFloat(req.query.dest_lat)
+function addTextInstructions(routesResponse) {
+    for (var currentLeg = 0; currentLeg < routesResponse.legs.length; currentLeg++) {
+        var currentLeg = routesResponse.legs[currentLeg];
+        for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
+            currentStep['instruction'] = osrmTextInstructions.compile('en', steps[currentStep], {
+                legCount: routesResponse.legs.length,
+                legIndex: currentLeg
+            });
         }
-    ]);
-    cb(waypointReturn);
+    }
 }
 
 module.exports = router;

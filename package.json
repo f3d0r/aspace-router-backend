@@ -8,6 +8,7 @@
         "nan": "^2.6.2",
         "node-cmake": "^2.3.2",
         "node-pre-gyp": "^0.11.0",
+        "osrm-text-instructions": "^0.13.2",
         "promisify-any": "^2.0.1",
         "rimraf": "^2.5.4"
     },

@@ -175,31 +175,34 @@ function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
     waypointSets.forEach(function (currentWaypointSet) {
         currentSegments = [];
         var parkingSpot = currentWaypointSet.parking_spot;
-        console.log("WAYPOINT SET:");
-        console.log(currentWaypointSet);
-        console.log("BIKE LOCS: ");
-        console.log(currentWaypointSet.bike_locs);
-        console.log("BIKE LOCS LENGTH: ")
-        console.log(currentWaypointSet.bike_locs.length);
-        var bikeSpot = currentWaypointSet.bike_locs[0];
         currentSegments.push({
             'name': segmentNames[0],
             'pretty_name': getSegmentPrettyName(segmentNames[0]),
             'origin': origin,
             'dest': metaFormat(parkingSpot)
         });
-        currentSegments.push({
-            'name': segmentNames[1],
-            'pretty_name': getSegmentPrettyName(segmentNames[1]),
-            'origin': metaFormat(parkingSpot),
-            'dest': metaFormat(bikeSpot)
-        })
-        currentSegments.push({
-            'name': segmentNames[0],
-            'pretty_name': getSegmentPrettyName(segmentNames[2]),
-            'origin': metaFormat(bikeSpot),
-            'dest': dest
-        })
+        if (currentWaypointSet.bike_locs.length > 0) {
+            var bikeSpot = currentWaypointSet.bike_locs[0];
+            currentSegments.push({
+                'name': segmentNames[1],
+                'pretty_name': getSegmentPrettyName(segmentNames[1]),
+                'origin': metaFormat(parkingSpot),
+                'dest': metaFormat(bikeSpot)
+            })
+            currentSegments.push({
+                'name': segmentNames[2],
+                'pretty_name': getSegmentPrettyName(segmentNames[2]),
+                'origin': metaFormat(bikeSpot),
+                'dest': dest
+            })
+        } else {
+            currentSegments.push({
+                'name': "walk_dest",
+                'pretty_name': getSegmentPrettyName("walk_dest"),
+                'origin': metaFormat(parkingSpot),
+                'dest': dest
+            })
+        }
         formattedSegments.push(currentSegments);
     });
     return formattedSegments;

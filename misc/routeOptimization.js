@@ -35,7 +35,7 @@ module.exports = {
             params = ['parking_price'];
         }
         if (param_weights === undefined) {
-            param_weights = [1e-2, 1]
+            param_weights = [1e-2, 1];
         }
         if (number_options === undefined) {
             number_options = 3;
@@ -78,7 +78,7 @@ module.exports = {
                     for (d in parking_spot_data) {
                         arr.push(parking_spot_data[d][params[i]])
                     }
-                    arr = center(arr)
+                    arr = sub_least(arr)
                     X = X.concat([arr["_data"]])
                 }
                 // Parking spot parameters now held in X
@@ -104,6 +104,7 @@ module.exports = {
                     for (i in parking_spot_data) {
                         sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                             bike_data.push(results)
+                            console.log(bike_data)
                         }, function () {
                             //no results were found 
                         }, function (error) {

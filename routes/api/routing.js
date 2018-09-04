@@ -59,27 +59,13 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                     'lat': req.query.dest_lat
                 },
                 bestSpots, ["drive_park", "walk_bike", "bike_dest"]);
-            routeOptionsResponse['segments'] = formattedSegments;
-            // reqs = [];
-            // formattedRoutes.forEach(function (currentRouteOption) {
-            //     currentRouteOption.forEach(function (currentSegment) {
-            //         reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-            //     });
-            // });
-            // Promise.all(reqs)
-            //     .then(data => {
-            //         currentIndex = 0;
-            //         formattedRoutes.forEach(function (currentRouteOption) {
-            //             currentRouteOption.forEach(function (currentSegment) {
-            //                 currentSegment['directions'] = data[currentIndex].body.routes;
-            //                 currentIndex++;
-            //             });
-            //         });
-            //         next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-            //     }).catch(function (error) {
-            //         console.log(error);
-            //     });
-            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+            Promise.all(getRequests(formattedSegments))
+                .then(function (responses) {
+                    routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
+                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+                }).catch(function (error) {
+                    next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                });
         }, function (error) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
@@ -123,16 +109,35 @@ router.post('/get_drive_direct_route', function (req, res, next) {
     // });
 });
 
-function getDirectionsRequest(profile, origin, dest) {
-    const url = constants.route_engine[profile];
-    return rp(url + origin[0] + ',' + origin[1] + ';' + dest[0] + ',' + dest[1])
-        .then(function (body) {
-            body = JSON.parse(body)
-            return body.routes[0].duration
-        })
-        .catch(function (err) {
-            return err;
-        })
+function combineSegments(formattedRoutes, responses) {
+    var responseIndex = 0;
+    formattedRoutes.forEach(function (currentRoute) {
+        currentRoute.forEach(function (currentSegment) {
+            currentSegment['directions'] = responses[responseIndex];
+            responseIndex++;
+        });
+    });
+    return formattedRoutes;
+}
+
+function getRequests(formattedRoutes) {
+    var reqs = [];
+    formattedRoutes.forEach(function (currentRoute) {
+        currentRoute.forEach(function (currentSegment) {
+            url = constants.route_engine[getMode(currentSegment.name)];
+            queryExtras = "?steps=true&annotations=true&geometries=geojson&overview=full";
+            reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
+                .then(function (body) {
+                    body = JSON.parse(body)
+                    body = addInstructions(body);
+                    return body;
+                })
+                .catch(function (err) {
+                    return err;
+                }));
+        });
+    });
+    return reqs;
 }
 
 function getSegmentPrettyName(name) {
@@ -214,7 +219,7 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
     return formattedSegments;
 }
 
-function addTextInstructions(routesResponse) {
+function addInstructions(routesResponse) {
     for (var currentLeg = 0; currentLeg < routesResponse.legs.length; currentLeg++) {
         var currentLeg = routesResponse.legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {

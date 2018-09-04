@@ -26,7 +26,7 @@ module.exports = {
             car_radius = 11000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 500;
+            bike_radius = 5000;
         }
         if (spot_size === undefined) {
             spot_size = 10;
@@ -153,7 +153,7 @@ module.exports = {
                         }
                         /* print('Best park & bike spots: ')
                         print(best_spots) */
-                        successCB([best_spots, bike_data]);
+                        successCB(best_spots);
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
                     // Walking time optimization

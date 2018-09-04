@@ -9,8 +9,8 @@ var helmet = require('helmet')
 var cluster = require('express-cluster');
 var path = require('path');
 var appRoot = require('app-root-path');
-var OSRM = require('osrm');
-module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'));
+// var OSRM = require('osrm');
+// module.exports = new OSRM(path.join(appRoot.toString(), '/us-west-latest.osrm'));
 
 const {
     IncomingWebhook

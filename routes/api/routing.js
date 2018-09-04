@@ -60,6 +60,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                     'lat': req.query.dest_lat
                 },
                 bestSpots, ["drive_park", "walk_bike", "bike_dest"]);
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
             Promise.all(getRequests(formattedSegments))
                 .then(function (responses) {
                     routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);

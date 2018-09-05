@@ -196,8 +196,8 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
             'dest': metaFormat(parkingSpot)
         });
         currentSegments.push({
-            'name': segmentNames[1],
-            'pretty_name': getSegmentPrettyName(segmentNames[1]),
+            'name': "walk_dest",
+            'pretty_name': getSegmentPrettyName("walk_dest"),
             'origin': metaFormat(parkingSpot),
             'dest': dest
         })

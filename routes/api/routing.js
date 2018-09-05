@@ -90,6 +90,7 @@ function getRequests(formattedRoutes) {
                     return body;
                 })
                 .catch(function (error) {
+                    console.log(error);
                     return error;
                 }));
         });

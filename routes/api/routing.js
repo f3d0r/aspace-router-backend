@@ -63,6 +63,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
             Promise.all(getRequests(formattedSegments))
                 .then(function (responses) {
                     routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
+                    // console.log(responses[0]);
                     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
@@ -127,9 +128,11 @@ function getRequests(formattedRoutes) {
         currentRoute.forEach(function (currentSegment) {
             url = constants.routing_engine[getMode(currentSegment.name)];
             queryExtras = "?steps=true&annotations=true&geometries=geojson&overview=full";
+            console.log(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras);
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {
-                    body = JSON.parse(body)
+                    body = JSON.parse(body);
+                    // console.log(body);
                     body = addInstructions(body);
                     return body;
                 })
@@ -229,12 +232,15 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
     return formattedSegments;
 }
 
-function addInstructions(routesResponse, successCB) {
-    for (var currentLeg = 0; currentLeg < routesResponse.legs.length; currentLeg++) {
-        var currentLeg = routesResponse.legs[currentLeg];
+function addInstructions(routesResponse) {
+    // console.log("---------------------------------------");
+    // console.log(routesResponse.routes);
+    // console.log(routesResponse.routes.legs);
+    for (var currentLeg = 0; currentLeg < routesResponse.routes.legs.length; currentLeg++) {
+        var currentLeg = routesResponse.routes.legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
             currentStep['instruction'] = osrmTextInstructions.compile('en', steps[currentStep], {
-                legCount: routesResponse.legs.length,
+                legCount: routesResponse.routes.legs.length,
                 legIndex: currentLeg
             });
         }

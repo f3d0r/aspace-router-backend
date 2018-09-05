@@ -85,7 +85,7 @@ function getRequests(formattedRoutes) {
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {
                     body = JSON.parse(body);
-                    console.log(body);
+                    // console.log(body);
                     body = addInstructions(body);
                     return body;
                 })

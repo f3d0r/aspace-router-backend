@@ -196,8 +196,7 @@ function addInstructions(routesResponse) {
             });
         }
     }
-    console.log(routeResponse)
-    return routeResponse;
+    return routesResponse;
 }
 
 function metaFormat(toFormat) {

@@ -187,11 +187,11 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
 }
 
 function addInstructions(routesResponse) {
-    for (var currentLeg = 0; currentLeg < routesResponse.routes.legs.length; currentLeg++) {
-        var currentLeg = routesResponse.routes.legs[currentLeg];
+    for (var currentLeg = 0; currentLeg < routesResponse.routes[0].legs.length; currentLeg++) {
+        var currentLeg = routesResponse.routes[0].legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
             currentStep['instruction'] = osrmTextInstructions.compile('en', steps[currentStep], {
-                legCount: routesResponse.routes.legs.length,
+                legCount: routesResponse.routes[0].legs.length,
                 legIndex: currentLeg
             });
         }

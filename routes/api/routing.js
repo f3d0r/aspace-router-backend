@@ -107,9 +107,8 @@ function getRequests(formattedRoutes) {
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {
                     body = JSON.parse(body);
-                    addInstructions(body, new function (instructionBody) {
-                        return instructionBody;
-                    });
+                    body = addInstructions(body);
+                    return body;
                 })
                 .catch(function (error) {
                     return error;
@@ -206,18 +205,21 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
     return formattedSegments;
 }
 
-function addInstructions(routesResponse, successCB) {
+function addInstructions(routesResponse) {
     for (var currentLeg = 0; currentLeg < routesResponse.routes[0].legs.length; currentLeg++) {
         var currentLeg = routesResponse.routes[0].legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
-            currentStep['instruction'] = osrmTextInstructions.compile('en', currentLeg.steps[currentStep], {
-                legCount: routesResponse.routes[0].legs.length,
-                legIndex: currentLeg
-            });
+            try {
+                currentLeg.steps[currentStep].instruction = osrmTextInstructions.compile('en', currentLeg.steps[currentStep], {
+                    legCount: routesResponse.routes[0].legs.length,
+                    legIndex: currentLeg
+                });
+            } catch (error) {
+                console.log(error);
+            }
         }
     }
-    console.log(routesResponse.routes[0].legs[0].steps)
-    successCB(routesResponse);
+    return routesResponse;
 }
 
 function metaFormat(toFormat) {

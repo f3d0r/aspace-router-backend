@@ -21,31 +21,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
         });
     });
 });
-
-//     getDriveWalkWaypoints(req, function (waypointSet) {
 //         formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
-//         reqs = [];
-//         formattedRoutes.forEach(function (currentRouteOption) {
-//             currentRouteOption.forEach(function (currentSegment) {
-//                 reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-//             });
-//         });
-//         Promise.all(reqs)
-//             .then(data => {
-//                 currentIndex = 0;
-//                 formattedRoutes.forEach(function (currentRouteOption) {
-//                     currentRouteOption.forEach(function (currentSegment) {
-//                         currentSegment['directions'] = data[currentIndex].body.routes;
-//                         currentIndex++;
-//                     });
-//                 });
-//                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-//             }).catch(function (error) {
-//                 console.log(error);
-//             });
-//     });
-//     });
-// });
 
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
@@ -85,30 +61,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
     });
-    // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-    //     getDriveDirectWaypoints(req, function (waypointSet) {
     //         formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
-    //         reqs = [];
-    //         formattedRoutes.forEach(function (currentRouteOption) {
-    //             currentRouteOption.forEach(function (currentSegment) {
-    //                 reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-    //             });
-    //         });
-    //         Promise.all(reqs)
-    //             .then(data => {
-    //                 currentIndex = 0;
-    //                 formattedRoutes.forEach(function (currentRouteOption) {
-    //                     currentRouteOption.forEach(function (currentSegment) {
-    //                         currentSegment['directions'] = data[currentIndex].body.routes;
-    //                         currentIndex++;
-    //                     });
-    //                 });
-    //                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-    //             }).catch(function (error) {
-    //                 console.log(error);
-    //             });
-    //     });
-    // });
 });
 
 function combineSegments(formattedRoutes, responses) {
@@ -132,7 +85,7 @@ function getRequests(formattedRoutes) {
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {
                     body = JSON.parse(body);
-                    // console.log(body);
+                    console.log(body);
                     body = addInstructions(body);
                     return body;
                 })

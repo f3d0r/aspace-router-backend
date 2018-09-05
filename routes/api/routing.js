@@ -186,19 +186,18 @@ function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
 
 function formatRegSegments(origin, dest, waypointSets, segmentNames) {
     formattedSegments = [];
-    waypointSets.forEach(function (currentWaypointSet) {
+    waypointSets.forEach(function (currentParkingSpot) {
         currentSegments = [];
-        var parkingSpot = currentWaypointSet.parking_spot;
         currentSegments.push({
             'name': segmentNames[0],
             'pretty_name': getSegmentPrettyName(segmentNames[0]),
             'origin': origin,
-            'dest': metaFormat(parkingSpot)
+            'dest': metaFormat(currentParkingSpot)
         });
         currentSegments.push({
-            'name': "walk_dest",
-            'pretty_name': getSegmentPrettyName("walk_dest"),
-            'origin': metaFormat(parkingSpot),
+            'name': segmentNames[1],
+            'pretty_name': getSegmentPrettyName(segmentNames[1]),
+            'origin': metaFormat(currentParkingSpot),
             'dest': dest
         })
         formattedSegments.push(currentSegments);

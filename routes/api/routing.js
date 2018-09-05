@@ -216,7 +216,7 @@ function addInstructions(routesResponse, successCB) {
             });
         }
     }
-    console.log(routesResponse)
+    console.log(routesResponse.routes[0].legs)
     successCB(routesResponse);
 }
 

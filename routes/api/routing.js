@@ -186,9 +186,6 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
 }
 
 function addInstructions(routesResponse) {
-    // console.log("---------------------------------------");
-    // console.log(routesResponse.routes);
-    // console.log(routesResponse.routes.legs);
     for (var currentLeg = 0; currentLeg < routesResponse.routes.legs.length; currentLeg++) {
         var currentLeg = routesResponse.routes.legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
@@ -198,6 +195,7 @@ function addInstructions(routesResponse) {
             });
         }
     }
+    console.log(routeResponse)
     return routeResponse;
 }
 

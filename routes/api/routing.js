@@ -131,6 +131,9 @@ function getRequests(formattedRoutes) {
                     voiceInstructions: true
                 })
                 .send()
+                .catch(function(error) {
+                    console.log("ERROR 3: " + JSON.stringify(error));
+                })
             );
         });
         return reqs;

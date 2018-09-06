@@ -108,31 +108,14 @@ function getRequests(formattedRoutes) {
     var reqs = [];
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            origin = [parseFloat(currentSegment.origin.lng), parseFloat(currentSegment.origin.lat)];
-            dest = [parseFloat(currentSegment.dest.lng), parseFloat(currentSegment.dest.lat)];
-            console.log(origin);
-            console.log(dest);
-            reqs.push(directionsClient
-                .getDirections({
-                    profile: getMode(currentSegment.name),
-                    waypoints: [{
-                            coordinates: origin
-                        },
-                        {
-                            coordinates: dest
-                        }
-                    ],
-                    annotations: ["duration", "distance", "speed", "congestion"],
-                    bannerInstructions: true,
-                    geometries: "polyline6",
-                    overview: "full",
-                    roundaboutExits: true,
-                    steps: true,
-                    voiceInstructions: true
-                })
-                .send()
-                .catch(function(error) {
-                    console.log("ERROR 3: " + JSON.stringify(error));
+            url = constants.routing_engine[getMode(currentSegment.name)];
+            queryExtras = "?steps=true&annotations=true&geometries=geojson&overview=full";
+            reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
+                .then(function (body) {
+                    body = JSON.parse(body);
+                    addInstructions(body, new function (instructionBody) {
+                        return instructionBody;
+                    });
                 })
             );
         });
@@ -225,6 +208,20 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
         formattedSegments.push(currentSegments);
     });
     return formattedSegments;
+}
+
+function addInstructions(routesResponse, successCB) {
+    for (var currentLeg = 0; currentLeg < routesResponse.routes[0].legs.length; currentLeg++) {
+        var currentLeg = routesResponse.routes[0].legs[currentLeg];
+        for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
+            currentStep['instruction'] = osrmTextInstructions.compile('en', currentLeg.steps[currentStep], {
+                legCount: routesResponse.routes[0].legs.length,
+                legIndex: currentLeg
+            });
+        }
+    }
+    console.log(routesResponse.routes[0].legs[0].steps)
+    successCB(routesResponse);
 }
 
 function metaFormat(toFormat) {

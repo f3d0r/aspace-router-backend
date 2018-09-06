@@ -106,16 +106,18 @@ function getRequests(formattedRoutes) {
     var reqs = [];
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            console.log(currentSegment.origin);
-            console.log(currentSegment.dest);
+            origin = [parseFloat(currentSegment.origin.lng), parseFloat(currentSegment.origin.lat)];
+            dest = [parseFloat(currentSegment.dest.lng), parseFloat(currentSegment.dest.lat)];
+            console.log(origin);
+            console.log(dest);
             reqs.push(directionsClient
                 .getDirections({
                     profile: getMode(currentSegment.name),
                     waypoints: [{
-                            coordinates: [parseFloat(currentSegment.origin.lng), parseFloat(currentSegment.origin.lat)]
+                            coordinates: origin
                         },
                         {
-                            coordinates: [parseFloat(currentSegment.dest.lng), parseFloat(currentSegment.dest.lat)],
+                            coordinates: dest
                         }
                     ],
                     annotations: ["duration", "distance", "speed", "congestion"],
@@ -218,23 +220,6 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
         formattedSegments.push(currentSegments);
     });
     return formattedSegments;
-}
-
-function addInstructions(routesResponse) {
-    for (var currentLeg = 0; currentLeg < routesResponse.routes[0].legs.length; currentLeg++) {
-        var currentLeg = routesResponse.routes[0].legs[currentLeg];
-        for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
-            try {
-                currentLeg.steps[currentStep].instruction = osrmTextInstructions.compile('en', currentLeg.steps[currentStep], {
-                    legCount: routesResponse.routes[0].legs.length,
-                    legIndex: currentLeg
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    }
-    return routesResponse;
 }
 
 function metaFormat(toFormat) {

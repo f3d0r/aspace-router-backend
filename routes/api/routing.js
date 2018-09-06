@@ -147,15 +147,15 @@ function getSegmentPrettyName(name) {
 
 function getMode(name) {
     if (name == "drive_park") {
-        return "mapbox/driving-traffic";
+        return "driving-traffic";
     } else if (name == "walk_bike") {
-        return "mapbox/walking";
+        return "walking";
     } else if (name == "bike_dest") {
-        return "mapbox/cycling";
+        return "cycling";
     } else if (name == "walk_dest") {
-        return "mapbox/walking";
+        return "walking";
     } else {
-        return "mapbox/driving-traffic";
+        return "driving-traffic";
     }
 }
 

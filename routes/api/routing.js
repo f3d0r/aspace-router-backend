@@ -1,15 +1,11 @@
 var router = require('express').Router();
+var rp = require('request-promise');
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');
-const mbxDirections = require('@mapbox/mapbox-sdk/services/directions');
-const directionsClient = mbxDirections({
-    accessToken: constants.mapbox.API_KEY
-});
 
 var version = 'v5';
 var osrmTextInstructions = require('osrm-text-instructions')(version);
-
 
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
 
@@ -113,14 +109,15 @@ function getRequests(formattedRoutes) {
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {
                     body = JSON.parse(body);
-                    addInstructions(body, new function (instructionBody) {
-                        return instructionBody;
-                    });
+                    body = addInstructions(body);
+                    return body;
                 })
-            );
+                .catch(function (error) {
+                    return error;
+                }));
         });
-        return reqs;
     });
+    return reqs;
 }
 
 function getSegmentPrettyName(name) {
@@ -139,15 +136,15 @@ function getSegmentPrettyName(name) {
 
 function getMode(name) {
     if (name == "drive_park") {
-        return "driving-traffic";
+        return "car_route";
     } else if (name == "walk_bike") {
-        return "walking";
+        return "walk_route";
     } else if (name == "bike_dest") {
-        return "cycling";
+        return "bike_route";
     } else if (name == "walk_dest") {
-        return "walking";
+        return "walk_route";
     } else {
-        return "driving-traffic";
+        return "car_route";
     }
 }
 

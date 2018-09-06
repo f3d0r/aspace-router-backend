@@ -57,9 +57,11 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                     routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
                     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
                 }).catch(function (error) {
+                    console.log("ERROR 1: " + JSON.stringify(error));
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
         }, function (error) {
+            console.log("ERROR 2: " + JSON.stringify(error));
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
     });

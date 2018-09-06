@@ -53,11 +53,9 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                     routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
                     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
                 }).catch(function (error) {
-                    console.log("ERROR 1: " + JSON.stringify(error));
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
         }, function (error) {
-            console.log("ERROR 2: " + JSON.stringify(error));
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
     });
@@ -93,7 +91,7 @@ function combineSegments(formattedRoutes, responses) {
     var responseIndex = 0;
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            currentSegment['directions'] = JSON.parse(responses[responseIndex]);
+            currentSegment['directions'] = responses[responseIndex];
             responseIndex++;
         });
     });
@@ -207,18 +205,21 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
     return formattedSegments;
 }
 
-function addInstructions(routesResponse, successCB) {
+function addInstructions(routesResponse) {
     for (var currentLeg = 0; currentLeg < routesResponse.routes[0].legs.length; currentLeg++) {
         var currentLeg = routesResponse.routes[0].legs[currentLeg];
         for (var currentStep = 0; currentStep < currentLeg.steps.length; currentStep++) {
-            currentStep['instruction'] = osrmTextInstructions.compile('en', currentLeg.steps[currentStep], {
-                legCount: routesResponse.routes[0].legs.length,
-                legIndex: currentLeg
-            });
+            try {
+                currentLeg.steps[currentStep].instruction = osrmTextInstructions.compile('en', currentLeg.steps[currentStep], {
+                    legCount: routesResponse.routes[0].legs.length,
+                    legIndex: currentLeg
+                });
+            } catch (error) {
+                console.log(error);
+            }
         }
     }
-    console.log(routesResponse.routes[0].legs[0].steps)
-    successCB(routesResponse);
+    return routesResponse;
 }
 
 function metaFormat(toFormat) {

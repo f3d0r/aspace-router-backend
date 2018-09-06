@@ -106,6 +106,8 @@ function getRequests(formattedRoutes) {
     var reqs = [];
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
+            console.log(currentSegment.origin);
+            console.log(currentSegment.dest);
             reqs.push(directionsClient
                 .getDirections({
                     profile: getMode(currentSegment.name),

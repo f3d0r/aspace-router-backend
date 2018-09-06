@@ -112,10 +112,10 @@ function getRequests(formattedRoutes) {
                 .getDirections({
                     profile: getMode(currentSegment.name),
                     waypoints: [{
-                            coordinates: [currentSegment.origin.lng, currentSegment.origin.lat]
+                            coordinates: [parseFloat(currentSegment.origin.lng), parseFloat(currentSegment.origin.lat)]
                         },
                         {
-                            coordinates: [currentSegment.dest.lng, currentSegment.dest.lat],
+                            coordinates: [parseFloat(currentSegment.dest.lng), parseFloat(currentSegment.dest.lat)],
                         }
                     ],
                     annotations: ["duration", "distance", "speed", "congestion"],

@@ -1,11 +1,15 @@
 var router = require('express').Router();
-var rp = require('request-promise');
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');
+const mbxDirections = require('@mapbox/mapbox-sdk/services/directions');
+const directionsClient = mbxDirections({
+    accessToken: constants.mapbox.API_KEY
+});
 
 var version = 'v5';
 var osrmTextInstructions = require('osrm-text-instructions')(version);
+
 
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
 
@@ -102,20 +106,29 @@ function getRequests(formattedRoutes) {
     var reqs = [];
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            url = constants.routing_engine[getMode(currentSegment.name)];
-            queryExtras = "?steps=true&annotations=true&geometries=geojson&overview=full";
-            reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
-                .then(function (body) {
-                    body = JSON.parse(body);
-                    body = addInstructions(body);
-                    return body;
+            reqs.push(directionsClient
+                .getDirections({
+                    profile: getMode(currentSegment.name),
+                    waypoints: [{
+                            coordinates: [currentSegment.origin.lng, currentSegment.origin.lat]
+                        },
+                        {
+                            coordinates: [currentSegment.dest.lng, currentSegment.dest.lat],
+                        }
+                    ],
+                    annotations: ["duration", "distance", "speed", "congestion"],
+                    bannerInstructions: true,
+                    geometries: "polyline6",
+                    overview: "full",
+                    roundaboutExits: true,
+                    steps: true,
+                    voiceInstructions: true
                 })
-                .catch(function (error) {
-                    return error;
-                }));
+                .send()
+            );
         });
+        return reqs;
     });
-    return reqs;
 }
 
 function getSegmentPrettyName(name) {
@@ -134,15 +147,15 @@ function getSegmentPrettyName(name) {
 
 function getMode(name) {
     if (name == "drive_park") {
-        return "car_route";
+        return "mapbox/driving-traffic";
     } else if (name == "walk_bike") {
-        return "walk_route";
+        return "mapbox/walking";
     } else if (name == "bike_dest") {
-        return "bike_route";
+        return "mapbox/cycling";
     } else if (name == "walk_dest") {
-        return "walk_route";
+        return "mapbox/walking";
     } else {
-        return "car_route";
+        return "mapbox/driving-traffic";
     }
 }
 

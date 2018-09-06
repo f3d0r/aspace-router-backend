@@ -95,7 +95,7 @@ function combineSegments(formattedRoutes, responses) {
     var responseIndex = 0;
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            currentSegment['directions'] = responses[responseIndex];
+            currentSegment['directions'] = JSON.parse(responses[responseIndex]);
             responseIndex++;
         });
     });

@@ -7,8 +7,6 @@
             "locate",
             "route",
             "height",
-            "many_to_one",
-            "many_to_many",
             "sources_to_targets",
             "optimized_route",
             "isochrone",

@@ -4,10 +4,10 @@ const math = require('mathjs');
 var appRoot = require('app-root-path');
 var Valhalla = require('valhalla');
 
-const config = appRoot + '/valhalla_config';
-var valhalla = new Valhalla(config);
-
+const configStr = appRoot + '/valhalla_config';
 console.log("CONFIG PATH: " + config);
+
+var valhalla = new Valhalla(configStr);
 
 module.exports = {
     /* Algorithm:

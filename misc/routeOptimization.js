@@ -55,9 +55,9 @@ module.exports = {
             var driving_reqs = []
             for (var i = 0; i < parking_spot_data.length; i++) {
                 driving_reqs.push(
-                    getDuration(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto", function (timeDuration) {
-                        console.log(timeDuration);
-                        return timeDuration;
+                    getDuration(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto", function (response) {
+                        console.log(response.trip.legs[0].summary.time);
+                        return response.trip.legs[0].summary.time;
                     }, function (error) {
                         console.log("LINE 61 ERROR: " + JSON.stringify(error));
                         failCB(error);
@@ -121,8 +121,9 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                driving_reqs.push(getDuration(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle", function (timeDuration) {
-                                    return timeDuration;
+                                driving_reqs.push(getDuration(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle", function (response) {
+                                    console.log(response.trip.legs[0].summary.time);
+                                    return response.trip.legs[0].summary.time
                                 }, function (error) {
                                     console.log("LINE 126 ERROR : " + JSON.stringify(error));
                                     failCB(error);
@@ -163,8 +164,9 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            getDuration(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian", function (timeDuration) {
-                                return timeDuration;
+                            getDuration(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian", function (response) {
+                                console.log(response.trip.legs[0].summary.time)
+                                return response.trip.legs[0].summary.time;
                             }, function (error) {
                                 console.log("LINE 168 ERROR : " + JSON.stringify(error));
                                 failCB(error);
@@ -278,12 +280,11 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
                 "units": "miles"
             }
         },
-        json: true
     };
 
     rp(options)
         .then(function (parsedBody) {
-            successCB(parsedBody.trip.legs[0].summary.time);
+            successCB(JSON.parse(parsedBody));
         })
         .catch(function (err) {
             console.log("RP RESPONSE ERROR: " + JSON.stringify(err));

@@ -1,11 +1,10 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-var appRoot = require('app-root-path');
 var Valhalla = require('valhalla');
 
-const configStr = appRoot + '/valhalla_config';
-console.log("CONFIG PATH: " + config);
+const configStr = './fixtures/valhalla_config';
+console.log("CONFIG PATH: " + configStr);
 
 var valhalla = new Valhalla(configStr);
 

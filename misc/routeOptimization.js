@@ -1,14 +1,13 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-const path = require('path');
 var appRoot = require('app-root-path');
 var Valhalla = require('valhalla');
 
-const config = path.join(appRoot, '/valhalla_config');
-var valhalla = new Valhalla(JSON.stringify(config));
+const config = appRoot + '/valhalla_config';
+var valhalla = new Valhalla(config);
 
-console.log("CONFIG PATH: " + JSON.stringify(config));
+console.log("CONFIG PATH: " + config);
 
 module.exports = {
     /* Algorithm:

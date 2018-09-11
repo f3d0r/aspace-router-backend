@@ -1,7 +1,7 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-var rp = require('request-promise');
+var request = require('request');
 
 module.exports = {
     /* Algorithm:
@@ -55,12 +55,13 @@ module.exports = {
             var driving_reqs = []
             for (var i = 0; i < parking_spot_data.length; i++) {
                 driving_reqs.push(
-                    getDuration(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto", function (response) {
-                        console.log(response.trip.legs[0].summary.time);
-                        return response.trip.legs[0].summary.time;
-                    }, function (error) {
+                    getDurationPromise(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto")
+                    .then(function (result) {
+                        console.log(result.trip.legs[0].summary.time);
+                        return result.trip.legs[0].summary.time;
+                    }).catch(function (err) {
                         console.log("LINE 61 ERROR: " + JSON.stringify(error));
-                        failCB(error);
+                        failCB(err);
                     })
                 );
             }
@@ -105,7 +106,7 @@ module.exports = {
                             console.log("LINE 104 NO RESULTS FOUND ERROR");
                         }, function (error) {
                             console.log("LINE 106 ERROR: " + JSON.stringify(error));
-                            return failCB(error);
+                            failCB(error);
                         });
                     };
 
@@ -121,13 +122,16 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                driving_reqs.push(getDuration(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle", function (response) {
-                                    console.log(response.trip.legs[0].summary.time);
-                                    return response.trip.legs[0].summary.time
-                                }, function (error) {
-                                    console.log("LINE 126 ERROR : " + JSON.stringify(error));
-                                    failCB(error);
-                                }))
+                                driving_reqs.push(
+                                    getDurationPromise(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle")
+                                    .then(function (result) {
+                                        console.log(result.trip.legs[0].summary.time);
+                                        return result.trip.legs[0].summary.time;
+                                    }).catch(function (err) {
+                                        console.log("LINE 136 ERROR: " + JSON.stringify(error));
+                                        failCB(err);
+                                    })
+                                )
                             );
                         }
                     }
@@ -164,12 +168,13 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            getDuration(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian", function (response) {
-                                console.log(response.trip.legs[0].summary.time)
-                                return response.trip.legs[0].summary.time;
-                            }, function (error) {
-                                console.log("LINE 168 ERROR : " + JSON.stringify(error));
-                                failCB(error);
+                            getDurationPromise(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian")
+                            .then(function (result) {
+                                console.log(result.trip.legs[0].summary.time);
+                                return result.trip.legs[0].summary.time;
+                            }).catch(function (err) {
+                                console.log("LINE 181 ERROR: " + JSON.stringify(error));
+                                failCB(err);
                             })
                         );
                     }
@@ -198,14 +203,14 @@ module.exports = {
                     });
                 }
             }).catch(function (error) {
-                console.log("LINE 198 ERROR : " + JSON.stringify(error));
+                console.log("LINE 201 ERROR : " + JSON.stringify(error));
                 failCB(error);
             });
         }, function () {
             console.log("LINE 204 NO RESULTS FOUND ERROR");
         }, function (error) {
             console.log("LINE 204 ERROR : " + JSON.stringify(error));
-            return failCB(error);
+            failCB(error);
         });
     }
 }
@@ -250,45 +255,41 @@ function print(value) {
     }
 }
 
-function getDuration(originLng, originLat, destLng, destLat, mode, successCB, failCB) {
-    console.log("ORIGIN LNG: " + parseFloat(originLng));
-    console.log("ORIGIN LAT: " + parseFloat(originLat));
-    console.log("DEST LNG: " + parseFloat(destLng));
-    console.log("DEST LAT: " + parseFloat(destLat));
-    console.log("MODE: " + mode);
-
-    var options = {
-        method: 'POST',
-        uri: 'http://localhost:8002/route',
-        headers: {
-            "Content-Type": 'application/json'
-        },
-        body: {
-            "locations": [{
-                    "lat": parseFloat(originLat),
-                    "lon": parseFloat(originLng),
-                    "type": "break"
+function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
+    return new Promise(
+        function (resolve, reject) {
+            var options = {
+                method: 'GET',
+                url: 'http://localhost:8002/route',
+                headers: {
+                    'content-type': 'application/json'
                 },
-                {
-                    "lat": parseFloat(destLat),
-                    "lon": parseFloat(destLng),
-                    "type": "break"
-                }
-            ],
-            "costing": mode,
-            "directions_options": {
-                "units": "miles"
-            }
-        },
-        json: true
-    };
+                body: {
+                    locations: [{
+                            lat: parseFloat(originLat),
+                            lon: parseFloat(originLng),
+                            type: 'break'
+                        },
+                        {
+                            lat: parseFloat(destLat),
+                            lon: parseFloat(destLng),
+                            type: 'break'
+                        }
+                    ],
+                    costing: mode,
+                    directions_options: {
+                        units: 'miles'
+                    }
+                },
+                json: true
+            };
 
-    rp(options)
-        .then(function (responseBody) {
-            successCB(responseBody);
-        })
-        .catch(function (err) {
-            console.log("RP RESPONSE ERROR: " + JSON.stringify(err));
-            failCB(err);
+            request(options, function (error, response, body) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(body);
+                }
+            });
         });
 }

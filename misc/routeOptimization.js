@@ -280,7 +280,7 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
 
     rp(options)
         .then(function (parsedBody) {
-            successCB(parsedBody.trips.legs[0].summary.time);
+            successCB(parsedBody.trip.legs[0].summary.time);
         })
         .catch(function (err) {
             console.log("RP RESPONSE ERROR: " + JSON.stringify(err));

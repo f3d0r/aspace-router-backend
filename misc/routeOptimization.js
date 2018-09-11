@@ -6,9 +6,9 @@ var appRoot = require('app-root-path');
 var Valhalla = require('valhalla');
 
 const config = path.join(appRoot, '/valhalla_config');
-var valhalla = new Valhalla(config);
+var valhalla = new Valhalla(JSON.stringify(config));
 
-console.log("CONFIG PATH: " + config);
+console.log("CONFIG PATH: " + JSON.stringify(config));
 
 module.exports = {
     /* Algorithm:

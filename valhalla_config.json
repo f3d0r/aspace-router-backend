@@ -1,7 +1,4 @@
 {
-    "additional_data": {
-        "elevation": "/data/valhalla/elevation/"
-    },
     "loki": {
         "actions": [
             "locate",

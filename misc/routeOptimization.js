@@ -1,6 +1,6 @@
 const constants = require('@config');
 var sql = require('@sql');
-var config = require('@valhalla_config');
+var config = require('@valhalla-config');
 const math = require('mathjs');
 var Valhalla = require('valhalla');
 

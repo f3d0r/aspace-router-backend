@@ -261,7 +261,7 @@ function print(value) {
 function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
     return new Promise(
         function (resolve, reject) {
-            var hersheyRequest = '{"locations":[' + parseFloat(originLat) + ',' + parseFloat(originLng) + '], [' + parseFloat(destLat) + ',' + parseFloat(destLng) + '],"costing":"' + mode + '"}';
+            var hersheyRequest = '{"locations":[{"lat":40.546115,"lon":-76.385076,"type":"break"}, {"lat":40.544232,"lon":-76.385752,"type":"break"}],"costing":"auto"}';
             valhalla.route(hersheyRequest, (err, resp) => {
                 if (err) {
                     console.log("LINE 267 ERROR: " + JSON.stringify(err))

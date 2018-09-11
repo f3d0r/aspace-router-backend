@@ -3,6 +3,7 @@ var sql = require('@sql');
 const math = require('mathjs');
 var appRoot = require('app-root-path');
 var config = require(appRoot + '/valhalla_config');
+console.log("CONFIG PATH = " + JSON.stringify(appRoot + '/valhalla_config'));
 var Valhalla = require('valhalla')(JSON.stringify(config));
 var valhalla = new Valhalla(JSON.stringify(config));
 
@@ -263,6 +264,7 @@ function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
         function (resolve, reject) {
             var hersheyRequest = '{"locations":[{"lat":40.546115,"lon":-76.385076,"type":"break"}, {"lat":40.544232,"lon":-76.385752,"type":"break"}],"costing":"auto"}';
             valhalla.route(hersheyRequest, (err, resp) => {
+                console.log(err);
                 if (err) {
                     console.log("LINE 267 ERROR: " + JSON.stringify(err))
                     reject(err);

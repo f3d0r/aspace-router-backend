@@ -3,10 +3,10 @@ var sql = require('@sql');
 const math = require('mathjs');
 var Valhalla = require('valhalla');
 
-const configStr = './fixtures/valhalla_config';
-console.log("CONFIG PATH: " + configStr);
+var config = require('./fixtures/basic_config');
+console.log("CONFIG PATH: " + config);
 
-var valhalla = new Valhalla(configStr);
+var valhalla = new Valhalla(config);
 
 module.exports = {
     /* Algorithm:

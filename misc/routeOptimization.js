@@ -63,7 +63,7 @@ module.exports = {
                         console.log(result.trip.legs[0].summary.time);
                         return result.trip.legs[0].summary.time;
                     }).catch(function (err) {
-                        console.log("LINE 61 ERROR: " + JSON.stringify(error));
+                        console.log("LINE 66 ERROR: " + JSON.stringify(error));
                         failCB(err);
                     })
                 );
@@ -106,9 +106,9 @@ module.exports = {
                         sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                             bike_data.push(results)
                         }, function () {
-                            console.log("LINE 104 NO RESULTS FOUND ERROR");
+                            console.log("LINE 109 NO RESULTS FOUND ERROR");
                         }, function (error) {
-                            console.log("LINE 106 ERROR: " + JSON.stringify(error));
+                            console.log("LINE 111 ERROR: " + JSON.stringify(error));
                             failCB(error);
                         });
                     };
@@ -131,7 +131,7 @@ module.exports = {
                                         console.log(result.trip.legs[0].summary.time);
                                         return result.trip.legs[0].summary.time;
                                     }).catch(function (err) {
-                                        console.log("LINE 136 ERROR: " + JSON.stringify(error));
+                                        console.log("LINE 134 ERROR: " + JSON.stringify(error));
                                         failCB(err);
                                     })
                                 )
@@ -176,7 +176,7 @@ module.exports = {
                                 console.log(result.trip.legs[0].summary.time);
                                 return result.trip.legs[0].summary.time;
                             }).catch(function (err) {
-                                console.log("LINE 181 ERROR: " + JSON.stringify(error));
+                                console.log("LINE 179 ERROR: " + JSON.stringify(error));
                                 failCB(err);
                             })
                         );
@@ -206,13 +206,13 @@ module.exports = {
                     });
                 }
             }).catch(function (error) {
-                console.log("LINE 201 ERROR : " + JSON.stringify(error));
+                console.log("LINE 209 ERROR : " + JSON.stringify(error));
                 failCB(error);
             });
         }, function () {
-            console.log("LINE 204 NO RESULTS FOUND ERROR");
+            console.log("LINE 213 NO RESULTS FOUND ERROR");
         }, function (error) {
-            console.log("LINE 204 ERROR : " + JSON.stringify(error));
+            console.log("LINE 215 ERROR : " + JSON.stringify(error));
             failCB(error);
         });
     }
@@ -264,6 +264,7 @@ function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
             var hersheyRequest = '{"locations":[' + parseFloat(originLat) + ',' + parseFloat(originLng) + '], [' + parseFloat(destLat) + ',' + parseFloat(destLng) + '],"costing":"' + mode + '"}';
             valhalla.route(hersheyRequest, (err, resp) => {
                 if (err) {
+                    console.log("LINE 267 ERROR: " + JSON.stringify(err))
                     reject(err);
                 } else {
                     console.log(JSON.parse(resp))

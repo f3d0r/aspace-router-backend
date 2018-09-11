@@ -1,9 +1,9 @@
 const constants = require('@config');
 var sql = require('@sql');
+var config = require('@valhalla_config');
 const math = require('mathjs');
 var Valhalla = require('valhalla');
 
-var config = require('./fixtures/basic_config');
 console.log("CONFIG PATH: " + config);
 
 var valhalla = new Valhalla(config);

@@ -279,12 +279,12 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
             "directions_options": {
                 "units": "miles"
             }
-        },
+        }
     };
 
     rp(options)
-        .then(function (parsedBody) {
-            successCB(JSON.parse(parsedBody));
+        .then(function (responseBody) {
+            successCB(JSON.parse(responseBody));
         })
         .catch(function (err) {
             console.log("RP RESPONSE ERROR: " + JSON.stringify(err));

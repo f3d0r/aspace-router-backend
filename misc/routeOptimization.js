@@ -267,8 +267,12 @@ function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
                     console.log("LINE 267 ERROR: " + JSON.stringify(err))
                     reject(err);
                 } else {
-                    console.log(JSON.parse(resp))
-                    resolve(JSON.parse(resp));
+                    try {
+                        console.log((resp))
+                        resolve(JSON.parse(resp));
+                    } catch (e) {
+                        console.log("PARSE ERROR : " + e)
+                    }
                 }
             })
         });

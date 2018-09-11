@@ -250,7 +250,7 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
     console.log(typeof parseFloat(destLng));
     console.log("DEST LAT: " + parseFloat(destLat));
     console.log(typeof parseFloat(destLat));
-    console.log("MODE: " + parseFloat(mode));
+    console.log("MODE: " + mode);
 
     var options = {
         method: 'POST',

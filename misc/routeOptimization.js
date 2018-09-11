@@ -56,6 +56,7 @@ module.exports = {
             for (var i = 0; i < parking_spot_data.length; i++) {
                 driving_reqs.push(
                     getDuration(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto", function (timeDuration) {
+                        console.log(timeDuration);
                         return timeDuration;
                     }, function (error) {
                         console.log("LINE 61 ERROR: " + JSON.stringify(error));
@@ -249,13 +250,9 @@ function print(value) {
 
 function getDuration(originLng, originLat, destLng, destLat, mode, successCB, failCB) {
     console.log("ORIGIN LNG: " + parseFloat(originLng));
-    console.log(typeof parseFloat(originLng));
     console.log("ORIGIN LAT: " + parseFloat(originLat));
-    console.log(typeof parseFloat(originLat));
     console.log("DEST LNG: " + parseFloat(destLng));
-    console.log(typeof parseFloat(destLng));
     console.log("DEST LAT: " + parseFloat(destLat));
-    console.log(typeof parseFloat(destLat));
     console.log("MODE: " + mode);
 
     var options = {

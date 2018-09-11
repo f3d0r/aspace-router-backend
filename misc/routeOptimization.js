@@ -242,15 +242,15 @@ function print(value) {
 }
 
 function getDuration(originLng, originLat, destLng, destLat, mode, successCB, failCB) {
-    console.log("ORIGIN LNG: " + originLng);
-    console.log(typeof originLng);
-    console.log("ORIGIN LAT: " + originLat);
-    console.log(typeof originLat);
-    console.log("DEST LNG: " + destLng);
-    console.log(typeof destLng);
-    console.log("DEST LAT: " + destLat);
-    console.log(typeof destLat);
-    console.log("MODE: " + mode);
+    console.log("ORIGIN LNG: " + parseFloat(originLng));
+    console.log(typeof parseFloat(originLng));
+    console.log("ORIGIN LAT: " + parseFloat(originLat));
+    console.log(typeof parseFloat(originLat));
+    console.log("DEST LNG: " + parseFloat(destLng));
+    console.log(typeof parseFloat(destLng));
+    console.log("DEST LAT: " + parseFloat(destLat));
+    console.log(typeof parseFloat(destLat));
+    console.log("MODE: " + parseFloat(mode));
 
     var options = {
         method: 'POST',
@@ -260,13 +260,13 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
         },
         body: {
             "locations": [{
-                    "lat": originLat,
-                    "lon": originLng,
+                    "lat": parseFloat(originLat),
+                    "lon": parseFloat(originLng),
                     "type": "break"
                 },
                 {
-                    "lat": destLat,
-                    "lon": destLng,
+                    "lat": parseFloat(destLat),
+                    "lon": parseFloat(destLng),
                     "type": "break"
                 }
             ],
@@ -283,6 +283,7 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
             successCB(parsedBody.trips.legs[0].summary.time);
         })
         .catch(function (err) {
+            console.log(JSON.stringify(err));
             failCB(err);
         });
 }

@@ -285,7 +285,7 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
 
     rp(options)
         .then(function (responseBody) {
-            successCB(JSON.parse(responseBody));
+            successCB(responseBody);
         })
         .catch(function (err) {
             console.log("RP RESPONSE ERROR: " + JSON.stringify(err));

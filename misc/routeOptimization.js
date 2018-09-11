@@ -58,6 +58,7 @@ module.exports = {
                     getDuration(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto", function (timeDuration) {
                         return timeDuration;
                     }, function (error) {
+                        console.log("LINE 61 ERROR: " + JSON.stringify(error));
                         failCB(error);
                     })
                 );
@@ -100,8 +101,9 @@ module.exports = {
                         sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                             bike_data.push(results)
                         }, function () {
-                            //no results were found 
+                            console.log("LINE 104 NO RESULTS FOUND ERROR");
                         }, function (error) {
+                            console.log("LINE 106 ERROR: " + JSON.stringify(error));
                             return failCB(error);
                         });
                     };
@@ -121,6 +123,7 @@ module.exports = {
                                 driving_reqs.push(getDuration(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle", function (timeDuration) {
                                     return timeDuration;
                                 }, function (error) {
+                                    console.log("LINE 126 ERROR : " + JSON.stringify(error));
                                     failCB(error);
                                 }))
                             );
@@ -162,6 +165,7 @@ module.exports = {
                             getDuration(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian", function (timeDuration) {
                                 return timeDuration;
                             }, function (error) {
+                                console.log("LINE 168 ERROR : " + JSON.stringify(error));
                                 failCB(error);
                             })
                         );
@@ -191,11 +195,13 @@ module.exports = {
                     });
                 }
             }).catch(function (error) {
+                console.log("LINE 198 ERROR : " + JSON.stringify(error));
                 failCB(error);
             });
         }, function () {
-            // No parking spots were found.
+            console.log("LINE 204 NO RESULTS FOUND ERROR");
         }, function (error) {
+            console.log("LINE 204 ERROR : " + JSON.stringify(error));
             return failCB(error);
         });
     }

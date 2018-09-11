@@ -13,6 +13,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
             routeOptionsResponse = {};
+            console.log(bestSpots);
             formattedSegments = formatRegSegments({
                     'lng': req.query.origin_lng,
                     'lat': req.query.origin_lat
@@ -38,6 +39,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
             routeOptionsResponse = {};
+            console.log(bestSpots);
             formattedSegments = formatBikeSegments({
                     'lng': req.query.origin_lng,
                     'lat': req.query.origin_lat
@@ -63,6 +65,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.DRIVE_PARK, function (bestSpots) {
             routeOptionsResponse = {};
+            console.log(bestSpots);
             formattedSegments = formatRegSegments({
                     'lng': req.query.origin_lng,
                     'lat': req.query.origin_lat

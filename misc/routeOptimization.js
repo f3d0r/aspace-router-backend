@@ -242,6 +242,16 @@ function print(value) {
 }
 
 function getDuration(originLng, originLat, destLng, destLat, mode, successCB, failCB) {
+    console.log("ORIGIN LNG: " + originLng);
+    console.log(typeof originLng);
+    console.log("ORIGIN LAT: " + originLat);
+    console.log(typeof originLat);
+    console.log("DEST LNG: " + destLng);
+    console.log(typeof destLng);
+    console.log("DEST LAT: " + destLat);
+    console.log(typeof destLat);
+    console.log("MODE: " + mode);
+
     var options = {
         method: 'POST',
         uri: 'http://localhost:8002/route',

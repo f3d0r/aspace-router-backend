@@ -53,17 +53,12 @@ module.exports = {
 
             // 3. Acquire driving times
             var driving_reqs = []
-            const orig_s = origin[0].toString() + ',' + origin[1].toString()
             for (var i = 0; i < parking_spot_data.length; i++) {
-                var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    rp(constants.routing_engine.car_route + orig_s + ';' + dest_s)
-                    .then(function (body) {
-                        body = JSON.parse(body)
-                        return body.routes[0].duration
-                    })
-                    .catch(function (err) {
-                        return failCB(err);
+                    getDuration(origin[0], origin[1], parking_spot_data[0], parking_spot_data[1], "auto", function (timeDuration) {
+                        return timeDuration;
+                    }, function (error) {
+                        failCB(error);
                     })
                 );
             }
@@ -123,14 +118,11 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                rp(constants.routing_engine.bike_route + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
-                                })
-                                .catch(function (err) {
-                                    return failCB(err);
-                                })
+                                driving_reqs.push(getDuration(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle", function (timeDuration) {
+                                    return timeDuration;
+                                }, function (error) {
+                                    failCB(error);
+                                }))
                             );
                         }
                     }
@@ -167,13 +159,10 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp(constants.routing_engine.walk_route + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
-                            .then(function (body) {
-                                body = JSON.parse(body)
-                                return body.routes[0].duration
-                            })
-                            .catch(function (err) {
-                                return failCB(err);
+                            getDuration(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian", function (timeDuration) {
+                                return timeDuration;
+                            }, function (error) {
+                                failCB(error);
                             })
                         );
                     }
@@ -250,4 +239,40 @@ function print(value) {
         const precision = 14
         console.log(math.format(value, precision))
     }
+}
+
+function getDuration(originLng, originLat, destLng, destLat, mode, successCB, failCB) {
+    var options = {
+        method: 'POST',
+        uri: 'http://localhost:8002/route',
+        headers: {
+            "Content-Type": 'application/json'
+        },
+        body: {
+            "locations": [{
+                    "lat": originLat,
+                    "lon": originLng,
+                    "type": "break"
+                },
+                {
+                    "lat": destLat,
+                    "lon": destLng,
+                    "type": "break"
+                }
+            ],
+            "costing": mode,
+            "directions_options": {
+                "units": "miles"
+            }
+        },
+        json: true
+    };
+
+    rp(options)
+        .then(function (parsedBody) {
+            successCB(parsedBody.trips.legs[0].summary.time);
+        })
+        .catch(function (err) {
+            failCB(err);
+        });
 }

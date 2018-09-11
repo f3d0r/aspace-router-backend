@@ -60,10 +60,8 @@ module.exports = {
                 driving_reqs.push(
                     getDurationPromise(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto")
                     .then(function (result) {
-                        console.log(result.trip.legs[0].summary.time);
                         return result.trip.legs[0].summary.time;
                     }).catch(function (err) {
-                        console.log("LINE 66 ERROR: " + JSON.stringify(error));
                         failCB(err);
                     })
                 );
@@ -105,10 +103,7 @@ module.exports = {
                     for (i in parking_spot_data) {
                         sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                             bike_data.push(results)
-                        }, function () {
-                            console.log("LINE 109 NO RESULTS FOUND ERROR");
-                        }, function (error) {
-                            console.log("LINE 111 ERROR: " + JSON.stringify(error));
+                        }, function () {}, function (error) {
                             failCB(error);
                         });
                     };
@@ -128,10 +123,8 @@ module.exports = {
                                 driving_reqs.push(
                                     getDurationPromise(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle")
                                     .then(function (result) {
-                                        console.log(result.trip.legs[0].summary.time);
                                         return result.trip.legs[0].summary.time;
                                     }).catch(function (err) {
-                                        console.log("LINE 134 ERROR: " + JSON.stringify(error));
                                         failCB(err);
                                     })
                                 )
@@ -173,10 +166,8 @@ module.exports = {
                         walk_time_reqs.push(
                             getDurationPromise(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian")
                             .then(function (result) {
-                                console.log(result.trip.legs[0].summary.time);
                                 return result.trip.legs[0].summary.time;
                             }).catch(function (err) {
-                                console.log("LINE 179 ERROR: " + JSON.stringify(error));
                                 failCB(err);
                             })
                         );
@@ -206,13 +197,9 @@ module.exports = {
                     });
                 }
             }).catch(function (error) {
-                console.log("LINE 209 ERROR : " + JSON.stringify(error));
                 failCB(error);
             });
-        }, function () {
-            console.log("LINE 213 NO RESULTS FOUND ERROR");
-        }, function (error) {
-            console.log("LINE 215 ERROR : " + JSON.stringify(error));
+        }, function () {}, function (error) {
             failCB(error);
         });
     }
@@ -262,19 +249,11 @@ function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
     return new Promise(
         function (resolve, reject) {
             var valhallaRequest = '{"locations":[{"lat":' + parseFloat(originLat) + ',"lon":' + parseFloat(originLng) + ',"type":"break"}, {"lat":' + parseFloat(destLat) + ',"lon":' + parseFloat(destLng) + ',"type":"break"}],"costing":"auto"}';
-            console.log("VALHALLA REQUEST: " + valhallaRequest);
             valhalla.route(valhallaRequest, (err, resp) => {
                 if (err) {
-                    console.log(err);
-                    console.log("LINE 267 ERROR: " + JSON.stringify(err))
                     reject(err);
                 } else {
-                    try {
-                        console.log(JSON.parse(resp));
-                        resolve(JSON.parse(resp));
-                    } catch (e) {
-                        console.log("PARSE ERROR : " + e)
-                    }
+                    resolve(JSON.parse(resp));
                 }
             })
         });

@@ -279,7 +279,8 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
             "directions_options": {
                 "units": "miles"
             }
-        }
+        },
+        json: true
     };
 
     rp(options)

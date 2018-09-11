@@ -12,7 +12,8 @@ const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance'
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
-            routeOptionsResponse = {};
+            // routeOptionsResponse = {};
+            console.log(bestSpots);
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', bestSpots));
             // formattedSegments = formatRegSegments({
             //         'lng': req.query.origin_lng,
@@ -38,7 +39,8 @@ router.post('/get_drive_walk_route', function (req, res, next) {
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
-            routeOptionsResponse = {};
+            // routeOptionsResponse = {};
+            console.log(bestSpots);
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', bestSpots));
             // formattedSegments = formatBikeSegments({
             //         'lng': req.query.origin_lng,
@@ -64,7 +66,8 @@ router.post('/get_drive_bike_route', function (req, res, next) {
 router.post('/get_drive_direct_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.DRIVE_PARK, function (bestSpots) {
-            routeOptionsResponse = {};
+            // routeOptionsResponse = {};
+            console.log(bestSpots);
             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', bestSpots));
 
             // formattedSegments = formatRegSegments({

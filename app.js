@@ -1,4 +1,5 @@
 require('module-alias/register');
+require('events').EventEmitter.prototype._maxListeners = 10000;
 
 // PACKAGE IMPORTS
 const express = require('express');

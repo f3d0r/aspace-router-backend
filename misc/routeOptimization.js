@@ -283,7 +283,7 @@ function getDuration(originLng, originLat, destLng, destLat, mode, successCB, fa
             successCB(parsedBody.trips.legs[0].summary.time);
         })
         .catch(function (err) {
-            console.log(JSON.stringify(err));
+            console.log("RP RESPONSE ERROR: " + JSON.stringify(err));
             failCB(err);
         });
 }

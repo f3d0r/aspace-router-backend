@@ -212,7 +212,7 @@ function addInstructions(routesResponse) {
                     legIndex: currentLeg
                 });
             } catch (error) {
-                next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', bestSpots));
+                console.log(error);
             }
         }
     }

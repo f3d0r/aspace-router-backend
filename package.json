@@ -123,8 +123,7 @@
         "@bcrypt": "misc/auth/bcrypt",
         "@route-optimization": "misc/routeOptimization",
         "@body-structure": "config/bodyStructs",
-        "@osrm": "app",
-        "@valhalla-config": "config/valhalla_config"
+        "@osrm": "app"
     },
     "_moduleDirectories": [
         "node_modules"

@@ -1,10 +1,7 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-
-var config = require('@valhalla-config');
-var Valhalla = require('valhalla')(JSON.stringify(config));
-var valhalla = new Valhalla(JSON.stringify(config));
+var rp = require('request-promise');
 
 module.exports = {
     /* Algorithm:
@@ -56,13 +53,17 @@ module.exports = {
 
             // 3. Acquire driving times
             var driving_reqs = []
+            const orig_s = origin[0].toString() + ',' + origin[1].toString()
             for (var i = 0; i < parking_spot_data.length; i++) {
+                var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    getDurationPromise(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto")
-                    .then(function (result) {
-                        return result.trip.legs[0].summary.time;
-                    }).catch(function (err) {
-                        failCB(err);
+                    rp(constants.routing_engine.car_route + orig_s + ';' + dest_s)
+                    .then(function (body) {
+                        body = JSON.parse(body)
+                        return body.routes[0].duration
+                    })
+                    .catch(function (err) {
+                        return failCB(err);
                     })
                 );
             }
@@ -103,8 +104,10 @@ module.exports = {
                     for (i in parking_spot_data) {
                         sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                             bike_data.push(results)
-                        }, function () {}, function (error) {
-                            failCB(error);
+                        }, function () {
+                            //no results were found 
+                        }, function (error) {
+                            return failCB(error);
                         });
                     };
 
@@ -120,14 +123,14 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                driving_reqs.push(
-                                    getDurationPromise(bike_coords[i][j][0], bike_coords[i][j][1], destination[0], destination[1], "bicycle")
-                                    .then(function (result) {
-                                        return result.trip.legs[0].summary.time;
-                                    }).catch(function (err) {
-                                        failCB(err);
-                                    })
-                                )
+                                rp(constants.routing_engine.bike_route + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
+                                .then(function (body) {
+                                    body = JSON.parse(body)
+                                    return body.routes[0].duration
+                                })
+                                .catch(function (err) {
+                                    return failCB(err);
+                                })
                             );
                         }
                     }
@@ -164,11 +167,13 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            getDurationPromise(parking_spot_data[i].lng, parking_spot_data[i].lat, destination[0], destination[1], "pedestrian")
-                            .then(function (result) {
-                                return result.trip.legs[0].summary.time;
-                            }).catch(function (err) {
-                                failCB(err);
+                            rp(constants.routing_engine.walk_route + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
+                            .then(function (body) {
+                                body = JSON.parse(body)
+                                return body.routes[0].duration
+                            })
+                            .catch(function (err) {
+                                return failCB(err);
                             })
                         );
                     }
@@ -199,8 +204,10 @@ module.exports = {
             }).catch(function (error) {
                 failCB(error);
             });
-        }, function () {}, function (error) {
-            failCB(error);
+        }, function () {
+            // No parking spots were found.
+        }, function (error) {
+            return failCB(error);
         });
     }
 }
@@ -243,18 +250,4 @@ function print(value) {
         const precision = 14
         console.log(math.format(value, precision))
     }
-}
-
-function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
-    return new Promise(
-        function (resolve, reject) {
-            var valhallaRequest = '{"locations":[{"lat":' + parseFloat(originLat) + ',"lon":' + parseFloat(originLng) + ',"type":"break"}, {"lat":' + parseFloat(destLat) + ',"lon":' + parseFloat(destLng) + ',"type":"break"}],"costing":"auto"}';
-            valhalla.route(valhallaRequest, (err, resp) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(JSON.parse(resp));
-                }
-            })
-        });
 }

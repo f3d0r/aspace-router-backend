@@ -6,7 +6,7 @@
         "shortcuts": true,
         "tile_dir": "/home/fedor/valhalla_tiles",
         "tile_extract": "/home/fedor/valhalla_tiles.tar",
-        "timezone": "/home/fedor/valhalla_tiles/timezones.sqlite",
+        "timezone": "/home/fedor/valhalla_tiles/timezones.sqlite"
     },
     "loki": {
         "actions": [

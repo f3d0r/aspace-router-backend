@@ -55,7 +55,7 @@ module.exports = {
             var driving_reqs = []
             for (var i = 0; i < parking_spot_data.length; i++) {
                 driving_reqs.push(
-                    getDuration(origin[0], origin[1], parking_spot_data[0], parking_spot_data[1], "auto", function (timeDuration) {
+                    getDuration(origin[0], origin[1], parking_spot_data[i].lng, parking_spot_data[i].lat, "auto", function (timeDuration) {
                         return timeDuration;
                     }, function (error) {
                         failCB(error);

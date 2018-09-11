@@ -1,7 +1,10 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-var request = require('request');
+var appRoot = require('app-root-path');
+var config = require(appRoot + '/valhalla_config');
+var Valhalla = require('valhalla')(JSON.stringify(config));
+var valhalla = new Valhalla(JSON.stringify(config));
 
 module.exports = {
     /* Algorithm:
@@ -258,38 +261,14 @@ function print(value) {
 function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
     return new Promise(
         function (resolve, reject) {
-            var options = {
-                method: 'GET',
-                url: 'http://localhost:8002/route',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: {
-                    locations: [{
-                            lat: parseFloat(originLat),
-                            lon: parseFloat(originLng),
-                            type: 'break'
-                        },
-                        {
-                            lat: parseFloat(destLat),
-                            lon: parseFloat(destLng),
-                            type: 'break'
-                        }
-                    ],
-                    costing: mode,
-                    directions_options: {
-                        units: 'miles'
-                    }
-                },
-                json: true
-            };
-
-            request(options, function (error, response, body) {
-                if (error) {
-                    reject(error);
+            var hersheyRequest = '{"locations":[' + parseFloat(originLat) + ',' + parseFloat(originLng) + '], [' + parseFloat(destLat) + ',' + parseFloat(destLng) + '],"costing":"' + mode + '"}';
+            valhalla.route(hersheyRequest, (err, resp) => {
+                if (err) {
+                    reject(err);
                 } else {
-                    resolve(body);
+                    console.log(JSON.parse(resp))
+                    resolve(JSON.parse(resp));
                 }
-            });
+            })
         });
 }

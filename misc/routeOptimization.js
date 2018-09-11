@@ -264,13 +264,13 @@ function getDurationPromise(originLng, originLat, destLng, destLat, mode) {
         function (resolve, reject) {
             var hersheyRequest = '{"locations":[{"lat":40.546115,"lon":-76.385076,"type":"break"}, {"lat":40.544232,"lon":-76.385752,"type":"break"}],"costing":"auto"}';
             valhalla.route(hersheyRequest, (err, resp) => {
-                console.log(err);
                 if (err) {
+                    console.log(err);
                     console.log("LINE 267 ERROR: " + JSON.stringify(err))
                     reject(err);
                 } else {
                     try {
-                        console.log((resp))
+                        console.log(JSON.parse(resp));
                         resolve(JSON.parse(resp));
                     } catch (e) {
                         console.log("PARSE ERROR : " + e)

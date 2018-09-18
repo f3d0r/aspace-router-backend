@@ -99,7 +99,7 @@ function getRequests(formattedRoutes) {
     var reqs = [];
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            url = constants.routing_engine[getMode(currentSegment.name)];
+            url = getRouteEngURL(currentSegment.name);
             queryExtras = "?steps=true&annotations=true&geometries=geojson&overview=full";
             reqs.push(rp(url + currentSegment.origin.lng + ',' + currentSegment.origin.lat + ';' + currentSegment.dest.lng + ',' + currentSegment.dest.lat + queryExtras)
                 .then(function (body) {
@@ -232,6 +232,20 @@ function metaFormat(toFormat) {
         }
     }
     return formatted;
+}
+
+function getRouteEngURL(routeMode) {
+    baseUrl = 'http://localhost'
+    if (typeof process.env.LOCAL != 'undefined' && process.env.LOCAL != null && process.env.LOCAL == 'TRUE') {
+        baseUrl = 'http://159.65.103.1'
+    }
+    if (routeMode == 'bike_route') {
+        return baseUrl + ':5001/route/v1/bike/';
+    } else if (routeMode == 'walk_route') {
+        return baseUrl + ':5002/route/v1/walk/';
+    } else {
+        return baseUrl + ':5000/route/v1/car/';
+    }
 }
 
 module.exports = router;

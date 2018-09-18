@@ -110,10 +110,7 @@ module.exports = {
                             for (j in results) {
                                 num_bikes = num_bikes + results[0].bikes_available
                             }
-<<<<<<< HEAD
-=======
 
->>>>>>> 8488894948c8dfdd01ddcf7943e13aa4f4aafde1
                             bike_data.push([results,num_bikes])
                         }, function () {
                             // no results were found 

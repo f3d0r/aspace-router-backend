@@ -106,7 +106,15 @@ module.exports = {
                             // count number of bikes around each parking spot here, and push that with results to bike_data.
                             // these counts will have to be pushed as a parameter into X, so it's important to figure out
                             // the correct threading and sequence for this routine. may require changes.
-                            bike_data.push(results)
+                            var num_bikes = 0
+                            for (j in results) {
+                                num_bikes = num_bikes + results[0].bikes_available
+                            }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8488894948c8dfdd01ddcf7943e13aa4f4aafde1
+                            bike_data.push([results,num_bikes])
                         }, function () {
                             // no results were found 
                         }, function (error) {
@@ -140,6 +148,9 @@ module.exports = {
                     Promise.all(bike_reqs).then(function (results) {
                         // Concatenate these biking times to X and re-optimize!
                         X.push(sub_least(results))
+                        num_bikes_array = bike_data.map(x => x[1])
+                        X.push(num_bikes_array)
+                        param_weights.push(1e-1)
                         param_weights.push(1e-1)
                         fX = math.multiply(math.matrix(param_weights), X);
                         const best_bike_indices = top_n(fX["_data"], number_options)
@@ -148,10 +159,10 @@ module.exports = {
                         best_spots = []
                         for (i in best_bike_indices) {
                             parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
-                            if (bike_data[i] !== undefined) {
+                            if (bike_data[i][0] !== undefined) {
                                 best_spots.push({
                                     parking_spot: parking_spot_data[best_bike_indices[i]],
-                                    bike_locs: bike_data[i],
+                                    bike_locs: bike_data[i][0],
                                     approx_biking_time: results[best_bike_indices[i]]
                                 })
                             } else {

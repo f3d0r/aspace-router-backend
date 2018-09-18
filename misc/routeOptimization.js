@@ -103,9 +103,12 @@ module.exports = {
                     var bike_data = []
                     for (i in parking_spot_data) {
                         sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
+                            // count number of bikes around each parking spot here, and push that with results to bike_data.
+                            // these counts will have to be pushed as a parameter into X, so it's important to figure out
+                            // the correct threading and sequence for this routine. may require changes.
                             bike_data.push(results)
                         }, function () {
-                            //no results were found 
+                            // no results were found 
                         }, function (error) {
                             return failCB(error);
                         });

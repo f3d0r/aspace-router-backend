@@ -265,8 +265,8 @@ function print(value) {
 
 function getRouteEngURL(routeMode) {
     baseUrl = 'http://localhost'
-    if (typeof process.env.ENV != 'undefined' && process.env.ENV != null && process.env.ENV == 'LOCAL') {
-        baseURL = 'http://159.65.103.1'
+    if (typeof process.env.LOCAL != 'undefined' && process.env.LOCAL != null && process.env.LOCAL == 'TRUE') {
+        baseUrl = 'http://159.65.103.1'
     }
     if (routeMode == 'bike') {
         return baseUrl + ':5001/route/v1/bike/';

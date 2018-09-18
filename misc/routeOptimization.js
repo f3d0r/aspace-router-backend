@@ -273,6 +273,6 @@ function getRouteEngURL(routeMode) {
     } else if (routeMode == 'walk') {
         return baseUrl + ':5002/route/v1/walk/';
     } else {
-        return baseUrl + '5000/route/v1/car/';
+        return baseUrl + ':5000/route/v1/car/';
     }
 }

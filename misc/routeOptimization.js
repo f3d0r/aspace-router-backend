@@ -57,7 +57,7 @@ module.exports = {
             for (var i = 0; i < parking_spot_data.length; i++) {
                 var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    rp(constants.routing_engine.car_route + orig_s + ';' + dest_s)
+                    rp(getRouteEngURL('car') + orig_s + ';' + dest_s)
                     .then(function (body) {
                         body = JSON.parse(body)
                         return body.routes[0].duration
@@ -131,7 +131,7 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                rp(constants.routing_engine.bike_route + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
+                                rp(getRouteEngURL('bike') + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration
@@ -156,10 +156,10 @@ module.exports = {
                         best_spots = []
                         for (i in best_bike_indices) {
                             parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
-                            if (bike_data[i] !== undefined) {
+                            if (bike_data[i][0] !== undefined) {
                                 best_spots.push({
                                     parking_spot: parking_spot_data[best_bike_indices[i]],
-                                    bike_locs: bike_data[i],
+                                    bike_locs: bike_data[i][0],
                                     approx_biking_time: results[best_bike_indices[i]]
                                 })
                             } else {
@@ -178,7 +178,7 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp(constants.routing_engine.walk_route + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
+                            rp(getRouteEngURL('walk') + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
                             .then(function (body) {
                                 body = JSON.parse(body)
                                 return body.routes[0].duration
@@ -260,5 +260,19 @@ function print(value) {
     } else { // assume value is a mathematical structure
         const precision = 14
         console.log(math.format(value, precision))
+    }
+}
+
+function getRouteEngURL(routeMode) {
+    baseUrl = 'http://localhost'
+    if (typeof process.env.ENV != 'undefined' && process.env.ENV != null && process.env.ENV == 'LOCAL') {
+        baseURL = 'http://159.65.103.1'
+    }
+    if (routeMode == 'bike') {
+        return baseUrl + ':5001/route/v1/bike/';
+    } else if (routeMode == 'walk') {
+        return baseUrl + ':5002/route/v1/walk/';
+    } else {
+        return baseUrl + '5000/route/v1/car/';
     }
 }

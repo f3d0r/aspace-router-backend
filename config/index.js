@@ -36,11 +36,6 @@ module.exports = {
         DATABASE_IP: '159.89.131.95',
         DATABASE_PORT: 'db_port'
     },
-    routing_engine: {
-        car_route : 'http://localhost:5000/route/v1/car/',
-        bike_route: 'http://localhost:5001/route/v1/bike/',
-        walk_route: 'http://localhost:5002/route/v1/walk/',
-    },
     digitalocean: {
         BUCKET_NAME: 'aspace',
         S3: new aws.S3({

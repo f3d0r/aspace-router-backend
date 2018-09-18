@@ -33,7 +33,7 @@ module.exports = {
         DATABASE_USER: 'api',
         DATABASE_PASSWORD: 'db_password',
         DATABASE_NAME: 'aspace',
-        DATABASE_IP: '178.128.3.166',
+        DATABASE_IP: '159.89.131.95',
         DATABASE_PORT: 'db_port'
     },
     routing_engine: {

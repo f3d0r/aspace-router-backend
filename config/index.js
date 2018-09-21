@@ -61,6 +61,7 @@ module.exports = {
     optimize: {
         DRIVE_PARK: '***REMOVED***',
         PARK_BIKE: '***REMOVED***',
-        PARK_WALK: '***REMOVED***'
+        PARK_WALK: '***REMOVED***',
+        time_threshold: 600
     }
 }

@@ -44,7 +44,7 @@ module.exports = {
         // 1. Get parking spots by radius 
         sql.select.selectRadius('parkopedia_parking', destination[1], destination[0], car_radius / 5280, function (results) {
 
-            var threshold = 600 // minutes
+            var threshold = constants.optimize.time_threshold // 600 minutes
             // Filter out spots based on duration
             for (i in results) {
                 /* if (results[i].id == "1136640" || results[i].id == "1136609" ) {

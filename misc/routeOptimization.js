@@ -183,7 +183,7 @@ module.exports = {
                             fX = math.multiply(math.matrix(param_weights), X);
                             const best_bike_indices = top_n(fX["_data"], number_options)
                             /* print('bike fX: ' + fX)
-                            // print('best bike spots: ' + best_bike_indices) */
+                            print('best bike spots: ' + best_bike_indices) */
                             best_spots = []
                             for (i in best_bike_indices) {
                                 parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]

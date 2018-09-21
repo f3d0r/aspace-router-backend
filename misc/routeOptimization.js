@@ -26,7 +26,7 @@ module.exports = {
             car_radius = 11000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 750;
+            bike_radius = 250;
         }
         if (spot_size === undefined) {
             spot_size = 10;
@@ -40,14 +40,35 @@ module.exports = {
         if (number_options === undefined) {
             number_options = 3;
         }
-
         var parking_spot_data = []
         // 1. Get parking spots by radius 
-        sql.select.selectRadius('parking', destination[1], destination[0], car_radius / 5280, function (results) {
-            parking_spot_data = results
+        sql.select.selectRadius('parkopedia_parking', destination[1], destination[0], car_radius / 5280, function (results) {
 
-            // 2. Filter out occupied spots
-            parking_spot_data = parking_spot_data.filter(val => val["occupied"] != "T");
+            var threshold = 600 // minutes
+            // Filter out spots based on duration
+            for (i in results) {
+                /* if (results[i].id == "1136640" || results[i].id == "1136609" ) {
+                    print(results[i])
+                } */
+                // print(results[i])
+                var entry = JSON.parse(results[i].pricing)
+                if (entry.entries != undefined) {
+                    for (j in entry.entries[0].costs) {
+                        if ( (entry.entries[0].costs[j].duration > threshold && entry.entries[0].costs[j].duration < 1000000) || entry.entries[0].costs[j].duration == 1000012) {
+                            parking_spot_data.push({"id": results[i].id,
+                                                    "lng": results[i].lng,
+                                                    "lat": results[i].lat,
+                                                    "parking_price": entry.entries[0].costs[j].amount
+                            })
+                        }
+                    }
+                }
+            }
+            // print(parking_spot_data.length)
+            // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
+
+            // 2. Filter out occupied spots... DEPRECATED for now
+            // parking_spot_data = parking_spot_data.filter(val => val["occupied"] != "T");
             // print('Number of UNOCCUPIED spots found in radius:')
             // print(parking_spot_data.length)
 

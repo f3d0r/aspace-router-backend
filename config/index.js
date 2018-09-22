@@ -62,6 +62,7 @@ module.exports = {
         DRIVE_PARK: '***REMOVED***',
         PARK_BIKE: '***REMOVED***',
         PARK_WALK: '***REMOVED***',
-        time_threshold: 600
+        time_threshold: 600,
+        cluster_distance_threshold: 0.1
     }
 }

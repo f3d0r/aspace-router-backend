@@ -2,7 +2,8 @@ const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
 var rp = require('request-promise');
-var turf = require('@turf/turf')
+var turf = require('@turf/turf');
+//const util = require('util');
 
 module.exports = {
     /* Algorithm:
@@ -48,10 +49,6 @@ module.exports = {
             var threshold = constants.optimize.time_threshold // 600 minutes
             // Filter out spots based on duration
             for (i in results) {
-                /* if (results[i].id == "1136640" || results[i].id == "1136609" ) {
-                    print(results[i])
-                } */
-                // print(results[i])
                 var entry = JSON.parse(results[i].pricing)
                 if (entry.entries != undefined) {
                     for (j in entry.entries[0].costs) {
@@ -81,23 +78,24 @@ module.exports = {
             var time_inds = []
             var clusters = []
             var parking_spots = Object.assign([], parking_spot_data);
+            var i = 0;
             while (i < parking_spots.length) {
                 var c_list = []
-                for (j = i + 1; j < parking_spots.length; j++) {
+                for (j = i; j < parking_spots.length; j++) {
                     if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
                             [parking_spots[j].lng, parking_spots[j].lat],
-                            options) < 1) {
+                            options) < constants.optimize.cluster_distance_threshold) {
                         if (c_list.length == 0) {
-                            time_inds.push(i)
-                            c_list.push(j)
+                            time_inds.push(parking_spot_data.indexOf(parking_spots[i]))
+                            c_list.push(parking_spot_data.indexOf(parking_spots[j]))
                         } else {
-                            c_list.push(j)
+                            c_list.push(parking_spot_data.indexOf(parking_spots[j]))
                         }
                     }
                 }
                 clusters.push(c_list)
                 for (k in c_list) {
-                    parking_spots.splice(k, 1)
+                    parking_spots.splice(parking_spots.indexOf(parking_spot_data[c_list[k]]), 1)
                 }
                 i = i + 1;
             }
@@ -105,12 +103,18 @@ module.exports = {
             // 3. Acquire driving times
             var driving_reqs = []
             const orig_s = origin[0].toString() + ',' + origin[1].toString()
-            for (var i = 0; i < parking_spots.length; i++) {
-                var dest_s = parking_spots[i].lng.toString() + ',' + parking_spots[i].lat.toString().toString()
+            print(time_inds)
+            print(parking_spots.length)
+            for (i in time_inds) {
+                var dest_s = parking_spot_data[time_inds[i]].lng.toString() + ',' + parking_spot_data[time_inds[i]].lat.toString()
                 driving_reqs.push(
                     rp(getRouteEngURL('car') + orig_s + ';' + dest_s)
-                    .then(function (body) {a
+                    .then(function (body) {
+                        //print(body)
+                        //console.log(util.inspect(body, false, null, true /* enable colors */))
                         body = JSON.parse(body)
+                        //console.log(util.inspect(body, false, null, true /* enable colors */))
+                        //console.log(util.inspect(body.routes[0].duration, false, null, true /* enable colors */))
                         return body.routes[0].duration
                     })
                     .catch(function (err) {
@@ -119,14 +123,24 @@ module.exports = {
                 );
             }
             Promise.all(driving_reqs).then(function (results) {
-                
-                var times = [].concat.apply([], results);
-                print(times)
-                /* fillArray()
-                var times = [].concat.apply([], results);
+                //print(results)
+                //var times = [].concat.apply([], results);
+                var times = []
                 for (i in clusters) {
-                    times.splice(i,0,)
-                } */
+                    times.push(fillArray(results[i],clusters[i].length))
+                }
+                clusters = [].concat.apply([], clusters);
+                var new_parking_list = []
+                for (i in clusters) {
+                    new_parking_list.push(parking_spot_data[clusters[i]])
+                }
+                parking_spot_data = new_parking_list
+                times = [].concat.apply([], times);
+                //print(clusters)
+                //print(times)
+
+                print(clusters.length)
+                print(times.length)
 
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]

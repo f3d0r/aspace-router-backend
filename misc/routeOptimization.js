@@ -3,7 +3,6 @@ var sql = require('@sql');
 const math = require('mathjs');
 var rp = require('request-promise');
 var turf = require('@turf/turf');
-//const util = require('util');
 
 module.exports = {
     /* Algorithm:
@@ -63,7 +62,7 @@ module.exports = {
                     }
                 }
             }
-            print(parking_spot_data.length)
+            // print(parking_spot_data.length)
             // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
 
             // 2. Filter out occupied spots... DEPRECATED for now
@@ -103,8 +102,8 @@ module.exports = {
             // 3. Acquire driving times
             var driving_reqs = []
             const orig_s = origin[0].toString() + ',' + origin[1].toString()
-            print(time_inds)
-            print(parking_spots.length)
+            // print(time_inds)
+            // print(parking_spots.length)
             for (i in time_inds) {
                 var dest_s = parking_spot_data[time_inds[i]].lng.toString() + ',' + parking_spot_data[time_inds[i]].lat.toString()
                 driving_reqs.push(
@@ -139,8 +138,8 @@ module.exports = {
                 //print(clusters)
                 //print(times)
 
-                print(clusters.length)
-                print(times.length)
+                // print(clusters.length)
+                // print(times.length)
 
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]

@@ -3,6 +3,7 @@ var rp = require('request-promise');
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');
+var sql = require('@sql');
 
 var version = 'v5';
 var osrmTextInstructions = require('osrm-text-instructions')(version);
@@ -12,19 +13,25 @@ const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance'
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
-            routeOptionsResponse = {};
-            formattedSegments = formatRegSegments({
-                    'lng': req.query.origin_lng,
-                    'lat': req.query.origin_lat
-                }, {
-                    'lng': req.query.dest_lng,
-                    'lat': req.query.dest_lat
-                },
-                bestSpots, ["drive_park", "walk_dest"]);
-            Promise.all(getRequests(formattedSegments))
-                .then(function (responses) {
-                    routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
-                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+            Promise.all([getLots(bestSpots.map(current => current['id']))])
+                .then(function (spotInfo) {
+                    routeOptionsResponse = {};
+                    bestSpots = combineParkingInfo(spotInfo[0], bestSpots, false);
+                    formattedSegments = formatRegSegments({
+                            'lng': req.query.origin_lng,
+                            'lat': req.query.origin_lat
+                        }, {
+                            'lng': req.query.dest_lng,
+                            'lat': req.query.dest_lat
+                        },
+                        bestSpots, ["drive_park", "walk_dest"]);
+                    Promise.all(getRequests(formattedSegments))
+                        .then(function (directionsResponses) {
+                            routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
+                            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+                        }).catch(function (error) {
+                            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                        });
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
@@ -37,19 +44,26 @@ router.post('/get_drive_walk_route', function (req, res, next) {
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
-            routeOptionsResponse = {};
-            formattedSegments = formatBikeSegments({
-                    'lng': req.query.origin_lng,
-                    'lat': req.query.origin_lat
-                }, {
-                    'lng': req.query.dest_lng,
-                    'lat': req.query.dest_lat
-                },
-                bestSpots, ["drive_park", "walk_bike", "bike_dest"]);
-            Promise.all(getRequests(formattedSegments))
-                .then(function (responses) {
-                    routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
-                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+            console.log(bestSpots);
+            Promise.all([getLots(bestSpots.map(current => current.parking_spot['id']))])
+                .then(function (spotInfo) {
+                    routeOptionsResponse = {};
+                    bestSpots = combineParkingInfo(spotInfo[0], bestSpots, true);
+                    formattedSegments = formatBikeSegments({
+                            'lng': req.query.origin_lng,
+                            'lat': req.query.origin_lat
+                        }, {
+                            'lng': req.query.dest_lng,
+                            'lat': req.query.dest_lat
+                        },
+                        bestSpots, ["drive_park", "walk_bike", "bike_dest"]);
+                    Promise.all(getRequests(formattedSegments))
+                        .then(function (responses) {
+                            routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
+                            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+                        }).catch(function (error) {
+                            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                        });
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
@@ -62,19 +76,25 @@ router.post('/get_drive_bike_route', function (req, res, next) {
 router.post('/get_drive_direct_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.DRIVE_PARK, function (bestSpots) {
-            routeOptionsResponse = {};
-            formattedSegments = formatRegSegments({
-                    'lng': req.query.origin_lng,
-                    'lat': req.query.origin_lat
-                }, {
-                    'lng': req.query.dest_lng,
-                    'lat': req.query.dest_lat
-                },
-                bestSpots, ["drive_park", "walk_dest"]);
-            Promise.all(getRequests(formattedSegments))
-                .then(function (responses) {
-                    routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
-                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+            Promise.all([getLots(bestSpots.map(current => current['id']))])
+                .then(function (spotInfo) {
+                    routeOptionsResponse = {};
+                    bestSpots = combineParkingInfo(spotInfo[0], bestSpots, false);
+                    formattedSegments = formatRegSegments({
+                            'lng': req.query.origin_lng,
+                            'lat': req.query.origin_lat
+                        }, {
+                            'lng': req.query.dest_lng,
+                            'lat': req.query.dest_lat
+                        },
+                        bestSpots, ["drive_park", "walk_dest"]);
+                    Promise.all(getRequests(formattedSegments))
+                        .then(function (directionsResponses) {
+                            routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
+                            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+                        }).catch(function (error) {
+                            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                        });
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
@@ -93,6 +113,39 @@ function combineSegments(formattedRoutes, responses) {
         });
     });
     return formattedRoutes;
+}
+
+function combineParkingInfo(spotInfo, bestSpots, isWithBike) {
+    spotInfo.forEach(function (currentSpotInfo) {
+        for (var bestSpotsIndex = 0; bestSpotsIndex < bestSpots.length; bestSpotsIndex++) {
+            if (isWithBike) {
+                if (parseInt(bestSpots[bestSpotsIndex].parking_spot['id']) == parseInt(currentSpotInfo.id)) {
+                    bestSpots[bestSpotsIndex].parking_spot['name'] = currentSpotInfo.pretty_name
+                        .replace(/&amp;/g, '&')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&apos;/g, '\'');
+    
+                    bestSpots[bestSpotsIndex].parking_spot['payment_process'] = currentSpotInfo['payment_process'];
+                    bestSpots[bestSpotsIndex].parking_spot['address'] = currentSpotInfo['address']
+                    bestSpots[bestSpotsIndex].parking_spot['payment_types'] = currentSpotInfo['payment_types'];
+                    bestSpots[bestSpotsIndex].parking_spot['facilities'] = currentSpotInfo['facilities'];
+                }
+            } else {
+                if (parseInt(bestSpots[bestSpotsIndex]['id']) == parseInt(currentSpotInfo.id)) {
+                    bestSpots[bestSpotsIndex]['name'] = currentSpotInfo.pretty_name
+                        .replace(/&amp;/g, '&')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&apos;/g, '\'');
+    
+                    bestSpots[bestSpotsIndex]['payment_process'] = currentSpotInfo['payment_process'];
+                    bestSpots[bestSpotsIndex]['address'] = currentSpotInfo['address']
+                    bestSpots[bestSpotsIndex]['payment_types'] = currentSpotInfo['payment_types'];
+                    bestSpots[bestSpotsIndex]['facilities'] = currentSpotInfo['facilities'];
+                }
+            }
+        }
+    });
+    return bestSpots;
 }
 
 function getRequests(formattedRoutes) {
@@ -129,18 +182,26 @@ function getSegmentPrettyName(name) {
     }
 }
 
-function getMode(name) {
-    if (name == "drive_park") {
-        return "car_route";
-    } else if (name == "walk_bike") {
-        return "walk_route";
-    } else if (name == "bike_dest") {
-        return "bike_route";
-    } else if (name == "walk_dest") {
-        return "walk_route";
-    } else {
-        return "car_route";
+function getLots(lotIDs) {
+    var query = 'SELECT * FROM `parkopedia_parking` WHERE '
+    for (var index = 0; index < lotIDs.length; index++) {
+        query += '`id` = ' + lotIDs[index];
+        if (index == lotIDs.length - 1)
+            query += ';'
+        else
+            query += ' OR '
     }
+    return new Promise(function (resolve, reject) {
+        sql.runRaw(query, function (response) {
+            resolve(response);
+        }, function (error) {
+            reject(error);
+        })
+    }).then(function (result) {
+        return result;
+    }).catch(function (error) {
+        throw error;
+    });
 }
 
 function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
@@ -212,7 +273,7 @@ function addInstructions(routesResponse) {
                     legIndex: currentLeg
                 });
             } catch (error) {
-                console.log(error);
+                throw error;
             }
         }
     }
@@ -233,6 +294,7 @@ function metaFormat(toFormat) {
     }
     return formatted;
 }
+
 function getRouteEngURL(routeMode) {
     if (typeof process.env.LOCAL != 'undefined' && process.env.LOCAL != null && process.env.LOCAL == 'TRUE') {
         if (routeMode == 'bike_route') {

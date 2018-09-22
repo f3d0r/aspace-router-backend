@@ -233,7 +233,6 @@ function metaFormat(toFormat) {
     }
     return formatted;
 }
-
 function getRouteEngURL(routeMode) {
     if (typeof process.env.LOCAL != 'undefined' && process.env.LOCAL != null && process.env.LOCAL == 'TRUE') {
         if (routeMode == 'bike_route') {
@@ -252,7 +251,6 @@ function getRouteEngURL(routeMode) {
             return 'http://localhost:5000/route/v1/car/';
         }
     }
-
 }
 
 module.exports = router;

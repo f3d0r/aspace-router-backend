@@ -2,6 +2,7 @@ const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
 var rp = require('request-promise');
+var turf = require('@turf/turf')
 
 module.exports = {
     /* Algorithm:
@@ -54,17 +55,18 @@ module.exports = {
                 var entry = JSON.parse(results[i].pricing)
                 if (entry.entries != undefined) {
                     for (j in entry.entries[0].costs) {
-                        if ( (entry.entries[0].costs[j].duration > threshold && entry.entries[0].costs[j].duration < 1000000) || entry.entries[0].costs[j].duration == 1000012) {
-                            parking_spot_data.push({"id": results[i].id,
-                                                    "lng": results[i].lng,
-                                                    "lat": results[i].lat,
-                                                    "parking_price": entry.entries[0].costs[j].amount
+                        if ((entry.entries[0].costs[j].duration > threshold && entry.entries[0].costs[j].duration < 1000000) || entry.entries[0].costs[j].duration == 1000012) {
+                            parking_spot_data.push({
+                                "id": results[i].id,
+                                "lng": results[i].lng,
+                                "lat": results[i].lat,
+                                "parking_price": entry.entries[0].costs[j].amount
                             })
                         }
                     }
                 }
             }
-            // print(parking_spot_data.length)
+            print(parking_spot_data.length)
             // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
 
             // 2. Filter out occupied spots... DEPRECATED for now
@@ -72,14 +74,42 @@ module.exports = {
             // print('Number of UNOCCUPIED spots found in radius:')
             // print(parking_spot_data.length)
 
+            // Cluster points that are near each other so you don't compute time-of-travel for all of them
+            var options = {
+                units: 'miles'
+            };
+            var time_inds = []
+            var clusters = []
+            var parking_spots = Object.assign([], parking_spot_data);
+            while (i < parking_spots.length) {
+                var c_list = []
+                for (j = i + 1; j < parking_spots.length; j++) {
+                    if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
+                            [parking_spots[j].lng, parking_spots[j].lat],
+                            options) < 1) {
+                        if (c_list.length == 0) {
+                            time_inds.push(i)
+                            c_list.push(j)
+                        } else {
+                            c_list.push(j)
+                        }
+                    }
+                }
+                clusters.push(c_list)
+                for (k in c_list) {
+                    parking_spots.splice(k, 1)
+                }
+                i = i + 1;
+            }
+
             // 3. Acquire driving times
             var driving_reqs = []
             const orig_s = origin[0].toString() + ',' + origin[1].toString()
-            for (var i = 0; i < parking_spot_data.length; i++) {
-                var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
+            for (var i = 0; i < parking_spots.length; i++) {
+                var dest_s = parking_spots[i].lng.toString() + ',' + parking_spots[i].lat.toString().toString()
                 driving_reqs.push(
                     rp(getRouteEngURL('car') + orig_s + ';' + dest_s)
-                    .then(function (body) {
+                    .then(function (body) {a
                         body = JSON.parse(body)
                         return body.routes[0].duration
                     })
@@ -89,7 +119,14 @@ module.exports = {
                 );
             }
             Promise.all(driving_reqs).then(function (results) {
+                
                 var times = [].concat.apply([], results);
+                print(times)
+                /* fillArray()
+                var times = [].concat.apply([], results);
+                for (i in clusters) {
+                    times.splice(i,0,)
+                } */
 
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]
@@ -308,3 +345,11 @@ function getRouteEngURL(routeMode) {
         return baseUrl + ':5000/route/v1/car/';
     }
 }
+
+function fillArray(value, len) {
+    if (len == 0) return [];
+    var a = [value];
+    while (a.length * 2 <= len) a = a.concat(a);
+    if (a.length < len) a = a.concat(a.slice(0, len - a.length));
+    return a;
+  }

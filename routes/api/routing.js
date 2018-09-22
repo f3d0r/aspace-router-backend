@@ -235,17 +235,24 @@ function metaFormat(toFormat) {
 }
 
 function getRouteEngURL(routeMode) {
-    baseUrl = 'http://localhost'
     if (typeof process.env.LOCAL != 'undefined' && process.env.LOCAL != null && process.env.LOCAL == 'TRUE') {
-        baseUrl = 'http://159.65.103.1'
-    }
-    if (routeMode == 'bike_route') {
-        return baseUrl + ':5001/route/v1/bike/';
-    } else if (routeMode == 'walk_route') {
-        return baseUrl + ':5002/route/v1/walk/';
+        if (routeMode == 'bike_route') {
+            return 'https://routing.trya.space/engine/bike/route/v1/driving/'
+        } else if (routeMode == 'walk_route') {
+            return 'https://routing.trya.space/engine/walk/route/v1/driving/'
+        } else {
+            return 'https://routing.trya.space/engine/car/route/v1/driving/'
+        }
     } else {
-        return baseUrl + ':5000/route/v1/car/';
+        if (routeMode == 'bike_route') {
+            return 'http://localhost:5001/route/v1/bike/';
+        } else if (routeMode == 'walk_route') {
+            return 'http://localhost:5002/route/v1/walk/';
+        } else {
+            return 'http://localhost:5000/route/v1/car/';
+        }
     }
+
 }
 
 module.exports = router;

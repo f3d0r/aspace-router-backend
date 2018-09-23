@@ -83,7 +83,7 @@ module.exports = {
                 for (j = i; j < parking_spots.length; j++) {
                     if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
                             [parking_spots[j].lng, parking_spots[j].lat],
-                            options) < constants.optimize.cluster_distance_threshold) {
+                            options) < constants.optimize.cluster_distance_threshold+0.15) {
                         if (c_list.length == 0) {
                             time_inds.push(parking_spot_data.indexOf(parking_spots[i]))
                             c_list.push(parking_spot_data.indexOf(parking_spots[j]))

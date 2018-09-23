@@ -62,7 +62,7 @@ module.exports = {
                     }
                 }
             }
-            // print(parking_spot_data.length)
+            print(parking_spot_data.length)
             // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
 
             // 2. Filter out occupied spots... DEPRECATED for now
@@ -78,12 +78,12 @@ module.exports = {
             var clusters = []
             var parking_spots = Object.assign([], parking_spot_data);
             var i = 0;
-            while (i < parking_spots.length) {
+            while (0 != parking_spots.length) {
                 var c_list = []
                 for (j = i; j < parking_spots.length; j++) {
                     if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
                             [parking_spots[j].lng, parking_spots[j].lat],
-                            options) < constants.optimize.cluster_distance_threshold) {
+                            options) < constants.optimize.cluster_distance_threshold+0.15) {
                         if (c_list.length == 0) {
                             time_inds.push(parking_spot_data.indexOf(parking_spots[i]))
                             c_list.push(parking_spot_data.indexOf(parking_spots[j]))
@@ -96,7 +96,6 @@ module.exports = {
                 for (k in c_list) {
                     parking_spots.splice(parking_spots.indexOf(parking_spot_data[c_list[k]]), 1)
                 }
-                i = i + 1;
             }
 
             // 3. Acquire driving times
@@ -125,8 +124,13 @@ module.exports = {
                 //print(results)
                 //var times = [].concat.apply([], results);
                 var times = []
+                var cnt = 0
                 for (i in clusters) {
                     times.push(fillArray(results[i],clusters[i].length))
+                    //print(fillArray(results[i],clusters[i].length).length)
+                    //print(clusters[i].length)
+                    //print('\n')
+                    cnt = cnt + clusters[i].length
                 }
                 clusters = [].concat.apply([], clusters);
                 var new_parking_list = []
@@ -135,8 +139,8 @@ module.exports = {
                 }
                 parking_spot_data = new_parking_list
                 times = [].concat.apply([], times);
-                //print(clusters)
-                //print(times)
+                // print(clusters)
+                // print(times)
 
                 // print(clusters.length)
                 // print(times.length)

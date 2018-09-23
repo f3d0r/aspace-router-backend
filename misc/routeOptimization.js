@@ -44,24 +44,40 @@ module.exports = {
         var parking_spot_data = []
         // 1. Get parking spots by radius 
         sql.select.selectRadius('parkopedia_parking', destination[1], destination[0], car_radius / 5280, function (results) {
-            //print(results)
-            var threshold = constants.optimize.time_threshold // 600 minutes
+            // print(results)
+            //print(results.length)
+            // Filter out valet only, customers only, etc.
+            results = results.filter(val => (val["restrictions"] != "Customers only") 
+                                         && (val["restrictions"] != "Valet only")
+                                         && (val["restrictions"] != "Events only")
+                                         && (val["restrictions"] != "Monthly only")
+                                         && (val["restrictions"] != "Visitors only")
+                                         && (val["restrictions"] != "Permit holders only")
+                                         && (val["restrictions"] != "Permit holders only||Visitors only")
+                                         && (val["restrictions"] != "Monthly only||Events only")
+                                         && (val["restrictions"] != "Customers only||Visitors only")
+                                         && (val["restrictions"] != "Customers only||Valet only")
+                                         );
+            //print(results.length)
             // Filter out spots based on duration
             for (i in results) {
                 var entry = JSON.parse(results[i].pricing)
                 if (entry.entries != undefined) {
                     for (j in entry.entries[0].costs) {
-                        if ((entry.entries[0].costs[j].duration > threshold && entry.entries[0].costs[j].duration < 1000000) || entry.entries[0].costs[j].duration == 1000012) {
+                        if ((entry.entries[0].costs[j].duration > constants.optimize.time_threshold && entry.entries[0].costs[j].duration < 1000000) || entry.entries[0].costs[j].duration == 1000012) {
                             parking_spot_data.push({
                                 "id": results[i].id,
                                 "lng": results[i].lng,
                                 "lat": results[i].lat,
                                 "parking_price": entry.entries[0].costs[j].amount
                             })
+                            //print(results[i].restrictions)
                         }
                     }
                 }
             }
+            //print(results.length)
+
             //print(parking_spot_data.length)
             // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
 
@@ -124,13 +140,13 @@ module.exports = {
                 //print(results)
                 //var times = [].concat.apply([], results);
                 var times = []
-                var cnt = 0
+                //var cnt = 0
                 for (i in clusters) {
                     times.push(fillArray(results[i],clusters[i].length))
                     //print(fillArray(results[i],clusters[i].length).length)
                     //print(clusters[i].length)
                     //print('\n')
-                    cnt = cnt + clusters[i].length
+                    //cnt = cnt + clusters[i].length
                 }
                 clusters = [].concat.apply([], clusters);
                 var new_parking_list = []

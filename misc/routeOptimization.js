@@ -27,7 +27,7 @@ module.exports = {
             car_radius = 11000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 250;
+            bike_radius = 750;
         }
         if (spot_size === undefined) {
             spot_size = 10;
@@ -44,8 +44,6 @@ module.exports = {
         var parking_spot_data = []
         // 1. Get parking spots by radius 
         sql.select.selectRadius('parkopedia_parking', destination[1], destination[0], car_radius / 5280, function (results) {
-            // print(results)
-            //print(results.length)
             // Filter out valet only, customers only, etc.
             results = results.filter(val => (val["restrictions"] != "Customers only") 
                                          && (val["restrictions"] != "Valet only")
@@ -76,9 +74,8 @@ module.exports = {
                     }
                 }
             }
-            //print(results.length)
+            results = undefined; // free some memory
 
-            //print(parking_spot_data.length)
             // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
 
             // 2. Filter out occupied spots... DEPRECATED for now
@@ -99,7 +96,7 @@ module.exports = {
                 for (j = i; j < parking_spots.length; j++) {
                     if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
                             [parking_spots[j].lng, parking_spots[j].lat],
-                            options) < constants.optimize.cluster_distance_threshold+0.15) {
+                            options) < constants.optimize.cluster_distance_threshold) {
                         if (c_list.length == 0) {
                             time_inds.push(parking_spot_data.indexOf(parking_spots[i]))
                             c_list.push(parking_spot_data.indexOf(parking_spots[j]))
@@ -113,12 +110,10 @@ module.exports = {
                     parking_spots.splice(parking_spots.indexOf(parking_spot_data[c_list[k]]), 1)
                 }
             }
-            //print(clusters.length)
+
             // 3. Acquire driving times
             var driving_reqs = []
             const orig_s = origin[0].toString() + ',' + origin[1].toString()
-            // print(time_inds)
-            // print(parking_spots.length)
             for (i in time_inds) {
                 var dest_s = parking_spot_data[time_inds[i]].lng.toString() + ',' + parking_spot_data[time_inds[i]].lat.toString()
                 driving_reqs.push(
@@ -137,16 +132,9 @@ module.exports = {
                 );
             }
             Promise.all(driving_reqs).then(function (results) {
-                //print(results)
-                //var times = [].concat.apply([], results);
                 var times = []
-                //var cnt = 0
                 for (i in clusters) {
                     times.push(fillArray(results[i],clusters[i].length))
-                    //print(fillArray(results[i],clusters[i].length).length)
-                    //print(clusters[i].length)
-                    //print('\n')
-                    //cnt = cnt + clusters[i].length
                 }
                 clusters = [].concat.apply([], clusters);
                 var new_parking_list = []
@@ -155,11 +143,6 @@ module.exports = {
                 }
                 parking_spot_data = new_parking_list
                 times = [].concat.apply([], times);
-                // print(clusters)
-                // print(times)
-
-                // print(clusters.length)
-                // print(times.length)
 
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]
@@ -185,6 +168,9 @@ module.exports = {
                     )
                 }
                 if (code == constants.optimize.DRIVE_PARK) {
+                    // Print total memory usage:
+                    //console.log(process.memoryUsage());
+
                     /* print('Best drive & park spots:')
                     print(best_spots) */
                     successCB(best_spots)

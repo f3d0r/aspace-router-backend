@@ -120,6 +120,26 @@ module.exports = {
                 });
                 connection.release();
             });
+        },
+        selectMultiRadius: function (database, coords, miles, successCB, noneFoundCB, failCB) {
+            db.getConnection(function (err, connection) {
+                var sql = "";
+                for (i in coords) {
+                    sql += "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
+                }
+                sql -= ";"
+                coords = coords.map(val => [val[1], val[0], val[1], miles]);
+                coords = [].concat.apply([], coords);
+                connection.query(sql, coords, function (error, rows) {
+                    if (error)
+                        return failCB(error);
+                    if (rows.length == 0)
+                        noneFoundCB();
+                    else
+                        successCB(rows)
+                });
+                connection.release();
+            });
         }
     },
     remove: {
@@ -143,7 +163,7 @@ module.exports = {
         },
     },
     update: {
-        updateSpotStatus: function (spot_id, occupied, successCB, noExistCB, failCB) {
+        updateSpotStatus(spot_id, occupied, successCB, noExistCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "UPDATE `parking` SET `occupied` = ? WHERE `spot_id` = ?";
                 connection.query(sql, [occupied, spot_id], function (error, results, fields) {
@@ -160,10 +180,10 @@ module.exports = {
     },
     runRaw: function (sql, successCB, failCB) {
         db.getConnection(function (err, connection) {
-            connection.query(sql, function (error, results, fields) {
+            connection.query(sql, function (error, rows) {
                 if (error)
                     return failCB(error);
-                successCB(results);
+                successCB(rows);
             });
             connection.release();
         });

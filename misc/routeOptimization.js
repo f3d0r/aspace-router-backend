@@ -172,7 +172,7 @@ module.exports = {
                 }
                 if (code == constants.optimize.DRIVE_PARK) {
                     // Print total memory usage:
-                    // console.log(process.memoryUsage());
+                    console.log(process.memoryUsage());
 
                     /* print('Best drive & park spots:')
                     print(best_spots) */

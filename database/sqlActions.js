@@ -143,7 +143,7 @@ module.exports = {
         },
     },
     update: {
-        updateSpotStatus(spot_id, occupied, successCB, noExistCB, failCB) {
+        updateSpotStatus: function (spot_id, occupied, successCB, noExistCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "UPDATE `parking` SET `occupied` = ? WHERE `spot_id` = ?";
                 connection.query(sql, [occupied, spot_id], function (error, results, fields) {
@@ -160,10 +160,10 @@ module.exports = {
     },
     runRaw: function (sql, successCB, failCB) {
         db.getConnection(function (err, connection) {
-            connection.query(sql, function (error, rows) {
+            connection.query(sql, function (error, results, fields) {
                 if (error)
                     return failCB(error);
-                successCB(rows);
+                successCB(results);
             });
             connection.release();
         });

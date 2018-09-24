@@ -43,8 +43,8 @@ module.exports = {
         }
         var parking_spot_data = []
         // 1. Get parking spots by radius 
-        sql.select.selectRadius('parkopedia_parking', destination[1], destination[0], car_radius / 5280, function (results) {
-            // Filter out valet only, customers only, etc.
+        sql.select.selectRadius('filtered_parkopedia', destination[1], destination[0], car_radius / 5280, function (results) {
+            /* // Filter out valet only, customers only, etc.
             results = results.filter(val => (val["restrictions"] != "Customers only") 
                                          && (val["restrictions"] != "Valet only")
                                          && (val["restrictions"] != "Events only")
@@ -69,20 +69,21 @@ module.exports = {
                                 "lat": results[i].lat,
                                 "parking_price": entry.entries[0].costs[j].amount
                             })
+                            break;
                             //print(results[i].restrictions)
                         }
                     }
                 }
             }
             results = undefined; // free some memory
-
             // Is there an in-line way to do the above? like... parking_spot_data = parking_spot_data.filter(val => val.pricing.entries[0].costs != "T");
 
             // 2. Filter out occupied spots... DEPRECATED for now
             // parking_spot_data = parking_spot_data.filter(val => val["occupied"] != "T");
             // print('Number of UNOCCUPIED spots found in radius:')
-            // print(parking_spot_data.length)
-
+            // print(parking_spot_data.length) */
+            results = JSON.parse(JSON.stringify(results))
+            parking_spot_data = results
             // Cluster points that are near each other so you don't compute time-of-travel for all of them
             var options = {
                 units: 'miles'
@@ -124,9 +125,11 @@ module.exports = {
                         body = JSON.parse(body)
                         //console.log(util.inspect(body, false, null, true /* enable colors */))
                         //console.log(util.inspect(body.routes[0].duration, false, null, true /* enable colors */))
+                        //print('success')
                         return body.routes[0].duration
                     })
                     .catch(function (err) {
+                        //print('error')
                         return failCB(err);
                     })
                 );
@@ -134,7 +137,7 @@ module.exports = {
             Promise.all(driving_reqs).then(function (results) {
                 var times = []
                 for (i in clusters) {
-                    times.push(fillArray(results[i],clusters[i].length))
+                    times.push(fillArray(results[i], clusters[i].length))
                 }
                 clusters = [].concat.apply([], clusters);
                 var new_parking_list = []
@@ -169,7 +172,7 @@ module.exports = {
                 }
                 if (code == constants.optimize.DRIVE_PARK) {
                     // Print total memory usage:
-                    //console.log(process.memoryUsage());
+                    // console.log(process.memoryUsage());
 
                     /* print('Best drive & park spots:')
                     print(best_spots) */
@@ -377,4 +380,4 @@ function fillArray(value, len) {
     while (a.length * 2 <= len) a = a.concat(a);
     if (a.length < len) a = a.concat(a.slice(0, len - a.length));
     return a;
-  }
+}

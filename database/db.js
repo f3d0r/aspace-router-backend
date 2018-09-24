@@ -7,6 +7,7 @@ var pool = mysql.createPool({
     password: constants.db.DATABASE_PASSWORD,
     database: constants.db.DATABASE_NAME,
     port: constants.db.DATABASE_PORT,
+    multipleStatements: true
 });
 
 exports.getConnection = function (callback) {

@@ -128,15 +128,21 @@ module.exports = {
                     sql += "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
                 }
                 sql -= ";"
+                console.log(mysql.format(sql,coords));
                 coords = coords.map(val => [val[1], val[0], val[1], miles]);
                 coords = [].concat.apply([], coords);
-                connection.query(sql, coords, function (error, rows) {
-                    if (error)
-                        return failCB(error);
-                    if (rows.length == 0)
+                connection.query("", coords, function (error, rows) {
+                    if (error) {
+                        console.log(error)
+                        return failCB(error)
+                    };
+                    if (rows.length == 0) {
                         noneFoundCB();
-                    else
-                        successCB(rows)
+                        console.log('here')
+                    } else {
+                        successCB(rows);
+                        console.log('here1')
+                    }
                 });
                 connection.release();
             });

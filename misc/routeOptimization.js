@@ -172,7 +172,7 @@ module.exports = {
                 }
                 if (code == constants.optimize.DRIVE_PARK) {
                     // Print total memory usage:
-                    console.log(process.memoryUsage());
+                    // console.log(process.memoryUsage());
 
                     /* print('Best drive & park spots:')
                     print(best_spots) */
@@ -181,30 +181,18 @@ module.exports = {
                     // Biking optimization
                     // Acquire available bikes:
                     // print(parking_spot_data.length)
-                    var bike_functions = []
-                    for (i in parking_spot_data) {
-                        bike_functions.push(
-                            new Promise(function (resolve, reject) {
-                                sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
-                                        // count number of bikes around each parking spot here, and push that with results to bike_data.
-                                        // these counts will have to be pushed as a parameter into X, so it's important to figure out
-                                        // the correct threading and sequence for this routine. may require changes.
-                                        var num_bikes = 0
-                                        for (j in results) {
-                                            num_bikes = num_bikes + results[j].bikes_available
-                                        }
-                                        resolve([results, num_bikes])
-
-                                    },
-                                    function () {
-                                        resolve([undefined, 0])
-                                    },
-                                    function (error) {
-                                        reject(failCB(error));
-                                    })
-                            }))
-                    };
-                    Promise.all(bike_functions).then(function (results) {
+                    var coords = parking_spot_data.map(val => [val.lng, val.lat])
+                    sql.select.selectMultiRadius('bike_locs', coords, bike_radius / 5280, function (results) {
+                        // count number of bikes around each parking spot here, and push that with results to bike_data.
+                        // these counts will have to be pushed as a parameter into X, so it's important to figure out
+                        // the correct threading and sequence for this routine. may require changes.
+                        print(results)
+                        print(results[0])
+                        var num_bikes = 0
+                        for (j in results) {
+                            num_bikes = num_bikes + results[j].bikes_available
+                        }
+                        //resolve([results, num_bikes])
                         bike_data = results
 
                         var bike_coords = []
@@ -263,6 +251,11 @@ module.exports = {
                             print(best_spots) */
                             successCB(best_spots);
                         })
+                    }, function () {
+                        // Empty response from selectMultiRadius for bikes
+
+                    }, function (error) {
+                        return failCB(error);
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
                     // Walking time optimization

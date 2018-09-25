@@ -123,26 +123,17 @@ module.exports = {
         },
         selectMultiRadius: function (database, coords, miles, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = "";
-                for (i in coords) {
-                    sql += "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
-                }
-                sql -= ";"
-                console.log(mysql.format(sql,coords));
+                var stmt = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
+                var sql = stmt.repeat(coords.length);
                 coords = coords.map(val => [val[1], val[0], val[1], miles]);
                 coords = [].concat.apply([], coords);
-                connection.query("", coords, function (error, rows) {
-                    if (error) {
-                        console.log(error)
-                        return failCB(error)
-                    };
-                    if (rows.length == 0) {
+                connection.query(sql, coords, function (error, rows) {
+                    if (error)
+                        return failCB(error);
+                    if (rows.length == 0)
                         noneFoundCB();
-                        console.log('here')
-                    } else {
-                        successCB(rows);
-                        console.log('here1')
-                    }
+                    else
+                        successCB(rows)
                 });
                 connection.release();
             });

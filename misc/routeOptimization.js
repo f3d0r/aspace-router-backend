@@ -186,15 +186,15 @@ module.exports = {
                         // count number of bikes around each parking spot here, and push that with results to bike_data.
                         // these counts will have to be pushed as a parameter into X, so it's important to figure out
                         // the correct threading and sequence for this routine. may require changes.
-                        print(results)
-                        print(results[0])
-                        var num_bikes = 0
-                        for (j in results) {
-                            num_bikes = num_bikes + results[j].bikes_available
+                        var num_bike_list = []
+                        for (i in results) {
+                            var num_bikes = 0
+                            for (j in results[i]) {
+                                num_bikes = num_bikes + results[i][j].bikes_available
+                            }
+                            num_bike_list.push(num_bikes)
                         }
-                        //resolve([results, num_bikes])
-                        bike_data = results
-
+                        bike_data = results.map((e,i) => [e, num_bike_list[i]]);
                         var bike_coords = []
                         var bike_reqs = []
                         for (i in results) {

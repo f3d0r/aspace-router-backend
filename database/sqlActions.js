@@ -2,6 +2,8 @@ var db = require('./db');
 var mysql = require('mysql');
 var uniqueString = require('unique-string');
 
+var turf = require('@turf/turf');
+
 module.exports = {
     insert: {
         addObject: function (database, jsonObject, successCB, failCB) {
@@ -181,6 +183,29 @@ module.exports = {
                 if (error)
                     return failCB(error);
                 successCB(rows);
+            });
+            connection.release();
+        });
+    },
+    locationUpdate: function (data, successCB, failCB) {
+        db.getConnection(function (err, connection) {
+            var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?;';
+            sql += 'SELECT `parking_spot`, `remaining_bikes`,`remaining_scoots` FROM `routing_sessions` WHERE `user_id` = ?';
+            // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
+            connection.query(sql, [data[0],data[1],data[1]], function (error, results) {
+                if (error)
+                    return failCB(error);
+                if (results.length == 0)
+                    noneFoundCB();
+                else {
+                    if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
+                        [parking_spots[j].lng, parking_spots[j].lat],
+                        options) > constants.optimize.cluster_distance_threshold 
+                        && remaining_bikes + remaining_scoots < lastMileOptions_threshold ) {
+                            // if this happens, we'll re-route the user
+                        }
+                    successCB(results);
+                }
             });
             connection.release();
         });

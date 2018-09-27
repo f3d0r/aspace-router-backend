@@ -237,7 +237,8 @@ module.exports = {
                                 if (bike_data[i][0] !== undefined) {
                                     best_spots.push({
                                         parking_spot: parking_spot_data[best_bike_indices[i]],
-                                        bike_locs: bike_data[i][0],
+                                        bike_locs: bike_data[best_bike_indices[i]][0],
+                                        num_bikes: bike_data[best_bike_indices[i]][1],
                                         approx_biking_time: results[best_bike_indices[i]]
                                     })
                                 } else {

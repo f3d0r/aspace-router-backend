@@ -37,13 +37,12 @@ module.exports = {
         },
         addSession: function (last_location, parking_dest, rem_bikes, rem_scoots, mode, successCB, failCB) {
             db.getConnection(function (err, connection) {
-                console.log('REACHED ADDSESSION ACTION')
+                // console.log('REACHED ADDSESSION ACTION')
                 var sql = 'INSERT INTO `routing_sessions` (`last_location`,`parking_dest`,`remaining_bikes`,`remaining_scoots`,`mode`) VALUES (?,?,?,?,?)';
                 connection.query(sql, [last_location, parking_dest, rem_bikes, rem_scoots, mode], function (error, results, fields) {
                     connection.release();
                     if (error) {
-                        console.log('ERROR');
-                        console.log(error);
+                        // console.log('Unsuccessful session insertion: ', error);
                         failCB(error);
                     } else {
                         successCB(results);

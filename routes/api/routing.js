@@ -11,7 +11,7 @@ var osrmTextInstructions = require('osrm-text-instructions')(version);
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
 
 router.post('/get_drive_walk_route', function (req, res, next) {
-    errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
+    errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng','session_starting'], function () {
         routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
             Promise.all([getLots(bestSpots.map(current => current['id']))])
                 .then(function (spotInfo) {
@@ -28,6 +28,12 @@ router.post('/get_drive_walk_route', function (req, res, next) {
                     Promise.all(getRequests(formattedSegments))
                         .then(function (directionsResponses) {
                             routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
+                            if (req.query.session_starting == '1') {
+                                console.log('ADDING NEW SESSION')
+                                sql.insert.addSession(req.query.origin_lng.toString()+','+req.query.origin_lat.toString(), routeOptionsResponse.routes[0][0].dest.lng.toString()+','+routeOptionsResponse.routes[0][0].dest.lat.toString(), null, null, 'walk', function (error){
+                                    next(errors.getResponseJSON('SESSION_INSERT_ERROR', error));
+                                })
+                            }
                             next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
                         }).catch(function (error) {
                             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));

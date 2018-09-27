@@ -15,20 +15,23 @@ connection.connect(function (err) {
   }
 
   // Create new table:
-  /* let createTable = `create table if not exists filtered_parkopedia(
-                          id varchar(255) primary key,
-                          lng float,
-                          lat float,
-                          parking_price int
+  let createTable = `create table if not exists routing_sessions(
+                          id int primary key auto_increment,
+                          last_location varchar(255),
+                          parking_dest varchar(255),
+                          remaining_bikes int,
+                          remaining_scoots int,
+                          mode varchar(255)
                       )`;
 
   connection.query(createTable, function (err, results, fields) {
     if (err) {
       console.log(err.message);
     }
-  }); */
-
-  /* var data = []
+    connection.end();
+  });
+});
+/* var data = []
   let sql = `SELECT * FROM parkopedia_parking WHERE (
     (restrictions!=? AND 
     restrictions!=? AND 
@@ -82,9 +85,9 @@ connection.connect(function (err) {
     });
 }); */
 
-  sql = "ALTER TABLE routing_sessions RENAME COLUMN `parking_spot` TO `parking_dest`";
-  sql = "ALTER TABLE routing_sessions CHANGE `parking_spot` `parking_dest` varchar(255)"
+/*   sql = "ALTER TABLE routing_sessions RENAME COLUMN `parking_spot` TO `parking_dest`";
+  sql = "ALTER TABLE routing_sessions CHANGE `user_id` `user_id` Integer PRIMARY KEY AUTOINCREMENT"
   connection.query(sql, function (results, err) {
     connection.end();
   })
-})
+}) */

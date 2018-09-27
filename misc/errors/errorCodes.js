@@ -173,5 +173,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 41,
         INFO: "bikes_endpoint_function_success"
+    },
+    NO_PARKING_FOUND: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 42,
+        INFO: "no_parking_found"
     }
 });

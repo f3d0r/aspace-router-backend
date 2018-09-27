@@ -16,7 +16,7 @@ module.exports = {
         6. Compute cost of each routing option and find minima
         7. Return minima as routing choices to user 
     */
-    optimalSpot: function (origin, destination, code, successCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
+    optimalSpot: function (origin, destination, code, successCB, noneFoundCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
         // number_options : number of routing options to provide user for specific last-mile transport choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk (0,1,2 have been encoded
         // into random strings)
@@ -302,16 +302,12 @@ module.exports = {
             });
         }, function () {
             // No parking spots were found.
-            console.log('No spots found.')
+            // console.log('No spots found.')
             return noneFoundCB();
         }, function (error) {
             return failCB(error);
         });
     }
-}
-
-function noneFoundCB() {
-    console.log("Please re-run with a larger car radius.")
 }
 
 function sub_least(arr) {

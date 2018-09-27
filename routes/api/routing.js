@@ -43,6 +43,8 @@ router.post('/get_drive_walk_route', function (req, res, next) {
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
+        }, function () {
+            next(errors.getResponseJSON('NO_PARKING_FOUND'));
         }, function (error) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
@@ -84,6 +86,8 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
+        }, function () {
+            next(errors.getResponseJSON('NO_PARKING_FOUND'));
         }, function (error) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });
@@ -123,6 +127,8 @@ router.post('/get_drive_direct_route', function (req, res, next) {
                 }).catch(function (error) {
                     next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
                 });
+        }, function () {
+            next(errors.getResponseJSON('NO_PARKING_FOUND'));
         }, function (error) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
         });

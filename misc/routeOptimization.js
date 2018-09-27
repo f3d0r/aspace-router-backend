@@ -146,7 +146,7 @@ module.exports = {
                 }
                 parking_spot_data = new_parking_list
                 times = [].concat.apply([], times);
-
+                
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]
                 var arr = []
@@ -301,12 +301,17 @@ module.exports = {
             });
         }, function () {
             // No parking spots were found.
+            console.log('No spots found.')
+            return noneFoundCB();
         }, function (error) {
             return failCB(error);
         });
     }
 }
 
+function noneFoundCB() {
+    console.log("Please re-run with a larger car radius.")
+}
 
 function sub_least(arr) {
     var min_vec = math.multiply(math.min(arr), math.ones(1, arr.length))

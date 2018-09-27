@@ -15,7 +15,7 @@ connection.connect(function (err) {
   }
 
   // Create new table:
-  let createTable = `create table if not exists filtered_parkopedia(
+  /* let createTable = `create table if not exists filtered_parkopedia(
                           id varchar(255) primary key,
                           lng float,
                           lat float,
@@ -26,9 +26,9 @@ connection.connect(function (err) {
     if (err) {
       console.log(err.message);
     }
-  });
-  
-  var data = []
+  }); */
+
+  /* var data = []
   let sql = `SELECT * FROM parkopedia_parking WHERE (
     (restrictions!=? AND 
     restrictions!=? AND 
@@ -80,4 +80,11 @@ connection.connect(function (err) {
       }
     });
     });
-});
+}); */
+
+  sql = "ALTER TABLE routing_sessions RENAME COLUMN `parking_spot` TO `parking_dest`";
+  sql = "ALTER TABLE routing_sessions CHANGE `parking_spot` `parking_dest` varchar(255)"
+  connection.query(sql, function (results, err) {
+    connection.end();
+  })
+})

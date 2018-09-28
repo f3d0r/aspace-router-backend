@@ -12,7 +12,8 @@ var turf = require('@turf/turf');
 
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
 
-// Current polygon within which our OSRM engine can route: (09/27/2018)
+// Current polygon within which our OSRM engine can route - 09/27/2018
+// Polygon defined by corners of states in this order: WA -> MT -> NM -> CA -> WA
 var routing_poly = turf.polygon([
     [
         [-123.09425354003905, 49.00049250972169],

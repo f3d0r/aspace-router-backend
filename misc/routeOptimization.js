@@ -4,6 +4,7 @@ const math = require('mathjs');
 var rp = require('request-promise');
 var turf = require('@turf/turf');
 
+const util = require('util')
 module.exports = {
     /* Algorithm:
         1. Obtain all spots within certain radius of user destination
@@ -27,7 +28,7 @@ module.exports = {
             car_radius = 11000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 750;
+            bike_radius = 650; // about 200 meters, reasonable for walking
         }
         if (spot_size === undefined) {
             spot_size = 10;
@@ -176,19 +177,50 @@ module.exports = {
                     // Acquire available bikes:
                     // print(parking_spot_data.length)
                     var coords = parking_spot_data.map(val => [val.lng, val.lat])
-                    sql.select.selectMultiRadius('bike_locs', coords, bike_radius / 5280, function (results) {
-                        // count number of bikes around each parking spot here, and push that with results to bike_data.
-                        // these counts will have to be pushed as a parameter into X, so it's important to figure out
-                        // the correct threading and sequence for this routine. may require changes.
-                        var num_bike_list = []
-                        for (i in results) {
-                            var num_bikes = 0
-                            for (j in results[i]) {
-                                num_bikes = num_bikes + results[i][j].bikes_available
-                            }
-                            num_bike_list.push(num_bikes)
-                        }
-                        bike_data = results.map((e, i) => [e, num_bike_list[i]]);
+                    var options = {
+                        url: "https://api.coord.co/v1/sv/location",
+                        qs: {
+                            latitude: '',
+                            longitude: '',
+                            radius_km: '0.2',
+                            access_key: "P7EDR-cX2WJYuE7__s71QAIlGrAwm-REyEyK9TK8rLk"
+                        },
+                        json: true
+                    }
+                    var bike_scoots_reqs = [];
+                    for (i in coords) {
+                        options.qs.longitude = coords[i][0].toString();
+                        options.qs.latitude = coords[i][1].toString();
+                        bike_scoots_reqs.push(
+                            rp(options)
+                            .then(function (body) {
+                                var num_bikes = 0;
+                                for (j in body.features) {
+                                    num_bikes += body.features[j].properties.num_bikes_available;
+                                }
+                                return [body.features, num_bikes]
+                            })
+                            .catch(function (err) {
+                                return failCB(err);
+                            })
+                        )
+                    }
+                    Promise.all(bike_scoots_reqs).then(function (results) {
+                        bike_data = results
+
+                        /* sql.select.selectMultiRadius('bike_locs', coords, bike_radius / 5280, function (results) {
+                            // count number of bikes around each parking spot here, and push that with results to bike_data.
+                            // these counts will have to be pushed as a parameter into X, so it's important to figure out
+                            // the correct threading and sequence for this routine. may require changes.
+                            var num_bike_list = []
+                            for (i in results) {
+                                var num_bikes = 0
+                                for (j in results[i]) {
+                                    num_bikes = num_bikes + results[i][j].bikes_available
+                                }
+                                num_bike_list.push(num_bikes)
+                            } 
+                            bike_data = results.map((e, i) => [e, num_bike_list[i]]); */
                         var bike_coords = []
                         var bike_reqs = []
                         for (i in results) {
@@ -245,13 +277,18 @@ module.exports = {
                             /* print('Best park & bike spots: ')
                             print(best_spots) */
                             successCB(best_spots);
-                        })
-                    }, function () {
+                        }).catch(function (error) {
+                            failCB(error);
+                        });
+                    }).catch(function (error) {
+                        failCB(error);
+                    });
+                    /* }, function () {
                         // Empty response from selectMultiRadius for bikes
 
                     }, function (error) {
                         return failCB(error);
-                    });
+                    }); */
                 } else if (code == constants.optimize.PARK_WALK) {
                     // Walking time optimization
                     var walk_time_reqs = []
@@ -289,6 +326,8 @@ module.exports = {
                         // print('Best walking spots: ')
                         // print(best_spots)
                         successCB(best_spots);
+                    }).catch(function (error) {
+                        failCB(error);
                     });
                 }
             }).catch(function (error) {

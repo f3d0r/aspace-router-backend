@@ -1,2 +1,3 @@
 node_modules/
 *.pbf
+ecosystem.config.json

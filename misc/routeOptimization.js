@@ -120,16 +120,10 @@ module.exports = {
                 driving_reqs.push(
                     rp(getRouteEngURL('car') + orig_s + ';' + dest_s)
                     .then(function (body) {
-                        //print(body)
-                        //console.log(util.inspect(body, false, null, true /* enable colors */))
                         body = JSON.parse(body)
-                        //console.log(util.inspect(body, false, null, true /* enable colors */))
-                        //console.log(util.inspect(body.routes[0].duration, false, null, true /* enable colors */))
-                        //print('success')
                         return body.routes[0].duration
                     })
                     .catch(function (err) {
-                        //print('error')
                         return failCB(err);
                     })
                 );
@@ -146,7 +140,7 @@ module.exports = {
                 }
                 parking_spot_data = new_parking_list
                 times = [].concat.apply([], times);
-                
+
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]
                 var arr = []
@@ -194,7 +188,7 @@ module.exports = {
                             }
                             num_bike_list.push(num_bikes)
                         }
-                        bike_data = results.map((e,i) => [e, num_bike_list[i]]);
+                        bike_data = results.map((e, i) => [e, num_bike_list[i]]);
                         var bike_coords = []
                         var bike_reqs = []
                         for (i in results) {

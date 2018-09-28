@@ -216,7 +216,7 @@ module.exports = {
     }
 }
 
-function getUserId(accessCode, deviceId, successCB, failCB) {
+function getUserId(accessCode, deviceId, successCB, noneFoundCB, failCB) {
     db.getConnection(function (err, connection) {
         var sql = 'SELECT `user_id` FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?';
         connection.query(sql, [accessCode, deviceId], function (error, rows) {

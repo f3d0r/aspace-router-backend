@@ -35,20 +35,26 @@ module.exports = {
                 
             });
         },
-        addSession: function (last_location, parking_dest, rem_bikes, rem_scoots, mode, successCB, failCB) {
+        addSession: function (last_location, parking_dest, rem_bikes, rem_scoots, mode, access_code, device_id, successCB, failCB) {
             db.getConnection(function (err, connection) {
-                // console.log('REACHED ADDSESSION ACTION')
-                var sql = 'INSERT INTO `routing_sessions` (`last_location`,`parking_dest`,`remaining_bikes`,`remaining_scoots`,`mode`) VALUES (?,?,?,?,?)';
-                connection.query(sql, [last_location, parking_dest, rem_bikes, rem_scoots, mode], function (error, results, fields) {
+               getUserId(access_code, device_id, function (user_id) {
+                var sql = 'INSERT INTO `routing_sessions` (`user_id`, `last_location`,`parking_dest`,`remaining_bikes`,`remaining_scoots`,`mode`) VALUES (?,?,?,?,?,?);';
+                sql += 'SELECT `session_id` FROM `routing_sessions` WHERE `user_id` = ? AND `status` = 0';
+                connection.query(sql, [user_id, last_location, parking_dest, rem_bikes, rem_scoots, mode, user_id], function (error, results, fields) {
                     connection.release();
                     if (error) {
-                        // console.log('Unsuccessful session insertion: ', error);
                         failCB(error);
                     } else {
-                        successCB(results);
+                        successCB(results[1][0].session_id);
                     }  
                 });
-                
+                }, function () {
+                    // user_id not found
+                    successCB("user_id_not_found");
+                }, function (err) {
+                    // user_id query failed
+                    failCB(err);
+                });
             });
         }
     },
@@ -208,4 +214,20 @@ module.exports = {
             });
         });
     }
+}
+
+function getUserId(accessCode, deviceId, successCB, failCB) {
+    db.getConnection(function (err, connection) {
+        var sql = 'SELECT `user_id` FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?';
+        connection.query(sql, [accessCode, deviceId], function (error, rows) {
+            if (error)
+                failCB(error);
+            else if (rows.length == 0)
+                noneFoundCB();
+            else {
+                successCB(rows[0].user_id);
+            }
+        });
+        connection.release();
+    });
 }

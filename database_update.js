@@ -16,7 +16,8 @@ connection.connect(function (err) {
 
   // Create new table:
   let createTable = `create table if not exists routing_sessions(
-                          id int primary key auto_increment,
+                          user_id varchar(255),
+                          session_id int primary key auto_increment,
                           last_location varchar(255),
                           parking_dest varchar(255),
                           remaining_bikes int,
@@ -85,8 +86,8 @@ connection.connect(function (err) {
     });
 }); */
 
-/*   sql = "ALTER TABLE routing_sessions RENAME COLUMN `parking_spot` TO `parking_dest`";
-  sql = "ALTER TABLE routing_sessions CHANGE `user_id` `user_id` Integer PRIMARY KEY AUTOINCREMENT"
+
+/*   sql = "ALTER TABLE routing_sessions CHANGE `id` `session_id`"
   connection.query(sql, function (results, err) {
     connection.end();
   })

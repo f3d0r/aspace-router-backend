@@ -8,11 +8,22 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-
+const Cabin = require('cabin');
+const responseTime = require('response-time');
+const {
+    Signale
+} = require('signale');
+const pino = require('pino')({
+    customLevels: {
+        log: 30
+    }
+});
 const {
     IncomingWebhook
 } = require('@slack/client');
+
 const cpuCount = require('os').cpus().length;
+const env = process.env.NODE_ENV || 'development';
 
 // LOCAL IMPORTS
 const constants = require('@config');
@@ -24,6 +35,15 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 // EXPRESS SET UP
 var app = express();
 
+// CABIN SET UP
+const cabin = new Cabin({
+    // (optional: your free API key from https://cabinjs.com)
+    // key: 'YOUR-CABIN-API-KEY',
+    axe: {
+        logger: env === 'production' ? pino : new Signale()
+    }
+});
+
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
@@ -33,10 +53,13 @@ cluster(function (worker) {
     app.use(bodyParser.json());
     app.use(cors());
     app.use(helmet())
+    app.use(responseTime());
+    app.use(cabin.middleware);
 
     // MAIN ENDPOINTS
-    app.get('/', function (req, res, next) {
-        next(errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)"));
+    app.get('/', function (req, res) {
+        // req.logger.info('someone visited the home page');
+        res.status(200).send(errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)"));
     });
 
     app.get('/ping', function (req, res, next) {
@@ -93,7 +116,7 @@ cluster(function (worker) {
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
             if (worker.id == 1)
-                console.log('Listening on port ' + server.address().port + ' with ' + cpuCount + ' threads.');
+                cabin.info('Listening on port ' + server.address().port + ' with ' + cpuCount + ' threads.');
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");

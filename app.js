@@ -92,11 +92,12 @@ cluster(function (worker) {
     // Start server
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
-            console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
+            if (worker.id == 1)
+                console.log('Listening on port ' + server.address().port + ' with ' + cpuCount + ' threads.');
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
     count: cpuCount
-})
+});

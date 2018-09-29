@@ -21,7 +21,7 @@ module.exports = {
         // number_options : number of routing options to provide user for specific last-mile transport choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk (0,1,2 have been encoded
         // into random strings)
-        // other inputs are straightforward...
+        // other inputs are straightforward.
 
         // Define optional parameters
         if (car_radius === undefined) {
@@ -182,7 +182,7 @@ module.exports = {
                         qs: {
                             latitude: '',
                             longitude: '',
-                            radius_km: '0.2',
+                            radius_km: (bike_radius/3300).toString(),
                             access_key: "P7EDR-cX2WJYuE7__s71QAIlGrAwm-REyEyK9TK8rLk"
                         },
                         json: true

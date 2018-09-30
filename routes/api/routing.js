@@ -80,7 +80,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
                                     sql.insert.addSession(last_loc_string, dest_string, null, null, 'walk', req.query.access_code, req.query.device_id, function (result) {
                                         if (result == "user_id_not_found") {
                                             next(errors.getResponseJSON('USER_ID_NOT_FOUND'));
-                                        } else if (typeof (result) == 'number') {
+                                        } else { //(typeof (result) == 'number') {
                                             // Session successfully inserted 
                                             // Should include session_id
                                             routeOptionsResponse['session_id'] = result;
@@ -140,7 +140,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                                     sql.insert.addSession(last_loc_string, dest_string, num_bikes, 0, 'bike', req.query.access_code, req.query.device_id, function (result) {
                                         if (result == "user_id_not_found") {
                                             next(errors.getResponseJSON('USER_ID_NOT_FOUND'));
-                                        } else if (typeof (result) == 'number') {
+                                        } else { // if (typeof (result) == 'number') {
                                             // Session successfully inserted 
                                             // Should include session_id
                                             routeOptionsResponse['session_id'] = result;
@@ -200,7 +200,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
                                     sql.insert.addSession(last_loc_string, dest_string, null, null, 'direct', req.query.access_code, req.query.device_id, function (result) {
                                         if (result == "user_id_not_found") {
                                             next(errors.getResponseJSON('USER_ID_NOT_FOUND'));
-                                        } else if (typeof (result) == 'number') {
+                                        } else { //if (typeof (result) == 'number') {
                                             // Session successfully inserted 
                                             // Should include session_id
                                             routeOptionsResponse['session_id'] = result;

@@ -80,61 +80,70 @@ var routing_poly = turf.polygon([
     ]
 ]);
 
+
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng', 'session_starting', 'access_code', 'device_id'], function () {
         var orig_pt = turf.point([parseFloat(req.query.origin_lng), parseFloat(req.query.origin_lat)]);
         var dest_pt = turf.point([parseFloat(req.query.dest_lng), parseFloat(req.query.dest_lat)]);
+        //check if both points are inside bounds for routing
         if (turf.booleanPointInPolygon(orig_pt, routing_poly) && turf.booleanPointInPolygon(dest_pt, routing_poly)) {
-            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
-                Promise.all([getLots(bestSpots.map(current => current['id']))])
-                    .then(function (spotInfo) {
-                        routeOptionsResponse = {};
-                        bestSpots = combineParkingInfo(spotInfo[0], bestSpots, false);
-                        formattedSegments = formatRegSegments({
-                                'lng': req.query.origin_lng,
-                                'lat': req.query.origin_lat
-                            }, {
-                                'lng': req.query.dest_lng,
-                                'lat': req.query.dest_lat
-                            },
-                            bestSpots, ["drive_park", "walk_dest"]);
-                        Promise.all(getRequests(formattedSegments))
-                            .then(function (directionsResponses) {
-                                routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
-                                if (req.query.session_starting == '1') {
-                                    // Initializes new routing session
-                                    var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
-                                    var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
-                                    sql.insert.addSession(last_loc_string, dest_string, null, null, 'walk', req.query.access_code, req.query.device_id, function (result) {
-                                        if (result == "user_id_not_found") {
-                                            next(errors.getResponseJSON('USER_ID_NOT_FOUND'));
-                                        } else if (typeof (result) == 'number') {
-                                            // Session successfully inserted 
-                                            // Should include session_id
-                                            routeOptionsResponse['session_id'] = result;
-                                            //console.log(result)
-                                            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                                        }
-                                    }, function (err) {
-                                        // Session insertion unsuccessful
-                                        next(errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err));
-                                    })
-                                } else {
-                                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                                }
-                            }).catch(function (error) {
-                                next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+            //if session starting (user id must be checked)
+            if (req.query.session_starting == '1') {
+                sql.select.getUserId(req.query.access_code, req.query.device_id, function (userId) {
+                    calcRoutes(req, constants.optimize.PARK_WALK, ["drive_park", "walk_dest"], function (response) {
+                        res.status(response.code).send(response.res);
+                    }, function () {
+                        var response = errors.getResponseJSON('NO_PARKING_FOUND');
+                        res.status(response.code).send(response.res);
+                    }, function (error) {
+                        var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                        next({
+                            response,
+                            error
+                        });
+                    }, function (req, routeOptionsResponse) {
+                        var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
+                        var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
+                        sql.insert.addSession(last_loc_string, dest_string, null, null, 'walk', userId, function (result) {
+                            routeOptionsResponse['session_id'] = result;
+                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            res.status(response.code).send(response.res);
+                        }, function (error) {
+                            // Session insertion unsuccessful
+                            var response = errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err);
+                            next({
+                                response,
+                                error
                             });
-                    }).catch(function (error) {
-                        next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                        });
                     });
-            }, function () {
-                next(errors.getResponseJSON('NO_PARKING_FOUND'));
-            }, function (error) {
-                next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
-            });
+                }, function () {
+                    var response = errors.getResponseJSON('USER_ID_NOT_FOUND');
+                    res.status(response.code).send(response.res);
+                }, function (error) {
+                    var response = errors.getResponseJSON('USER_ID_NOT_FOUND', error);
+                    next({
+                        response,
+                        error
+                    });
+                });
+            } else {
+                calcRoutes(req, constants.optimize.PARK_WALK, ["drive_park", "walk_dest"], function (response) {
+                    res.status(response.code).send(response.res);
+                }, function () {
+                    var response = errors.getResponseJSON('NO_PARKING_FOUND');
+                    res.status(response.code).send(response.res);
+                }, function (error) {
+                    var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                    next({
+                        response,
+                        error
+                    });
+                });
+            }
         } else {
-            next(errors.getResponseJSON('ROUTING_NOT_AVAILABLE'));
+            var response = errors.getResponseJSON('ROUTING_NOT_AVAILABLE');
+            res.status(response.code).send(response.res);
         }
     });
 });
@@ -143,67 +152,65 @@ router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng', 'session_starting', 'access_code', 'device_id'], function () {
         var orig_pt = turf.point([parseFloat(req.query.origin_lng), parseFloat(req.query.origin_lat)]);
         var dest_pt = turf.point([parseFloat(req.query.dest_lng), parseFloat(req.query.dest_lat)]);
+        //check if both points are inside bounds for routing
         if (turf.booleanPointInPolygon(orig_pt, routing_poly) && turf.booleanPointInPolygon(dest_pt, routing_poly)) {
-            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
-                var num_bikes = bestSpots[0].num_bikes;
-                Promise.all([getLots(bestSpots.map(current => current.parking_spot['id']))])
-                    .then(function (spotInfo) {
-                        routeOptionsResponse = {};
-                        bestSpots = combineParkingInfo(spotInfo[0], bestSpots, true);
-                        formattedSegments = formatBikeSegments({
-                                'lng': req.query.origin_lng,
-                                'lat': req.query.origin_lat
-                            }, {
-                                'lng': req.query.dest_lng,
-                                'lat': req.query.dest_lat
-                            },
-                            bestSpots, ["drive_park", "walk_bike", "bike_dest"]);
-                        Promise.all(getRequests(formattedSegments))
-                            .then(function (responses) {
-                                routeOptionsResponse['routes'] = combineSegments(formattedSegments, responses);
-                                if (req.query.session_starting == '1') {
-                                    // Initializes new routing session
-                                    var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
-                                    var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
-                                    sql.insert.addSession(last_loc_string, dest_string, num_bikes, 0, 'bike', req.query.access_code, req.query.device_id, function (result) {
-                                        if (result == "user_id_not_found") {
-                                            return next(errors.getResponseJSON('USER_ID_NOT_FOUND'));
-                                        } else if (typeof (result) == 'number') {
-                                            // Session successfully inserted 
-                                            // Should include session_id
-                                            routeOptionsResponse['session_id'] = result;
-                                            //console.log(result)
-                                            console.log("HERE1");
-                                            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                                        }
-                                    }, function (err) {
-                                        // Session insertion unsuccessful
-                                        next(errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err));
-                                    })
-                                } else {
-                                    console.log("HERE2");
-                                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                                }
-                                console.log("HERE3");
-                                res.send(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                            }).catch(function (error) {
-                                console.log("HERE4");
-                                next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+            //if session starting (user id must be checked)
+            if (req.query.session_starting == '1') {
+                sql.select.getUserId(req.query.access_code, req.query.device_id, function (userId) {
+                    calcRoutes(req, constants.optimize.PARK_BIKE, ["drive_park", "walk_bike", "bike_dest"], function (response) {
+                        res.status(response.code).send(response.res);
+                    }, function () {
+                        var response = errors.getResponseJSON('NO_PARKING_FOUND');
+                        res.status(response.code).send(response.res);
+                    }, function (error) {
+                        var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                        next({
+                            response,
+                            error
+                        });
+                    }, function (req, routeOptionsResponse, num_bikes) {
+                        var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
+                        var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
+                        sql.insert.addSession(last_loc_string, dest_string, num_bikes, 0, 'bike', userId, function (result) {
+                            routeOptionsResponse['session_id'] = result;
+                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            res.status(response.code).send(response.res);
+                        }, function (error) {
+                            // Session insertion unsuccessful
+                            var response = errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err);
+                            next({
+                                response,
+                                error
                             });
-                    }).catch(function (error) {
-                        console.log("HERE5");
-                        next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                        });
                     });
-            }, function () {
-                console.log("HERE6");
-                next(errors.getResponseJSON('NO_PARKING_FOUND'));
-            }, function (error) {
-                console.log("HERE7");
-                next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
-            });
+                }, function () {
+                    var response = errors.getResponseJSON('USER_ID_NOT_FOUND');
+                    res.status(response.code).send(response.res);
+                }, function (error) {
+                    var response = errors.getResponseJSON('USER_ID_NOT_FOUND', error);
+                    next({
+                        response,
+                        error
+                    });
+                });
+            } else {
+                calcRoutes(req, constants.optimize.DRIVE_PARK, ["drive_park", "walk_dest"], function (response) {
+                    res.status(response.code).send(response.res);
+                }, function () {
+                    var response = errors.getResponseJSON('NO_PARKING_FOUND');
+                    res.status(response.code).send(response.res);
+                }, function (error) {
+                    var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                    next({
+                        response,
+                        error
+                    });
+                });
+            }
         } else {
-            console.log("HERE8");
-            next(errors.getResponseJSON('ROUTING_NOT_AVAILABLE'));
+            var response = errors.getResponseJSON('ROUTING_NOT_AVAILABLE');
+            res.status(response.code).send(response.res);
         }
     });
 });
@@ -212,58 +219,65 @@ router.post('/get_drive_direct_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng', 'session_starting', 'access_code', 'device_id'], function () {
         var orig_pt = turf.point([parseFloat(req.query.origin_lng), parseFloat(req.query.origin_lat)]);
         var dest_pt = turf.point([parseFloat(req.query.dest_lng), parseFloat(req.query.dest_lat)]);
+        //check if both points are inside bounds for routing
         if (turf.booleanPointInPolygon(orig_pt, routing_poly) && turf.booleanPointInPolygon(dest_pt, routing_poly)) {
-            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.DRIVE_PARK, function (bestSpots) {
-                Promise.all([getLots(bestSpots.map(current => current['id']))])
-                    .then(function (spotInfo) {
-                        routeOptionsResponse = {};
-                        bestSpots = combineParkingInfo(spotInfo[0], bestSpots, false);
-                        formattedSegments = formatRegSegments({
-                                'lng': req.query.origin_lng,
-                                'lat': req.query.origin_lat
-                            }, {
-                                'lng': req.query.dest_lng,
-                                'lat': req.query.dest_lat
-                            },
-                            bestSpots, ["drive_park", "walk_dest"]);
-                        Promise.all(getRequests(formattedSegments))
-                            .then(function (directionsResponses) {
-                                routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
-                                if (req.query.session_starting == '1') {
-                                    // Initializes new routing session
-                                    var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
-                                    var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
-                                    sql.insert.addSession(last_loc_string, dest_string, null, null, 'direct', req.query.access_code, req.query.device_id, function (result) {
-                                        if (result == "user_id_not_found") {
-                                            next(errors.getResponseJSON('USER_ID_NOT_FOUND'));
-                                        } else if (typeof (result) == 'number') {
-                                            // Session successfully inserted 
-                                            // Should include session_id
-                                            routeOptionsResponse['session_id'] = result;
-                                            //console.log(result)
-                                            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                                        }
-                                    }, function (err) {
-                                        // Session insertion unsuccessful
-                                        next(errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err));
-                                    })
-                                } else {
-                                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                                }
-                                next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
-                            }).catch(function (error) {
-                                next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+            //if session starting (user id must be checked)
+            if (req.query.session_starting == '1') {
+                sql.select.getUserId(req.query.access_code, req.query.device_id, function (userId) {
+                    calcRoutes(req, constants.optimize.DRIVE_PARK, ["drive_park", "walk_dest"], function (response) {
+                        res.status(response.code).send(response.res);
+                    }, function () {
+                        var response = errors.getResponseJSON('NO_PARKING_FOUND');
+                        res.status(response.code).send(response.res);
+                    }, function (error) {
+                        var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                        next({
+                            response,
+                            error
+                        });
+                    }, function (req, routeOptionsResponse) {
+                        var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
+                        var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
+                        sql.insert.addSession(last_loc_string, dest_string, null, null, 'direct', userId, function (result) {
+                            routeOptionsResponse['session_id'] = result;
+                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            res.status(response.code).send(response.res);
+                        }, function (error) {
+                            // Session insertion unsuccessful
+                            var response = errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err);
+                            next({
+                                response,
+                                error
                             });
-                    }).catch(function (error) {
-                        next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+                        });
                     });
-            }, function () {
-                next(errors.getResponseJSON('NO_PARKING_FOUND'));
-            }, function (error) {
-                next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
-            });
+                }, function () {
+                    var response = errors.getResponseJSON('USER_ID_NOT_FOUND');
+                    res.status(response.code).send(response.res);
+                }, function (error) {
+                    var response = errors.getResponseJSON('USER_ID_NOT_FOUND', error);
+                    next({
+                        response,
+                        error
+                    });
+                });
+            } else {
+                calcRoutes(req, constants.optimize.DRIVE_PARK, ["drive_park", "walk_dest"], function (response) {
+                    res.status(response.code).send(response.res);
+                }, function () {
+                    var response = errors.getResponseJSON('NO_PARKING_FOUND');
+                    res.status(response.code).send(response.res);
+                }, function (error) {
+                    var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                    next({
+                        response,
+                        error
+                    });
+                });
+            }
         } else {
-            next(errors.getResponseJSON('ROUTING_NOT_AVAILABLE'));
+            var response = errors.getResponseJSON('ROUTING_NOT_AVAILABLE');
+            res.status(response.code).send(response.res);
         }
     });
 });
@@ -477,6 +491,67 @@ function getRouteEngURL(routeMode) {
             return 'http://localhost:5000/route/v1/car/';
         }
     }
+}
+
+function calcRoutes(req, routeTypeConst, segmentNames, successCB, noResultCB, failCB, intermediaryFN) {
+    routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], routeTypeConst, function (bestSpots) {
+        Promise.all([getLots(bestSpots.map(current => current['id']))])
+            .then(function (spotInfo) {
+                routeOptionsResponse = {};
+                bestSpots = combineParkingInfo(spotInfo[0], bestSpots, routeTypeConst == constants.optimize.PARK_BIKE);
+                var num_bikes = null;
+                if (routeTypeConst == constants.optimize.PARK_BIKE) {
+                    formattedSegments = formatBikeSegments({
+                            'lng': req.query.origin_lng,
+                            'lat': req.query.origin_lat
+                        }, {
+                            'lng': req.query.dest_lng,
+                            'lat': req.query.dest_lat
+                        },
+                        bestSpots, segmentNames);
+                    num_bikes = bestSpots[0].num_bikes;
+                } else {
+                    formattedSegments = formatRegSegments({
+                            'lng': req.query.origin_lng,
+                            'lat': req.query.origin_lat
+                        }, {
+                            'lng': req.query.dest_lng,
+                            'lat': req.query.dest_lat
+                        },
+                        bestSpots, segmentNames);
+                }
+                Promise.all(getRequests(formattedSegments))
+                    .then(function (directionsResponses) {
+                        routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
+                        if (typeof intermediaryFN != 'undefined' && intermediaryFN != null) {
+                            intermediaryFN(req, routeOptionsResponse, num_bikes);
+                        } else {
+                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            successCB(response);
+                        }
+                    }).catch(function (error) {
+                        var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                        failCB({
+                            response,
+                            error
+                        });
+                    });
+            }).catch(function (error) {
+                var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+                failCB({
+                    response,
+                    error
+                });
+            });
+    }, function () {
+        noResultCB();
+    }, function (error) {
+        var response = errors.getResponseJSON('ROUTE_CALCULATION_ERROR');
+        failCB({
+            response,
+            error
+        });
+    });
 }
 
 module.exports = router;

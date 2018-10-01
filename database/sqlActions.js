@@ -12,7 +12,7 @@ module.exports = {
                     connection.release();
                     if (error)
                         failCB(error);
-                    else 
+                    else
                         successCB(results);
                 });
 
@@ -32,12 +32,11 @@ module.exports = {
                     else
                         successCB(results);
                 });
-                
+
             });
         },
-        addSession: function (last_location, parking_dest, rem_bikes, rem_scoots, mode, access_code, device_id, successCB, failCB) {
+        addSession: function (last_location, parking_dest, rem_bikes, rem_scoots, mode, user_id, successCB, failCB) {
             db.getConnection(function (err, connection) {
-               getUserId(access_code, device_id, function (user_id) {
                 var sql = 'INSERT INTO `routing_sessions` (`user_id`, `last_location`,`parking_dest`,`remaining_bikes`,`remaining_scoots`,`mode`) VALUES (?,?,?,?,?,?);';
                 sql += 'SELECT `session_id` FROM `routing_sessions` WHERE `user_id` = ? AND `status` = 0';
                 connection.query(sql, [user_id, last_location, parking_dest, rem_bikes, rem_scoots, mode, user_id], function (error, results, fields) {
@@ -46,14 +45,7 @@ module.exports = {
                         failCB(error);
                     } else {
                         successCB(results[1][0].session_id);
-                    }  
-                });
-                }, function () {
-                    // user_id not found
-                    successCB("user_id_not_found");
-                }, function (err) {
-                    // user_id query failed
-                    failCB(err);
+                    }
                 });
             });
         }
@@ -134,6 +126,20 @@ module.exports = {
                 });
             });
         },
+        getUserId: function (accessCode, deviceId, successCB, noneFoundCB, failCB) {
+            db.getConnection(function (err, connection) {
+                var sql = 'SELECT `user_id` FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?';
+                connection.query(sql, [accessCode, deviceId], function (error, rows) {
+                    connection.release();
+                    if (error)
+                        failCB(error);
+                    else if (rows.length == 0)
+                        noneFoundCB();
+                    else
+                        successCB(rows[0].user_id);
+                });
+            });
+        },
         selectRadius: function (database, lat, lng, miles, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
@@ -181,7 +187,7 @@ module.exports = {
                     connection.release();
                     if (error)
                         failCB(error);
-                    else 
+                    else
                         successCB(rows);
                 });
             });
@@ -214,20 +220,4 @@ module.exports = {
             });
         });
     }
-}
-
-function getUserId(accessCode, deviceId, successCB, noneFoundCB, failCB) {
-    db.getConnection(function (err, connection) {
-        var sql = 'SELECT `user_id` FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?';
-        connection.query(sql, [accessCode, deviceId], function (error, rows) {
-            if (error)
-                failCB(error);
-            else if (rows.length == 0)
-                noneFoundCB();
-            else {
-                successCB(rows[0].user_id);
-            }
-        });
-        connection.release();
-    });
 }

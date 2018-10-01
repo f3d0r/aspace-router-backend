@@ -195,7 +195,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                     });
                 });
             } else {
-                calcRoutes(req, constants.optimize.DRIVE_PARK, ["drive_park", "walk_dest"], function (response) {
+                calcRoutes(req, constants.optimize.PARK_BIKE, ["drive_park", "walk_dest"], function (response) {
                     res.status(response.code).send(response.res);
                 }, function () {
                     var response = errors.getResponseJSON('NO_PARKING_FOUND');
@@ -361,6 +361,7 @@ function getSegmentPrettyName(name) {
 }
 
 function getLots(lotIDs) {
+    console.log(lotIDs)
     var query = 'SELECT * FROM `parkopedia_parking` WHERE '
     for (var index = 0; index < lotIDs.length; index++) {
         query += '`id` = ' + lotIDs[index];
@@ -495,7 +496,13 @@ function getRouteEngURL(routeMode) {
 
 function calcRoutes(req, routeTypeConst, segmentNames, successCB, noResultCB, failCB, intermediaryFN) {
     routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], routeTypeConst, function (bestSpots) {
-        Promise.all([getLots(bestSpots.map(current => current['id']))])
+        var lotIds;
+        if (routeTypeConst == constants.optimize.PARK_BIKE) {
+            lotIds = [getLots(bestSpots.map(current => current.parking_spot['id']))];
+        } else {
+            lotIds = [getLots(bestSpots.map(current => current['id']))];
+        }
+        Promise.all(lotIds)
             .then(function (spotInfo) {
                 routeOptionsResponse = {};
                 bestSpots = combineParkingInfo(spotInfo[0], bestSpots, routeTypeConst == constants.optimize.PARK_BIKE);

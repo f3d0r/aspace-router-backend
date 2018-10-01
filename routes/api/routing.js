@@ -244,7 +244,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
                             res.status(response.code).send(response.res);
                         }, function (error) {
                             // Session insertion unsuccessful
-                            var response = errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', err);
+                            var response = errors.getResponseJSON('ROUTING_SESSION_INSERTION_FAILED', error);
                             next({
                                 response,
                                 error

@@ -200,7 +200,7 @@ module.exports = Object.freeze({
         INFO: "user_id_not_found"
     },
     ROUTING_NOT_AVAILABLE: {
-        HTTP_CODE: 403,
+        HTTP_CODE: 500,
         RESPONSE_CODE: 45,
         INFO: "routing_not_available"
     },

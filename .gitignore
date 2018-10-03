@@ -1,3 +1,4 @@
 node_modules/
+optic.yml
 *.pbf
 ecosystem.config.json

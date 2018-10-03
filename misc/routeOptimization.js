@@ -16,7 +16,7 @@ module.exports = {
         6. Compute cost of each routing option and find minima
         7. Return minima as routing choices to user 
     */
-    optimalSpot: function (origin, destination, code, successCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
+    optimalSpot: function (origin, destination, code, successCB, noneFoundCB, failCB, car_radius, number_options, bike_radius, spot_size, params, param_weights) {
         // number_options : number of routing options to provide user for specific last-mile transport choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk (0,1,2 have been encoded
         // into random strings)
@@ -120,16 +120,10 @@ module.exports = {
                 driving_reqs.push(
                     rp(getRouteEngURL('car') + orig_s + ';' + dest_s)
                     .then(function (body) {
-                        //print(body)
-                        //console.log(util.inspect(body, false, null, true /* enable colors */))
                         body = JSON.parse(body)
-                        //console.log(util.inspect(body, false, null, true /* enable colors */))
-                        //console.log(util.inspect(body.routes[0].duration, false, null, true /* enable colors */))
-                        //print('success')
                         return body.routes[0].duration
                     })
                     .catch(function (err) {
-                        //print('error')
                         return failCB(err);
                     })
                 );
@@ -194,7 +188,7 @@ module.exports = {
                             }
                             num_bike_list.push(num_bikes)
                         }
-                        bike_data = results.map((e,i) => [e, num_bike_list[i]]);
+                        bike_data = results.map((e, i) => [e, num_bike_list[i]]);
                         var bike_coords = []
                         var bike_reqs = []
                         for (i in results) {
@@ -237,7 +231,8 @@ module.exports = {
                                 if (bike_data[i][0] !== undefined) {
                                     best_spots.push({
                                         parking_spot: parking_spot_data[best_bike_indices[i]],
-                                        bike_locs: bike_data[i][0],
+                                        bike_locs: bike_data[best_bike_indices[i]][0],
+                                        num_bikes: bike_data[best_bike_indices[i]][1],
                                         approx_biking_time: results[best_bike_indices[i]]
                                     })
                                 } else {
@@ -301,12 +296,13 @@ module.exports = {
             });
         }, function () {
             // No parking spots were found.
+            // console.log('No spots found.')
+            return noneFoundCB();
         }, function (error) {
             return failCB(error);
         });
     }
 }
-
 
 function sub_least(arr) {
     var min_vec = math.multiply(math.min(arr), math.ones(1, arr.length))

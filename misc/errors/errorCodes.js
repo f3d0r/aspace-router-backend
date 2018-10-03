@@ -1,4 +1,9 @@
 module.exports = Object.freeze({
+    RESPONSE_TIMEOUT: {
+        HTTP_CODE: 408,
+        RESPONSE_CODE: -10,
+        INFO: "response_timeout"
+    },
     INVALID_OR_MISSING_OUTPUT_TYPE: {
         HTTP_CODE: 422,
         RESPONSE_CODE: -7,
@@ -23,6 +28,11 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: -2,
         INFO: "invalid_access_code"
+    },
+    GENERAL_SERVER_ERROR: {
+        HTTP_CODE: 500,
+        RESPONSE_CODE: 0,
+        INFO: "general_server_error"
     },
     MISSING_PARAMETER: {
         HTTP_CODE: 422,
@@ -173,5 +183,40 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 41,
         INFO: "bikes_endpoint_function_success"
+    },
+    NO_PARKING_FOUND: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 42,
+        INFO: "no_parking_found"
+    },
+    ROUTING_SESSION_INSERTION_FAILED: {
+        HTTP_CODE: 500,
+        RESPONSE_CODE: 43,
+        INFO: "routing_session_insertion_failed"
+    },
+    USER_ID_NOT_FOUND: {
+        HTTP_CODE: 500,
+        RESPONSE_CODE: 44,
+        INFO: "user_id_not_found"
+    },
+    ROUTING_NOT_AVAILABLE: {
+        HTTP_CODE: 403,
+        RESPONSE_CODE: 45,
+        INFO: "routing_not_available"
+    },
+    ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 46,
+        INFO: "route_update_endpoint_function_success"
+    },
+    ROUTE_STATUS_UPDATE_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 47,
+        INFO: "route_status_update_success"
+    },
+    ROUTE_STATUS_UPDATE_FAILED: {
+        HTTP_CODE: 500,
+        RESPONSE_CODE: 48,
+        INFO: "route_status_update_failed"
     }
 });

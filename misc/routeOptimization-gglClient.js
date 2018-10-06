@@ -46,7 +46,7 @@ module.exports = {
 
         var parking_spot_data = []
         // 1. Get parking spots by radius 
-        sql.select.selectRadius('parking', destination[1], destination[0], car_radius / 5280, function (results) {
+        sql.select.selectRadius('parking', destination[1], destination[0], car_radius / 5280, false, function (results) {
             parking_spot_data = results
 
             // 2. Filter out occupied spots
@@ -108,7 +108,7 @@ module.exports = {
                     // Acquire available bikes:
                     var bike_data = []
                     for (i in parking_spot_data) {
-                        sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
+                        sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, false, function (results) {
                             bike_data.push(results)
                         }, function () {
                             //no results were found 

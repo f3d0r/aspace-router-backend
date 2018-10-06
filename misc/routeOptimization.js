@@ -43,7 +43,7 @@ module.exports = {
         }
         var parking_spot_data = []
         // 1. Get parking spots by radius 
-        sql.select.selectRadius('filtered_parkopedia', destination[1], destination[0], car_radius / 5280, function (results) {
+        sql.select.selectRadius('filtered_parkopedia', destination[1], destination[0], car_radius / 5280, true, function (results) {
             /* // Filter out valet only, customers only, etc.
             results = results.filter(val => (val["restrictions"] != "Customers only") 
                                          && (val["restrictions"] != "Valet only")
@@ -176,7 +176,7 @@ module.exports = {
                     // Acquire available bikes:
                     // print(parking_spot_data.length)
                     var coords = parking_spot_data.map(val => [val.lng, val.lat])
-                    sql.select.selectMultiRadius('bike_locs', coords, bike_radius / 5280, function (results) {
+                    sql.select.selectMultiRadius('bike_locs', coords, bike_radius / 5280, false, function (results) {
                         // count number of bikes around each parking spot here, and push that with results to bike_data.
                         // these counts will have to be pushed as a parameter into X, so it's important to figure out
                         // the correct threading and sequence for this routine. may require changes.

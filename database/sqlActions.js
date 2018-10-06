@@ -140,36 +140,70 @@ module.exports = {
                 });
             });
         },
-        selectRadius: function (database, lat, lng, miles, successCB, noneFoundCB, failCB) {
-            db.getLocalConnection(function (err, connection) {
-                var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
-                connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (rows.length == 0)
-                        noneFoundCB();
-                    else
-                        successCB(rows)
+        selectRadius: function (database, lat, lng, miles, localDB, successCB, noneFoundCB, failCB) {
+            if (localDB) {
+                db.getLocalConnection(function (err, connection) {
+                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                    connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
+                        connection.release();
+                        if (error)
+                            failCB(error);
+                        else if (rows.length == 0)
+                            noneFoundCB();
+                        else
+                            successCB(rows)
+                    });
                 });
-            });
+            } else {
+                db.getConnection(function (err, connection) {
+                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                    connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
+                        connection.release();
+                        if (error)
+                            failCB(error);
+                        else if (rows.length == 0)
+                            noneFoundCB();
+                        else
+                            successCB(rows)
+                    });
+                });
+            }
         },
-        selectMultiRadius: function (database, coords, miles, successCB, noneFoundCB, failCB) {
-            db.getLocalConnection(function (err, connection) {
-                var stmt = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
-                var sql = stmt.repeat(coords.length);
-                coords = coords.map(val => [val[1], val[0], val[1], miles]);
-                coords = [].concat.apply([], coords);
-                connection.query(sql, coords, function (error, rows) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (rows.length == 0)
-                        noneFoundCB();
-                    else
-                        successCB(rows)
+        selectMultiRadius: function (database, coords, miles, localDB, successCB, noneFoundCB, failCB) {
+            if (localDB) {
+                db.getLocalConnection(function (err, connection) {
+                    var stmt = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
+                    var sql = stmt.repeat(coords.length);
+                    coords = coords.map(val => [val[1], val[0], val[1], miles]);
+                    coords = [].concat.apply([], coords);
+                    connection.query(sql, coords, function (error, rows) {
+                        connection.release();
+                        if (error)
+                            failCB(error);
+                        else if (rows.length == 0)
+                            noneFoundCB();
+                        else
+                            successCB(rows)
+                    });
                 });
-            });
+            } else {
+                db.getConnection(function (err, connection) {
+                    var stmt = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
+                    var sql = stmt.repeat(coords.length);
+                    coords = coords.map(val => [val[1], val[0], val[1], miles]);
+                    coords = [].concat.apply([], coords);
+                    connection.query(sql, coords, function (error, rows) {
+                        connection.release();
+                        if (error)
+                            failCB(error);
+                        else if (rows.length == 0)
+                            noneFoundCB();
+                        else
+                            successCB(rows)
+                    });
+                });
+            }
+            
         }
     },
     remove: {

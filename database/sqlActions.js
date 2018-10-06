@@ -141,7 +141,7 @@ module.exports = {
             });
         },
         selectRadius: function (database, lat, lng, miles, successCB, noneFoundCB, failCB) {
-            db.getConnection(function (err, connection) {
+            db.getLocalConnection(function (err, connection) {
                 var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
                 connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                     connection.release();
@@ -155,7 +155,7 @@ module.exports = {
             });
         },
         selectMultiRadius: function (database, coords, miles, successCB, noneFoundCB, failCB) {
-            db.getConnection(function (err, connection) {
+            db.getLocalConnection(function (err, connection) {
                 var stmt = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?;";
                 var sql = stmt.repeat(coords.length);
                 coords = coords.map(val => [val[1], val[0], val[1], miles]);
@@ -210,7 +210,7 @@ module.exports = {
         },
     },
     runRaw: function (sql, successCB, failCB) {
-        db.getConnection(function (err, connection) {
+        db.getLocalConnection(function (err, connection) {
             connection.query(sql, function (error, rows) {
                 connection.release();
                 if (error)

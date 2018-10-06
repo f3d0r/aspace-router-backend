@@ -8,8 +8,10 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var sqreen = require('sqreen');
 const Cabin = require('cabin');
 const responseTime = require('response-time');
+
 const {
     Signale
 } = require('signale');
@@ -22,7 +24,18 @@ const {
     IncomingWebhook
 } = require('@slack/client');
 
-const cpuCount = require('os').cpus().length;
+var threadCount;
+if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU") {
+    threadCount = require('os').cpus().length;
+} else {
+    try {
+        threadCount = parseInt(process.env.THREAD_COUNT)
+    } catch (e) {
+        console.log("INVALID \"INSTANCE_COUNT\" environment variable. Exiting...")
+        process.exit()
+    }
+}
+
 const env = process.env.NODE_ENV || 'development';
 
 // LOCAL IMPORTS
@@ -129,12 +142,12 @@ cluster(function (worker) {
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
             if (worker.id == 1) {
-                cabin.info('Listening on port ' + server.address().port + ' with ' + cpuCount + ' threads.');
+                cabin.info('Listening on port ' + server.address().port + ' with ' + threadCount + ' threads.');
             }
         });
     } else {
         cabin.error("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
-    count: cpuCount
+    count: threadCount
 })

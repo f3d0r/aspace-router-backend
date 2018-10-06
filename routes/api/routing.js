@@ -195,7 +195,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                     });
                 });
             } else {
-                calcRoutes(req, constants.optimize.PARK_BIKE, ["drive_park", "walk_dest"], function (response) {
+                calcRoutes(req, constants.optimize.PARK_BIKE, ["drive_park", "walk_bike", "bike_dest"], function (response) {
                     res.status(response.code).send(response.res);
                 }, function () {
                     var response = errors.getResponseJSON('NO_PARKING_FOUND');
@@ -361,7 +361,6 @@ function getSegmentPrettyName(name) {
 }
 
 function getLots(lotIDs) {
-    console.log(lotIDs)
     var query = 'SELECT * FROM `parkopedia_parking` WHERE '
     for (var index = 0; index < lotIDs.length; index++) {
         query += '`id` = ' + lotIDs[index];
@@ -394,27 +393,27 @@ function formatBikeSegments(origin, dest, waypointSets, segmentNames) {
             'origin': origin,
             'dest': metaFormat(parkingSpot)
         });
-        if (typeof currentWaypointSet.bike_locs != 'undefined' && currentWaypointSet.bike_locs != null) {
+        if (currentWaypointSet.bike_locs.length > 0) {
             var bikeSpot = currentWaypointSet.bike_locs[0];
             currentSegments.push({
                 'name': segmentNames[1],
                 'pretty_name': getSegmentPrettyName(segmentNames[1]),
                 'origin': metaFormat(parkingSpot),
                 'dest': metaFormat(bikeSpot)
-            })
+            });
             currentSegments.push({
                 'name': segmentNames[2],
                 'pretty_name': getSegmentPrettyName(segmentNames[2]),
                 'origin': metaFormat(bikeSpot),
                 'dest': dest
-            })
+            });
         } else {
             currentSegments.push({
                 'name': "walk_dest",
                 'pretty_name': getSegmentPrettyName("walk_dest"),
                 'origin': metaFormat(parkingSpot),
                 'dest': dest
-            })
+            });
         }
         formattedSegments.push(currentSegments);
     });

@@ -221,7 +221,8 @@ module.exports = {
                             for (i in rows) {
                                 ids.push(rows[i].id)
                             }
-                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND (duration =  1000012 OR (duration > 599 AND duration < 1000000))"
+                            console.log(ids)
+                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND (duration =  1000012 OR (duration > 599 AND duration < 1000000)) ORDER BY id"
                             connection.query(sql, [
                                 [ids]
                             ], function (error, price_rows) {
@@ -229,13 +230,13 @@ module.exports = {
                                 if (error) {
                                     console.log(error)
                                     failCB(error);
-                                }
-                                else if (price_rows.length == 0)
+                                } else if (price_rows.length == 0)
                                     noneFoundCB();
                                 else {
                                     ids = price_rows.map(val => val.id)
+                                    console.log(ids)
                                     rows = rows.filter(val => ids.includes(val.id))
-                                    rows = rows.map((val, i) => Object.assign({},val, price_rows[i]))
+                                    rows = rows.map((val, i) => Object.assign({}, val, price_rows[i]))
                                     successCB(rows)
                                 }
                             })

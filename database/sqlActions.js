@@ -174,6 +174,7 @@ module.exports = {
                                 } else if (price_rows.length == 0)
                                     noneFoundCB();
                                 else {
+                                    //console.log(price_rows)
                                     var old_id = price_rows[0].id
                                     var old_price = price_rows[0].parking_price
                                     var j = 1
@@ -182,17 +183,18 @@ module.exports = {
                                             old_id = price_rows[j].id
                                             old_price = price_rows[j].parking_price
                                             delete price_rows[j - 1]
+                                            price_rows = price_rows.filter(val => Object.keys(val).length > 0)
                                         } else if (price_rows[j].id == old_id && price_rows[j].parking_price < old_price) {
                                             old_id = price_rows[j - 1].id
                                             old_price = price_rows[j - 1].parking_price
                                             delete price_rows[j]
+                                            price_rows = price_rows.filter(val => Object.keys(val).length > 0)
                                         } else {
                                             old_id = price_rows[j].id
                                             old_price = price_rows[j].parking_price
                                             j++
                                         }
                                     }
-                                    price_rows = price_rows.filter(val => Object.keys(val).length > 0)
                                     ids = price_rows.map(val => val.id)
                                     rows = rows.filter(val => ids.includes(val.id))
                                     rows = rows.map((val, i) => Object.assign({}, val, price_rows[i]))

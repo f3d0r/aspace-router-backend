@@ -18,23 +18,6 @@ module.exports = {
 
             });
         },
-        addSpots: function (points, successCB, failCB) {
-            db.getConnection(function (err, connection) {
-                mappedSpots = []
-                points.forEach(function (currentSpot) {
-                    mappedSpots.push([currentSpot.lng, currentSpot.lat, currentSpot.block_id]);
-                })
-                var sql = 'INSERT INTO `parking` (`lng`, `lat`, `block_id`) VALUES ?';
-                connection.query(sql, [mappedSpots], function (error, results, fields) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else
-                        successCB(results);
-                });
-
-            });
-        },
         addSession: function (last_location, parking_dest, rem_bikes, rem_scoots, mode, user_id, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = 'INSERT INTO `routing_sessions` (`user_id`, `last_location`,`parking_dest`,`remaining_bikes`,`remaining_scoots`,`mode`) VALUES (?,?,?,?,?,?);';
@@ -51,48 +34,6 @@ module.exports = {
         }
     },
     select: {
-        databasePermissionCheck: function (database, auth_key, permission, successCB, failCB) {
-            db.getConnection(function (err, connection) {
-                var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `auth_key` = ? AND `permission` LIKE ?";
-                connection.query(sql, [auth_key, "%" + permission + "%"], function (error, rows) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (rows.length == 1)
-                        successCB();
-                    else
-                        failCB();
-                });
-            });
-        },
-        authKeyPermissionCheck: function (database, username, permission, successCB, failCB) {
-            db.getConnection(function (err, connection) {
-                var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `username` = ? AND `auth_key_permissions` LIKE ?";
-                connection.query(sql, [username, "%" + permission + "%"], function (error, rows) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (rows.length == 1)
-                        successCB(rows);
-                    else
-                        failCB();
-                });
-            });
-        },
-        tempAuthKeyCheck: function (database, username, genKey, permission, successCB, failCB) {
-            db.getConnection(function (err, connection) {
-                var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `request_user` = ? AND `temp_key` = ? AND `permissions` LIKE ?";
-                connection.query(sql, [username, genKey, "%" + permission + "%"], function (error, rows) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (rows.length == 1)
-                        successCB(rows);
-                    else
-                        failCB();
-                });
-            });
-        },
         regularSelect: function (database, selection, keys, operators, values, numResults, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = 'SELECT ';
@@ -258,43 +199,6 @@ module.exports = {
                 });
             }
         }
-    },
-    remove: {
-        regularDelete: function (database, keys, values, successCB, failCB) {
-            db.getConnection(function (err, connection) {
-                var sql = "DELETE FROM " + connection.escapeId(database) + " WHERE ";
-                if (keys.length != values.length)
-                    return failCB('Key length must match value length.');
-                for (var index = 0; index < keys.length; index++)
-                    if (index < keys.length - 1)
-                        sql += "`" + keys[index] + "` = ? AND ";
-                    else
-                        sql += "`" + keys[index] + "` = ?";
-                connection.query(sql, values, function (error, rows) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else
-                        successCB(rows);
-                });
-            });
-        },
-    },
-    update: {
-        updateSpotStatus(spot_id, occupied, successCB, noExistCB, failCB) {
-            db.getConnection(function (err, connection) {
-                var sql = "UPDATE `parking` SET `occupied` = ? WHERE `spot_id` = ?";
-                connection.query(sql, [occupied, spot_id], function (error, results, fields) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (results.affectedRows == 1)
-                        successCB();
-                    else
-                        noExistCB();
-                });
-            });
-        },
     },
     runRaw: function (sql, successCB, failCB) {
         db.getLocalConnection(function (err, connection) {

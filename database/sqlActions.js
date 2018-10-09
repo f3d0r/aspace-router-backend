@@ -203,7 +203,59 @@ module.exports = {
                     });
                 });
             }
-            
+
+        },
+        selectRadnPrice: function (database1, database2, lat, lng, miles, localDB, successCB, noneFoundCB, failCB) {
+            if (localDB) {
+                db.getLocalConnection(function (err, connection) {
+                    var sql = "SELECT id, lng, lat, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database1) + "  HAVING distance < ?"
+                    connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
+                        //connection.release();
+                        if (error) {
+                            console.log(error)
+                            failCB(error);
+                        } else if (rows.length == 0)
+                            noneFoundCB();
+                        else {
+                            var ids = []
+                            for (i in rows) {
+                                ids.push(rows[i].id)
+                            }
+                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND (duration =  1000012 OR (duration > 599 AND duration < 1000000))"
+                            connection.query(sql, [
+                                [ids]
+                            ], function (error, price_rows) {
+                                connection.release();
+                                if (error) {
+                                    console.log(error)
+                                    failCB(error);
+                                }
+                                else if (price_rows.length == 0)
+                                    noneFoundCB();
+                                else {
+                                    ids = price_rows.map(val => val.id)
+                                    rows = rows.filter(val => ids.includes(val.id))
+                                    rows = rows.map((val, i) => Object.assign({},val, price_rows[i]))
+                                    successCB(rows)
+                                }
+                            })
+                        }
+                    });
+                });
+            } else {
+                db.getConnection(function (err, connection) {
+                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                    connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
+                        connection.release();
+                        if (error)
+                            failCB(error);
+                        else if (rows.length == 0)
+                            noneFoundCB();
+                        else
+                            successCB(rows)
+                    });
+                });
+            }
         }
     },
     remove: {

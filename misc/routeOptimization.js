@@ -43,7 +43,7 @@ module.exports = {
         }
         var parking_spot_data = []
         // 1. Get parking spots by radius 
-        sql.select.selectRadius('filtered_parkopedia', destination[1], destination[0], car_radius / 5280, true, function (results) {
+        sql.select.selectRadnPrice('parkopedia_parking', 'parkopedia_pricing', destination[1], destination[0], car_radius / 5280, true, function (results) {
             /* // Filter out valet only, customers only, etc.
             results = results.filter(val => (val["restrictions"] != "Customers only") 
                                          && (val["restrictions"] != "Valet only")
@@ -67,7 +67,7 @@ module.exports = {
                                 "id": results[i].id,
                                 "lng": results[i].lng,
                                 "lat": results[i].lat,
-                                "parking_price": entry.entries[0].costs[j].amount
+                                "parking_price": entry.entries[0].costs[j].parking_price
                             })
                             break;
                             //print(results[i].restrictions)

@@ -1,8 +1,18 @@
 var mysql = require('mysql');
 const constants = require('@config');
+var request = require('request');
+
+var localIP;
+if (typeof process.env.LOCAL_DATABASE_IP == "undefined" || process.env.LOCAL_DATABASE_IP == null) {
+    request('http://icanhazip.com', function (error, response, body) {
+        localIP = body;
+    });
+} else {
+    localIP = process.env.LOCAL_DATABASE_IP;
+}
 
 var pool = mysql.createPool({
-    host: constants.db.DATABASE_IP,
+    host: process.env.MAIN_DATABASE_IP,
     user: constants.db.DATABASE_USER,
     password: constants.db.DATABASE_PASSWORD,
     database: constants.db.DATABASE_NAME,
@@ -11,7 +21,7 @@ var pool = mysql.createPool({
 });
 
 var localPool = mysql.createPool({
-    host: '127.0.0.1',
+    host: process.env.LOCAL_DATABASE_IP,
     user: constants.db.DATABASE_USER,
     password: constants.db.DATABASE_PASSWORD,
     database: constants.db.DATABASE_NAME,

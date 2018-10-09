@@ -170,13 +170,12 @@ module.exports = {
                                 if (error) {
                                     console.log(error)
                                     failCB(error);
-                                }
-                                else if (price_rows.length == 0)
+                                } else if (price_rows.length == 0)
                                     noneFoundCB();
                                 else {
                                     ids = price_rows.map(val => val.id)
                                     rows = rows.filter(val => ids.includes(val.id))
-                                    rows = rows.map((val, i) => Object.assign({},val, price_rows[i]))
+                                    rows = rows.map((val, i) => Object.assign({}, val, price_rows[i]))
                                     successCB(rows)
                                 }
                             })

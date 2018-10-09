@@ -33,10 +33,10 @@ module.exports = {
             spot_size = 10;
         }
         if (params === undefined) {
-            params = ['parking_price'];
+            params = [];
         }
         if (param_weights === undefined) {
-            param_weights = [1e-2, 1];
+            param_weights = [1e-2];
         }
         if (number_options === undefined) {
             number_options = 3;
@@ -172,6 +172,8 @@ module.exports = {
                     print(best_spots) */
                     successCB(best_spots)
                 } else if (code == constants.optimize.PARK_BIKE) {
+                    params.push('parking_price')
+                    param_weights.push(1)
                     // Biking optimization
                     // Acquire available bikes:
                     // print(parking_spot_data.length)
@@ -253,6 +255,9 @@ module.exports = {
                         return failCB(error);
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
+                    params.push('parking_price')
+                    param_weights.push(1)
+                    
                     // Walking time optimization
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {

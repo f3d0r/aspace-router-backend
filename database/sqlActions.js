@@ -149,9 +149,9 @@ module.exports = {
         selectRadnPrice: function (database1, database2, lat, lng, miles, localDB, successCB, noneFoundCB, failCB) {
             if (localDB) {
                 db.getLocalConnection(function (err, connection) {
-                    var sql = "SELECT id, lng, lat, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database1) + "  HAVING distance < ?"
+                    var sql = "SELECT id, lng, lat, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database1) + "  HAVING distance < ? ORDER BY id"
                     connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
-                        //connection.release();
+
                         if (error) {
                             console.log(error)
                             failCB(error);
@@ -162,8 +162,8 @@ module.exports = {
                             for (i in rows) {
                                 ids.push(rows[i].id)
                             }
-                            console.log(ids)
-                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND (duration =  1000012 OR (duration > 599 AND duration < 1000000)) ORDER BY id"
+                            //console.log(ids)
+                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND duration =  1000012 ORDER BY id"
                             connection.query(sql, [
                                 [ids]
                             ], function (error, price_rows) {
@@ -174,8 +174,26 @@ module.exports = {
                                 } else if (price_rows.length == 0)
                                     noneFoundCB();
                                 else {
+                                    var old_id = price_rows[0].id
+                                    var old_price = price_rows[0].parking_price
+                                    var j = 1
+                                    while (price_rows.length > j) {
+                                        if (price_rows[j].id == old_id && price_rows[j].parking_price > old_price) {
+                                            old_id = price_rows[j].id
+                                            old_price = price_rows[j].parking_price
+                                            delete price_rows[j - 1]
+                                        } else if (price_rows[j].id == old_id && price_rows[j].parking_price < old_price) {
+                                            old_id = price_rows[j - 1].id
+                                            old_price = price_rows[j - 1].parking_price
+                                            delete price_rows[j]
+                                        } else {
+                                            old_id = price_rows[j].id
+                                            old_price = price_rows[j].parking_price
+                                            j++
+                                        }
+                                    }
+                                    price_rows = price_rows.filter(val => Object.keys(val).length > 0)
                                     ids = price_rows.map(val => val.id)
-                                    console.log(ids)
                                     rows = rows.filter(val => ids.includes(val.id))
                                     rows = rows.map((val, i) => Object.assign({}, val, price_rows[i]))
                                     successCB(rows)

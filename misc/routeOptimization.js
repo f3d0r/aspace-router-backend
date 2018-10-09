@@ -174,6 +174,17 @@ module.exports = {
                 } else if (code == constants.optimize.PARK_BIKE) {
                     params.push('parking_price')
                     param_weights.push(1)
+
+                    var X = [sub_least(times)]
+                    var arr = []
+                    for (i in params) {
+                        arr = []
+                        for (d in parking_spot_data) {
+                            arr.push(parking_spot_data[d][params[i]])
+                        }
+                        arr = sub_least(arr)
+                        X = X.concat([arr["_data"]])
+                    }
                     // Biking optimization
                     // Acquire available bikes:
                     // print(parking_spot_data.length)
@@ -257,7 +268,18 @@ module.exports = {
                 } else if (code == constants.optimize.PARK_WALK) {
                     params.push('parking_price')
                     param_weights.push(1)
-                    
+
+                    var X = [sub_least(times)]
+                    var arr = []
+                    for (i in params) {
+                        arr = []
+                        for (d in parking_spot_data) {
+                            arr.push(parking_spot_data[d][params[i]])
+                        }
+                        arr = sub_least(arr)
+                        X = X.concat([arr["_data"]])
+                    }
+
                     // Walking time optimization
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {

@@ -144,6 +144,8 @@ module.exports = {
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]
                 var arr = []
+                var drive_direct_params = params
+                drive_direct_params.push('distance')
                 for (i in params) {
                     arr = []
                     for (d in parking_spot_data) {
@@ -152,6 +154,8 @@ module.exports = {
                     arr = sub_least(arr)
                     X = X.concat([arr["_data"]])
                 }
+                var drive_direct_param_weights = param_weights
+                drive_direct_param_weights.push(10)
                 // Parking spot parameters now held in X
 
                 // Final drive & park optimization
@@ -214,7 +218,7 @@ module.exports = {
                         for (var i = 0; i < results.length; i++) {
                             for (var j = 0; j < bike_coords[i].length; j++) {
                                 bike_reqs.push(
-                                    rp(getRouteEngURL('bike') + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
+                                    rp(getRouteEngURL('bike_route') + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
                                     .then(function (body) {
                                         body = JSON.parse(body)
                                         return body.routes[0].duration
@@ -284,7 +288,7 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp(getRouteEngURL('walk') + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
+                            rp(getRouteEngURL('walk_route') + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() + ';' + destination[0].toString() + ',' + destination[1].toString())
                             .then(function (body) {
                                 body = JSON.parse(body)
                                 return body.routes[0].duration

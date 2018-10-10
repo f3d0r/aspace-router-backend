@@ -18,7 +18,7 @@ fs.readFile('/home/api/remote_config/prod/routing_map.geojson', "utf-8", functio
     if (err) {
         routingMapConstraints = "INVALID FILE"
     } else {
-        routingMapConstraints = data;
+        routingMapConstraints = JSON.parse(data);
     }
 });
 

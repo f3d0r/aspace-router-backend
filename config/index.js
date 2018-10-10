@@ -63,6 +63,7 @@ module.exports = {
         PARK_BIKE: '***REMOVED***',
         PARK_WALK: '***REMOVED***',
         time_threshold: 600,
-        cluster_distance_threshold: 0.1
+        cluster_distance_threshold: 0.1, // miles
+        bike_threshold: 0.249 // miles
     }
 }

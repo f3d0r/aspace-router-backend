@@ -13,15 +13,6 @@ var turf = require('@turf/turf');
 
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
 
-var routingMapConstraints;
-fs.readFile('/home/api/remote_config/prod/routing_map.geojson', "utf-8", function read(err, data) {
-    if (err) {
-        routingMapConstraints = "INVALID FILE"
-    } else {
-        routingMapConstraints = JSON.parse(data);
-    }
-});
-
 function processFile() {
     console.log(content);
 }
@@ -230,8 +221,17 @@ router.post('/get_drive_bike_route', function (req, res, next) {
 });
 
 router.get('/get_routing_map_constraints', function (req, res, next) {
-    var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
-    res.status(response.code).send(response.res);
+    fs.readFile('/home/api/remote_config/prod/routing_map.geojson', "utf-8", function read(err, data) {
+        var routingMapConstraints;
+        if (err) {
+            routingMapConstraints = "INVALID FILE"
+        } else {
+            routingMapConstraints = JSON.parse(data);
+        }
+        var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
+        res.status(response.code).send(response.res);
+    });
+
 });
 
 router.post('/get_drive_direct_route', function (req, res, next) {

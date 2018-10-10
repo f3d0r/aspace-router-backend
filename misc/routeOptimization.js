@@ -4,6 +4,8 @@ const math = require('mathjs');
 var rp = require('request-promise');
 var turf = require('@turf/turf');
 
+//const util = require('util')
+
 module.exports = {
     /* Algorithm:
         1. Obtain all spots within certain radius of user destination
@@ -138,7 +140,11 @@ module.exports = {
                 for (i in clusters) {
                     new_parking_list.push(parking_spot_data[clusters[i]])
                 }
-                parking_spot_data = new_parking_list
+                parking_spot_data = new_parking_list.map(function (el) {
+                    var o = Object.assign({}, el);
+                    o.type = 'parking';
+                    return o;
+                })
                 times = [].concat.apply([], times);
 
                 // 4. Acquire remaining cost function parameters
@@ -172,8 +178,8 @@ module.exports = {
                     // Print total memory usage:
                     // console.log(process.memoryUsage());
 
-                    /* print('Best drive & park spots:')
-                    print(best_spots) */
+                    /*  print('Best drive & park spots:')
+                     console.log(util.inspect(best_spots, false, null, true)) */
                     successCB(best_spots)
                 } else if (code == constants.optimize.PARK_BIKE) {
                     params.push('parking_price')
@@ -260,7 +266,7 @@ module.exports = {
 
                             }
                             /* print('Best park & bike spots: ')
-                            print(best_spots) */
+                            console.log(util.inspect(best_spots, false, null, true)) */
                             successCB(best_spots);
                         })
                     }, function () {
@@ -317,8 +323,8 @@ module.exports = {
                             parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
                             best_spots.push(parking_spot_data[best_walk_indices[i]])
                         }
-                        // print('Best walking spots: ')
-                        // print(best_spots)
+                        /* print('Best walking spots: ')
+                        console.log(util.inspect(best_spots, false, null, true)) */
                         successCB(best_spots);
                     });
                 }

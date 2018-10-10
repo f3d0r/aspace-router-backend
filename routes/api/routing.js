@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var rp = require('request-promise');
+var fs = require('fs');
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');
@@ -11,6 +12,19 @@ var osrmTextInstructions = require('osrm-text-instructions')(version);
 var turf = require('@turf/turf');
 
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
+
+var routingMapConstraints;
+fs.readFile('/home/api/remote_config/routing_map.geojson', function read(err, data) {
+    if (err) {
+        routingMapConstraints = "INVALID FILE"
+    } else {
+        routingMapConstraints = data;
+    }
+});
+
+function processFile() {
+    console.log(content);
+}
 
 // Current polygon within which our OSRM engine can route - 09/27/2018
 // Polygon defined by corners of states in this order: WA -> MT -> NM -> CA -> WA
@@ -213,6 +227,11 @@ router.post('/get_drive_bike_route', function (req, res, next) {
             res.status(response.code).send(response.res);
         }
     });
+});
+
+router.get('/get_routing_map_constraints', function (req, res, next) {
+    var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
+    res.status(response.code).send(response.res);
 });
 
 router.post('/get_drive_direct_route', function (req, res, next) {

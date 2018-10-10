@@ -183,21 +183,10 @@ module.exports = {
                     successCB(best_spots)
                 } else if (code == constants.optimize.PARK_BIKE) {
                     params.push('parking_price')
-                    param_weights.push(1)
-
-                    var X = [sub_least(times)]
-                    var arr = []
-                    for (i in params) {
-                        arr = []
-                        for (d in parking_spot_data) {
-                            arr.push(parking_spot_data[d][params[i]])
-                        }
-                        arr = sub_least(arr)
-                        X = X.concat([arr["_data"]])
-                    }
+                    param_weights.push(2)
                     // Biking optimization
+
                     // Acquire available bikes:
-                    // print(parking_spot_data.length)
                     var coords = parking_spot_data.map(val => [val.lng, val.lat])
                     sql.select.selectMultiRadius('bike_locs', coords, bike_radius / 5280, false, function (results) {
                         // count number of bikes around each parking spot here, and push that with results to bike_data.
@@ -236,10 +225,51 @@ module.exports = {
                             }
                         }
                         Promise.all(bike_reqs).then(function (results) {
+
+
                             // Concatenate these biking times to X and re-optimize!
-                            X.push(sub_least(results))
-                            // print(bike_data.length)
+
+                            // FOR TESTING MAP FUNCTION BELOW
+                            /* var index = []
+                            for (i in bike_data) {
+                                if (parking_spot_data[i].distance < constants.optimize.bike_threshold){
+                                    index.push(i)
+                                    console.log(util.inspect(bike_data[i], false, null, true))
+                                }
+                            } */
+                            bike_data = bike_data.map(function (el, ind) {
+                                if (parking_spot_data[ind].distance < constants.optimize.bike_threshold) {
+                                    // don't bike, so delete bike info so it doesn't go to response
+                                    return [
+                                        [], 0
+                                    ];
+                                } else {
+                                    return el;
+                                }
+                            })
+                            /* for (i in index) {
+                                console.log(util.inspect(bike_data[index[i]], false, null, true))
+                            } */
+
                             num_bikes_array = bike_data.map(x => x[1])
+
+                            var X = [sub_least(times)]
+                            var arr = []
+                            for (i in params) {
+                                arr = []
+                                for (d in parking_spot_data) {
+                                    if (params[i] == 'parking_price' && num_bikes_array[d] != 0 && parking_spot_data[d].distance > constants.optimize.bike_threshold) {
+                                        arr.push(parking_spot_data[d][params[i]] + 1 /* this incorporates bikeshare cost, in future should add multiple of distance e.g. $0.5 per mile or minute */ )
+                                    } else {
+                                        arr.push(parking_spot_data[d][params[i]])
+                                    }
+                                }
+                                arr = sub_least(arr)
+                                X = X.concat([arr["_data"]])
+                            }
+
+                            X.push(sub_least(results))
+
                             // print(num_bikes_array)
                             X.push(num_bikes_array)
                             param_weights.push(1e-1)
@@ -277,7 +307,7 @@ module.exports = {
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
                     params.push('parking_price')
-                    param_weights.push(1)
+                    param_weights.push(2)
 
                     var X = [sub_least(times)]
                     var arr = []

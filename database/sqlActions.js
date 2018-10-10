@@ -182,13 +182,11 @@ module.exports = {
                                         if (price_rows[j].id == old_id && price_rows[j].parking_price > old_price) {
                                             old_id = price_rows[j].id
                                             old_price = price_rows[j].parking_price
-                                            delete price_rows[j - 1]
-                                            price_rows = price_rows.filter(val => Object.keys(val).length > 0)
+                                            price_rows.splice(j - 1, 1)
                                         } else if (price_rows[j].id == old_id && price_rows[j].parking_price < old_price) {
                                             old_id = price_rows[j - 1].id
                                             old_price = price_rows[j - 1].parking_price
-                                            delete price_rows[j]
-                                            price_rows = price_rows.filter(val => Object.keys(val).length > 0)
+                                            price_rows.splice(j, 1)
                                         } else {
                                             old_id = price_rows[j].id
                                             old_price = price_rows[j].parking_price

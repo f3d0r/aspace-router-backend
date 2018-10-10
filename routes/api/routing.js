@@ -14,7 +14,7 @@ var turf = require('@turf/turf');
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
 
 var routingMapConstraints;
-fs.readFile('/home/api/remote_config/routing_map.geojson', function read(err, data) {
+fs.readFile('/home/api/remote_config/prod/routing_map.geojson', function read(err, data) {
     if (err) {
         routingMapConstraints = "INVALID FILE"
     } else {

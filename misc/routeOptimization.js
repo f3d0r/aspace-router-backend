@@ -38,7 +38,7 @@ module.exports = {
             params = [];
         }
         if (param_weights === undefined) {
-            param_weights = [1e-2];
+            param_weights = [1e-2]; // driving time weight
         }
         if (number_options === undefined) {
             number_options = 3;
@@ -161,7 +161,7 @@ module.exports = {
                     X = X.concat([arr["_data"]])
                 }
                 var drive_direct_param_weights = param_weights
-                drive_direct_param_weights.push(10)
+                drive_direct_param_weights.push(10) // parking spot distance weight
                 // Parking spot parameters now held in X
 
                 // Final drive & park optimization
@@ -182,9 +182,9 @@ module.exports = {
                      console.log(util.inspect(best_spots, false, null, true)) */
                     successCB(best_spots)
                 } else if (code == constants.optimize.PARK_BIKE) {
-                    params.push('parking_price')
-                    param_weights.push(2)
                     // Biking optimization
+                    params.push('parking_price')
+                    param_weights.push(2) // parking price weight
 
                     // Acquire available bikes:
                     var coords = parking_spot_data.map(val => [val.lng, val.lat])
@@ -225,8 +225,6 @@ module.exports = {
                             }
                         }
                         Promise.all(bike_reqs).then(function (results) {
-
-
                             // Concatenate these biking times to X and re-optimize!
 
                             // FOR TESTING MAP FUNCTION BELOW
@@ -269,11 +267,9 @@ module.exports = {
                             }
 
                             X.push(sub_least(results))
-
-                            // print(num_bikes_array)
                             X.push(num_bikes_array)
-                            param_weights.push(1e-1)
-                            param_weights.push(-1e-1)
+                            param_weights.push(1e-1) // biking times weight
+                            param_weights.push(-5e-2) // # of bikes weight
                             fX = math.multiply(math.matrix(param_weights), X);
                             const best_bike_indices = top_n(fX["_data"], number_options)
                             /* print('bike fX: ' + fX)
@@ -307,7 +303,7 @@ module.exports = {
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
                     params.push('parking_price')
-                    param_weights.push(2)
+                    param_weights.push(2) // parking price weight
 
                     var X = [sub_least(times)]
                     var arr = []
@@ -341,12 +337,9 @@ module.exports = {
                         results = sub_least(results)
                         results = results["_data"]
                         X_walk.push(results)
-                        walk_weights.push(1e-2)
+                        walk_weights.push(1e-2) // walking time weight
                         fX = math.multiply(math.matrix(walk_weights), X_walk);
                         const best_walk_indices = top_n(fX["_data"], number_options);
-                        /* print('walk fX: ' + fX["_data"])
-                        print(fX)
-                        print('best walking spots: ' + best_walk_indices) */
                         best_spots = []
                         for (i in best_car_indices) {
                             parking_spot_data[best_walk_indices[i]]["driving_time"] = times[best_walk_indices[i]]

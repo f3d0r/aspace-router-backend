@@ -4,7 +4,7 @@ const math = require('mathjs');
 var rp = require('request-promise');
 var turf = require('@turf/turf');
 
-//const util = require('util')
+// const util = require('util')
 
 module.exports = {
     /* Algorithm:
@@ -150,7 +150,7 @@ module.exports = {
                 // 4. Acquire remaining cost function parameters
                 var X = [sub_least(times)]
                 var arr = []
-                var drive_direct_params = params
+                var drive_direct_params = Object.assign([], params)
                 drive_direct_params.push('distance')
                 for (i in params) {
                     arr = []
@@ -160,7 +160,7 @@ module.exports = {
                     arr = sub_least(arr)
                     X = X.concat([arr["_data"]])
                 }
-                var drive_direct_param_weights = param_weights
+                var drive_direct_param_weights = Object.assign([], param_weights)
                 drive_direct_param_weights.push(10) // parking spot distance weight
                 // Parking spot parameters now held in X
 
@@ -248,9 +248,7 @@ module.exports = {
                             /* for (i in index) {
                                 console.log(util.inspect(bike_data[index[i]], false, null, true))
                             } */
-
                             num_bikes_array = bike_data.map(x => x[1])
-
                             var X = [sub_least(times)]
                             var arr = []
                             for (i in params) {
@@ -265,15 +263,12 @@ module.exports = {
                                 arr = sub_least(arr)
                                 X = X.concat([arr["_data"]])
                             }
-
                             X.push(sub_least(results))
                             X.push(num_bikes_array)
-                            param_weights.push(1e-1) // biking times weight
+                            param_weights.push(5e-2) // biking times weight
                             param_weights.push(-5e-2) // # of bikes weight
                             fX = math.multiply(math.matrix(param_weights), X);
                             const best_bike_indices = top_n(fX["_data"], number_options)
-                            /* print('bike fX: ' + fX)
-                            print('best bike spots: ' + best_bike_indices) */
                             best_spots = []
                             for (i in best_bike_indices) {
                                 parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
@@ -297,7 +292,7 @@ module.exports = {
                         })
                     }, function () {
                         // Empty response from selectMultiRadius for bikes
-
+                        noneFoundCB();
                     }, function (error) {
                         return failCB(error);
                     });

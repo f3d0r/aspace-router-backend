@@ -161,7 +161,7 @@ module.exports = {
                     X = X.concat([arr["_data"]])
                 }
                 var drive_direct_param_weights = Object.assign([], param_weights)
-                drive_direct_param_weights.push(10) // parking spot distance weight
+                drive_direct_param_weights.push(10000) // parking spot distance weight
                 // Parking spot parameters now held in X
 
                 // Final drive & park optimization

@@ -148,20 +148,20 @@ module.exports = {
                 times = [].concat.apply([], times);
 
                 // 4. Acquire remaining cost function parameters
-                var X = [sub_least(times)]
+                var X = []//[sub_least(times)]
                 var arr = []
                 var drive_direct_params = Object.assign([], params)
                 drive_direct_params.push('distance')
-                for (i in params) {
+                for (i in drive_direct_params) {
                     arr = []
                     for (d in parking_spot_data) {
-                        arr.push(parking_spot_data[d][params[i]])
+                        arr.push(parking_spot_data[d][drive_direct_params[i]])
                     }
                     arr = sub_least(arr)
                     X = X.concat([arr["_data"]])
                 }
-                var drive_direct_param_weights = Object.assign([], param_weights)
-                drive_direct_param_weights.push(10000) // parking spot distance weight
+                var drive_direct_param_weights = []//Object.assign([], param_weights)
+                drive_direct_param_weights.push(10) // parking spot distance weight
                 // Parking spot parameters now held in X
 
                 // Final drive & park optimization

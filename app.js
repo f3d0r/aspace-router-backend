@@ -15,8 +15,10 @@ const timber = require('timber');
 var morgan = require('morgan')
 
 const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
-const transport = new timber.transports.HTTPS('5543_f3d20c3caa932f78:293dd69146fb4cc482b8f24e94364ee394c90bdc935f862e491adb9b7aa2939f');
-timber.install(transport);
+if (process.env.LOCAL != "TRUE") {
+    const transport = new timber.transports.HTTPS(process.env.TIMBER_TOKEN);
+    timber.install(transport);
+}
 
 const {
     IncomingWebhook

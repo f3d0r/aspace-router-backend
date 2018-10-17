@@ -1,6 +1,7 @@
 require('module-alias/register');
 
 // PACKAGE IMPORTS
+require('sqreen');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -8,18 +9,15 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-var sqreen = require('sqreen');
-const Cabin = require('cabin');
-const responseTime = require('response-time');
 
-const {
-    Signale
-} = require('signale');
-const pino = require('pino')({
-    customLevels: {
-        log: 30
-    }
-});
+const responseTime = require('response-time');
+const timber = require('timber');
+var morgan = require('morgan')
+
+const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
+const transport = new timber.transports.HTTPS('5543_f3d20c3caa932f78:293dd69146fb4cc482b8f24e94364ee394c90bdc935f862e491adb9b7aa2939f');
+timber.install(transport);
+
 const {
     IncomingWebhook
 } = require('@slack/client');
@@ -36,7 +34,6 @@ if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU"
     }
 }
 
-const env = process.env.NODE_ENV || 'development';
 
 // LOCAL IMPORTS
 const constants = require('@config');
@@ -48,15 +45,6 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 // EXPRESS SET UP
 var app = express();
 
-// CABIN SET UP
-const cabin = new Cabin({
-    // (optional: your free API key from https://cabinjs.com)
-    // key: 'YOUR-CABIN-API-KEY',
-    axe: {
-        logger: env === 'production' ? pino : new Signale()
-    }
-});
-
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
@@ -67,7 +55,16 @@ cluster(function (worker) {
     app.use(cors());
     app.use(helmet())
     app.use(responseTime());
-    app.use(cabin.middleware);
+    app.use(morgan(loggingFormat, {
+        skip: function (req, res) {
+            if (req.url == '/ping' || req.url == '/') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }));
+
 
     // MAIN ENDPOINTS
     app.get('/', function (req, res) {
@@ -87,10 +84,10 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(slackSendError);
     app.use(haltOnTimedout);
-    app.use(cabinErrorLog);
+    // app.use(cabinErrorLog);
 
     function errorHandler(error, req, res, next) {
-        var url  = process.env.BASE_URL + req.originalUrl;
+        var url = process.env.BASE_URL + req.originalUrl;
         if (error.message == "Response timeout") {
             var response = errors.getResponseJSON('RESPONSE_TIMEOUT', "Please check API status at status.trya.space");
             res.status(response.code).send(response.res);
@@ -109,12 +106,12 @@ cluster(function (worker) {
     }
 
     function cabinErrorLog(error, req, res, next) {
-        var url  = process.env.BASE_URL + req.originalUrl;
+        var url = process.env.BASE_URL + req.originalUrl;
         res.logger.error("ERROR: " + error + "\nURL: " + url + "\nEnv: " + process.env.ENV_NAME);
     }
 
     function slackSendError(error, req, res, next) {
-        var url  = process.env.BASE_URL + req.originalUrl;
+        var url = process.env.BASE_URL + req.originalUrl;
         var message = "Error: " + error.message + "\nCode: " + error.code + "\nURL: " + url + "\nEnv: " + process.env.ENV_NAME;
         webhook.send(message, function (error, res) {
             if (error)
@@ -142,11 +139,11 @@ cluster(function (worker) {
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
             if (worker.id == 1) {
-                cabin.info('Listening on port ' + server.address().port + ' with ' + threadCount + ' threads.');
+                console.log('Listening on port ' + server.address().port + ' with ' + threadCount + ' threads.');
             }
         });
     } else {
-        cabin.error("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
+        console.error("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
     count: threadCount

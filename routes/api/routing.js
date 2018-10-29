@@ -527,21 +527,21 @@ function calcRoutes(req, routeTypeConst, segmentNames, successCB, noResultCB, fa
                 var num_bikes = null;
                 if (routeTypeConst == constants.optimize.PARK_BIKE) {
                     formattedSegments = formatBikeSegments({
-                            'lng': req.query.origin_lng,
-                            'lat': req.query.origin_lat
+                            'lng': parseFloat(req.query.origin_lng),
+                            'lat': parseFloat(req.query.origin_lat)
                         }, {
-                            'lng': req.query.dest_lng,
-                            'lat': req.query.dest_lat
+                            'lng': parseFloat(req.query.dest_lng),
+                            'lat': parseFloat(req.query.dest_lat)
                         },
                         bestSpots, segmentNames);
                     num_bikes = bestSpots[0].num_bikes;
                 } else {
                     formattedSegments = formatRegSegments({
-                            'lng': req.query.origin_lng,
-                            'lat': req.query.origin_lat
+                            'lng': parseFloat(req.query.origin_lng),
+                            'lat': parseFloat(req.query.origin_lat)
                         }, {
-                            'lng': req.query.dest_lng,
-                            'lat': req.query.dest_lat
+                            'lng': parseFloat(req.query.dest_lng),
+                            'lat': parseFloat(req.query.dest_lat)
                         },
                         bestSpots, segmentNames);
                 }

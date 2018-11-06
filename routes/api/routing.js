@@ -1,6 +1,8 @@
 var router = require('express').Router();
 var rp = require('request-promise');
 var fs = require('fs');
+var root = require('app-root-path');
+var path = require('path');
 var errors = require('@errors');
 const constants = require('@config');
 var routeOptimization = require('@route-optimization');
@@ -12,78 +14,21 @@ var osrmTextInstructions = require('osrm-text-instructions')(version);
 var turf = require('@turf/turf');
 
 const metaKeys = ['occupied', 'parking_price', 'block_id', 'spot_id', 'distance', 'driving_time', 'company', 'region', 'id', 'num', 'bikes_available', 'type', 'distance'];
+var routing_poly;
 
-function processFile() {
-    console.log(content);
+// Current polygon within which our OSRM engine can route - 11/44/2018
+// Polygon defined by corners of states in this order: All US
+getRoutingPolys();
+
+function getRoutingPolys() {
+    var jsonContents = JSON.parse(fs.readFileSync(path.join(root.path, '/config/bounds.geojson'), 'utf8'));
+    var polyCoords = []
+    jsonContents.features.forEach(function (currentFeature) {
+        polyCoords.push(currentFeature.geometry.coordinates)
+    })
+    routing_poly = turf.multiPolygon(polyCoords);
+    console.log(routing_poly.geometry.coordinates.length)
 }
-
-// Current polygon within which our OSRM engine can route - 09/27/2018
-// Polygon defined by corners of states in this order: WA -> MT -> NM -> CA -> WA
-var routing_poly = turf.polygon([
-    [
-        [-125.9201, 31.86887],
-        [-133.0637, 49.45605],
-        [-126.7388, 49.27953],
-        [-125.7377, 48.88595],
-        [-124.9267, 48.52386],
-        [-124.6114, 48.50045],
-        [-123.8791, 48.30351],
-        [-123.5778, 48.25107],
-        [-123.2639, 48.29759],
-        [-123.1898, 48.44641],
-        [-123.2771, 48.6989],
-        [-123.0208, 48.77277],
-        [-123.0246, 48.82635],
-        [-123.3626, 49.01136],
-        [-104.0475, 49.00168],
-        [-104.0355, 44.99604],
-        [-104.0563, 44.99586],
-        [-104.0522, 41.002],
-        [-102.0507, 41.0031],
-        [-102.041, 36.99129],
-        [-102.9994, 36.99779],
-        [-103.0004, 36.49718],
-        [-103.0376, 36.49754],
-        [-103.033, 34.34069],
-        [-103.0597, 31.99562],
-        [-106.6141, 31.99754],
-        [-106.6237, 31.98929],
-        [-106.6358, 31.98534],
-        [-106.6285, 31.97295],
-        [-106.6191, 31.97417],
-        [-106.6178, 31.96598],
-        [-106.6138, 31.95756],
-        [-106.6145, 31.94849],
-        [-106.6248, 31.92745],
-        [-106.612, 31.92192],
-        [-106.6099, 31.91881],
-        [-106.6341, 31.90807],
-        [-106.644, 31.89733],
-        [-106.6326, 31.89002],
-        [-106.6274, 31.88315],
-        [-106.6346, 31.87152],
-        [-106.6248, 31.85659],
-        [-106.6141, 31.84758],
-        [-106.6009, 31.84537],
-        [-106.6018, 31.82652],
-        [-106.5912, 31.82586],
-        [-106.5771, 31.81312],
-        [-106.5704, 31.81529],
-        [-106.5436, 31.8084],
-        [-106.5212, 31.78318],
-        [-108.2022, 31.7797],
-        [-108.2013, 31.33043],
-        [-111.0741, 31.32659],
-        [-114.8224, 32.49577],
-        [-114.7986, 32.56554],
-        [-114.8123, 32.61167],
-        [-114.8082, 32.6264],
-        [-114.7781, 32.63682],
-        [-114.7576, 32.66248],
-        [-114.7271, 32.71506],
-        [-125.9201, 31.86887]
-    ]
-]);
 
 
 router.post('/get_drive_walk_route', function (req, res, next) {

@@ -4,6 +4,7 @@
     "private": false,
     "description": "aspace, Inc. - Backend (node.js/Express.js stack), available at https://api.trya.space.",
     "dependencies": {
+        "app-root-path": "^2.1.0",
         "cabin": "^2.0.4",
         "koa": "^2.5.3",
         "mkdirp": "^0.5.1",
@@ -131,7 +132,8 @@
         "@bcrypt": "misc/auth/bcrypt",
         "@route-optimization": "misc/routeOptimization",
         "@body-structure": "config/bodyStructs",
-        "@osrm": "app"
+        "@osrm": "app",
+        "@routing-poly": "config/routingPoly"
     },
     "_moduleDirectories": [
         "node_modules"

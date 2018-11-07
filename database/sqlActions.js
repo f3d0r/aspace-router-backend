@@ -1,8 +1,4 @@
 var db = require('./db');
-var mysql = require('mysql');
-var uniqueString = require('unique-string');
-
-var turf = require('@turf/turf');
 
 module.exports = {
     insert: {

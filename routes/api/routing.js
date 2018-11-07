@@ -27,7 +27,6 @@ function getRoutingPolys() {
         polyCoords.push(currentFeature.geometry.coordinates)
     })
     routing_poly = turf.multiPolygon(polyCoords);
-    console.log(routing_poly.geometry.coordinates.length)
 }
 
 

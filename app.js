@@ -83,12 +83,12 @@ cluster(function (worker) {
 
     // MAIN ENDPOINTS
     app.get('/', function (req, res) {
-        var response = errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
+        var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
         res.status(response.code).send(response.res);
     });
 
     app.get('/ping', function (req, res, next) {
-        var response = errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "pong");
+        var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
         res.status(response.code).send(response.res);
     });
 
@@ -116,6 +116,7 @@ cluster(function (worker) {
                 res.status(response.code).send(response.res);
             }
         }
+        console.log(error.err);
         next(error);
     }
 

@@ -55,7 +55,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
                         var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
                         sql.insert.addSession(last_loc_string, dest_string, null, null, 'walk', userId, function (result) {
                             routeOptionsResponse['session_id'] = result;
-                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             res.status(response.code).send(response.res);
                         }, function (error) {
                             // Session insertion unsuccessful
@@ -122,7 +122,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                         var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
                         sql.insert.addSession(last_loc_string, dest_string, num_bikes, 0, 'bike', userId, function (result) {
                             routeOptionsResponse['session_id'] = result;
-                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             res.status(response.code).send(response.res);
                         }, function (error) {
                             // Session insertion unsuccessful
@@ -168,12 +168,16 @@ router.get('/get_routing_map_constraints', function (req, res, next) {
     fs.readFile('/home/api/remote_config/prod/routing_map.geojson', "utf-8", function read(err, data) {
         var routingMapConstraints;
         if (err) {
-            routingMapConstraints = "INVALID FILE"
+            var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', 'ROUTING CONSTRAINTS NOT FOUND');
+            next({
+                response,
+                err
+            });
         } else {
             routingMapConstraints = JSON.parse(data);
+            var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
+            res.status(response.code).send(response.res);
         }
-        var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
-        res.status(response.code).send(response.res);
     });
 
 });
@@ -203,7 +207,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
                         var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
                         sql.insert.addSession(last_loc_string, dest_string, null, null, 'direct', userId, function (result) {
                             routeOptionsResponse['session_id'] = result;
-                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             res.status(response.code).send(response.res);
                         }, function (error) {
                             // Session insertion unsuccessful
@@ -495,7 +499,7 @@ function calcRoutes(req, routeTypeConst, segmentNames, successCB, noResultCB, fa
                         if (typeof intermediaryFN != 'undefined' && intermediaryFN != null) {
                             intermediaryFN(req, routeOptionsResponse, num_bikes);
                         } else {
-                            var response = errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
+                            var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             successCB(response);
                         }
                     }).catch(function (error) {

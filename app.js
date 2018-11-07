@@ -1,29 +1,48 @@
+//GLOBAL IMPORTS
 require('module-alias/register');
+require('sqreen');
 
 // PACKAGE IMPORTS
-require('sqreen');
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const timeout = require('connect-timeout');
+var express = require('express');
+var bodyParser = require('body-parser');
+var cors = require('cors');
+var timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-
-const responseTime = require('response-time');
-const timber = require('timber');
+var Logger = require('logdna');
+var ip = require('ip')
+var os = require('os')
+var responseTime = require('response-time');
 var morgan = require('morgan')
-
-const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
-if (process.env.LOCAL != "TRUE") {
-    const transport = new timber.transports.HTTPS(process.env.TIMBER_TOKEN);
-    timber.install(transport);
-}
-
-const {
+var {
     IncomingWebhook
 } = require('@slack/client');
 
+// LOCAL IMPORTS
+var constants = require('@config');
+var errors = require('@errors');
+var errorCodes = require('@error-codes');
+
+//LOGGING SET UP
+var logger = Logger.setupDefaultLogger("1390778264d6a4672158e747548a0e74", {
+    hostname: os.hostname(),
+    ip: ip.address(),
+    app: process.env.APP_NAME,
+    env: process.env.ENV_NAME,
+    index_meta: true,
+    tags: process.env.APP_NAME + ',' + process.env.ENV_NAME + ',' + os.hostname()
+});
+console.log = function (d) {
+    process.stdout.write(d + '\n');
+    logger.log(d);
+}
+logger.write = function(d) {
+    logger.log(d);
+}
+const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
+
+//EXPRESS THREAD COUNT SET UP
 var threadCount;
 if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU") {
     threadCount = require('os').cpus().length;
@@ -36,12 +55,7 @@ if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU"
     }
 }
 
-
-// LOCAL IMPORTS
-const constants = require('@config');
-const errors = require('@errors');
-const errorCodes = require("@error-codes");
-
+// SLACK SET UP
 const webhook = new IncomingWebhook(constants.slack.webhook);
 
 // EXPRESS SET UP
@@ -67,7 +81,6 @@ cluster(function (worker) {
         }
     }));
 
-
     // MAIN ENDPOINTS
     app.get('/', function (req, res) {
         var response = errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
@@ -84,9 +97,8 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(errorHandler);
     app.use(haltOnTimedout);
-    app.use(slackSendError);
+    app.use(sendSlackError);
     app.use(haltOnTimedout);
-    // app.use(cabinErrorLog);
 
     function errorHandler(error, req, res, next) {
         var url = process.env.BASE_URL + req.originalUrl;
@@ -107,17 +119,11 @@ cluster(function (worker) {
         next(error);
     }
 
-    function cabinErrorLog(error, req, res, next) {
-        var url = process.env.BASE_URL + req.originalUrl;
-        res.logger.error("ERROR: " + error + "\nURL: " + url + "\nEnv: " + process.env.ENV_NAME);
-    }
-
-    function slackSendError(error, req, res, next) {
-        var url = process.env.BASE_URL + req.originalUrl;
-        var message = "Error: " + error.message + "\nCode: " + error.code + "\nURL: " + url + "\nEnv: " + process.env.ENV_NAME;
+    function sendSlackError(error, req) {
+        var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
         webhook.send(message, function (error, res) {
             if (error)
-                res.logger.error('Error: ', error);
+                console.log('Error: ', error);
         });
     }
 
@@ -149,4 +155,4 @@ cluster(function (worker) {
     }
 }, {
     count: threadCount
-})
+});

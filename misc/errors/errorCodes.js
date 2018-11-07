@@ -37,7 +37,7 @@ module.exports = Object.freeze({
     ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 0,
-        INFO: "ENDPOINT_FUNCTION_SUCCESS"
+        INFO: "endpoint_function_success"
     },
     MISSING_PARAMETER: {
         HTTP_CODE: 422,

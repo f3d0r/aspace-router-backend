@@ -25,7 +25,7 @@ var errors = require('@errors');
 var errorCodes = require('@error-codes');
 
 //LOGGING SET UP
-var logger = Logger.setupDefaultLogger("1390778264d6a4672158e747548a0e74", {
+var logger = Logger.setupDefaultLogger(process.env.LOG_DNA_API_KEY, {
     hostname: os.hostname(),
     ip: ip.address(),
     app: process.env.APP_NAME,

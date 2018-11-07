@@ -7,7 +7,7 @@ module.exports = {
         }, function () {
             failureCB();
         }, function (error) {
-            failureCB();
+            failureCB(error);
         });
     }
 }

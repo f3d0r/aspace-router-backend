@@ -38,7 +38,7 @@ console.log = function (d) {
     logger.log(d);
 }
 logger.write = function(d) {
-    logger.log(d);
+    console.log(d)
 }
 const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
 
@@ -78,7 +78,8 @@ cluster(function (worker) {
             } else {
                 return false;
             }
-        }
+        },
+        stream: logger
     }));
 
     // MAIN ENDPOINTS

@@ -151,9 +151,7 @@ module.exports = {
                 db.getLocalConnection(function (err, connection) {
                     var sql = "SELECT id, lng, lat, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database1) + "  HAVING distance < ? ORDER BY id"
                     connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
-
                         if (error) {
-                            console.log(error)
                             failCB(error);
                         } else if (rows.length == 0)
                             noneFoundCB();
@@ -162,19 +160,16 @@ module.exports = {
                             for (i in rows) {
                                 ids.push(rows[i].id)
                             }
-                            //console.log(ids)
                             sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND duration =  1000012 ORDER BY id"
                             connection.query(sql, [
                                 [ids]
                             ], function (error, price_rows) {
                                 connection.release();
                                 if (error) {
-                                    console.log(error)
                                     failCB(error);
                                 } else if (price_rows.length == 0)
                                     noneFoundCB();
                                 else {
-                                    //console.log(price_rows)
                                     var old_id = price_rows[0].id
                                     var old_price = price_rows[0].parking_price
                                     var j = 1

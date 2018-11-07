@@ -124,11 +124,6 @@ module.exports = Object.freeze({
         RESPONSE_CODE: 27,
         INFO: "route_calculation_error"
     },
-    MAIN_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 30,
-        INFO: "main_endpoint_function_success"
-    },
     ROUTING_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 31,

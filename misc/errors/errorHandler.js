@@ -1,5 +1,4 @@
 const ERROR_CODES = require('./errorCodes');
-const bodyStructs = require('@body-structure');
 
 module.exports = {
     getResponseJSON: function (error, extraJSON) {

@@ -85,12 +85,12 @@ cluster(function (worker) {
     }));
 
     // MAIN ENDPOINTS
-    app.get(globalEndpoint + '/', function (req, res) {
+    app.get('/', function (req, res) {
         var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
         res.status(response.code).send(response.res);
     });
 
-    app.get(globalEndpoint + '/ping', function (req, res, next) {
+    app.get('/ping', function (req, res, next) {
         var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
         res.status(response.code).send(response.res);
     });

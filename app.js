@@ -98,8 +98,8 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(errorHandler);
     app.use(haltOnTimedout);
-    app.use(sendSlackError);
-    app.use(haltOnTimedout);
+    // app.use(sendSlackError);
+    // app.use(haltOnTimedout);
 
     function errorHandler(error, req, res, next) {
         var url = process.env.BASE_URL + req.originalUrl;

@@ -121,13 +121,13 @@ cluster(function (worker) {
         next(error);
     }
 
-    function sendSlackError(error, req) {
-        var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
-        webhook.send(message, function (error, res) {
-            if (error)
-                console.log('Error: ', error);
-        });
-    }
+    // function sendSlackError(error, req) {
+    //     var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
+    //     webhook.send(message, function (error, res) {
+    //         if (error)
+    //             console.log('Error: ', error);
+    //     });
+    // }
 
     function haltOnTimedout(req, res, next) {
         if (!req.timedout)

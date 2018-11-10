@@ -75,7 +75,7 @@ cluster(function (worker) {
     app.use(responseTime());
     app.use(morgan(loggingFormat, {
         skip: function (req, res) {
-            if (req.url == '/ping' || req.url == '/') {
+            if (req.url == '/v1/ping' || req.url == '/v1/') {
                 return true;
             } else {
                 return false;

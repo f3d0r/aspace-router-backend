@@ -24,6 +24,8 @@ var constants = require('@config');
 var errors = require('@errors');
 var errorCodes = require('@error-codes');
 
+const globalEndpoint = 'v1/'
+
 //LOGGING SET UP
 var logger = Logger.setupDefaultLogger(process.env.LOG_DNA_API_KEY, {
     hostname: os.hostname(),
@@ -37,7 +39,7 @@ console.log = function (d) {
     process.stdout.write(d + '\n');
     logger.log(d);
 }
-logger.write = function(d) {
+logger.write = function (d) {
     console.log(d)
 }
 const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
@@ -83,12 +85,12 @@ cluster(function (worker) {
     }));
 
     // MAIN ENDPOINTS
-    app.get('/', function (req, res) {
+    app.get(globalEndpoint + '/', function (req, res) {
         var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
         res.status(response.code).send(response.res);
     });
 
-    app.get('/ping', function (req, res, next) {
+    app.get(globalEndpoint + '/ping', function (req, res, next) {
         var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
         res.status(response.code).send(response.res);
     });

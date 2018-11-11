@@ -6,7 +6,7 @@
         "@slack/client": "^4.8.0",
         "@turf/turf": "^5.1.6",
         "app-root-path": "^2.1.0",
-        "aws-sdk": "^2.350.0",
+        "aws-sdk": "^2.353.0",
         "body-parser": "^1.18.3",
         "connect-timeout": "^1.9.0",
         "cors": "^2.8.5",
@@ -27,7 +27,7 @@
         "request": "^2.88.0",
         "request-promise": "^4.2.2",
         "response-time": "^2.3.2",
-        "sqreen": "^1.27.0",
+        "sqreen": "^1.27.1",
         "unique-string": "^1.0.0"
     },
     "scripts": {

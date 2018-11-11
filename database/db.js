@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var ip = require('ip');
 const constants = require('@config');
 
 var pool = mysql.createPool({
@@ -11,7 +12,7 @@ var pool = mysql.createPool({
 });
 
 var localPool = mysql.createPool({
-    host: process.env.LOCAL_DATABASE_IP,
+    host: ip.address(),
     user: constants.db.DATABASE_USER,
     password: constants.db.DATABASE_PASSWORD,
     database: constants.db.DATABASE_NAME,

@@ -24,8 +24,6 @@ var constants = require('@config');
 var errors = require('@errors');
 var errorCodes = require('@error-codes');
 
-var globalEndpoint = constants.express.GLOBAL_ENDPOINT;
-
 //LOGGING SET UP
 var logger = Logger.setupDefaultLogger(process.env.LOG_DNA_API_KEY, {
     hostname: os.hostname(),
@@ -62,6 +60,7 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 
 // EXPRESS SET UP
 var app = express();
+const globalEndpoint = constants.express.GLOBAL_ENDPOINT;
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));

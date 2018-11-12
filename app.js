@@ -63,6 +63,8 @@ var app = express();
 const globalEndpoint = constants.express.GLOBAL_ENDPOINT;
 
 cluster(function (worker) {
+    app.enable("trust proxy");
+
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
     app.use(bodyParser.urlencoded({

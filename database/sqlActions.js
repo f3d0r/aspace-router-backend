@@ -38,7 +38,7 @@ module.exports = {
                 } else {
                     sql += selection[0] + ' ';
                     for (index = 1; index < selection.length; index++) {
-                        sql += ', ' + selection[index]
+                        sql += ', ' + selection[index];
                     }
                 }
                 sql += ' FROM ' + connection.escapeId(database) + ' WHERE ';
@@ -55,7 +55,7 @@ module.exports = {
                     if (error)
                         failCB(error);
                     else if (numResults == null)
-                        successCB(rows)
+                        successCB(rows);
                     else if (numResults != null && rows.length == 0)
                         noneFoundCB();
                     else
@@ -80,7 +80,7 @@ module.exports = {
         selectRadius: function (database, lat, lng, miles, localDB, successCB, noneFoundCB, failCB) {
             if (localDB) {
                 db.getLocalConnection(function (err, connection) {
-                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?";
                     connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                         connection.release();
                         if (error)
@@ -88,12 +88,12 @@ module.exports = {
                         else if (rows.length == 0)
                             noneFoundCB();
                         else
-                            successCB(rows)
+                            successCB(rows);
                     });
                 });
             } else {
                 db.getConnection(function (err, connection) {
-                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?";
                     connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                         connection.release();
                         if (error)
@@ -101,7 +101,7 @@ module.exports = {
                         else if (rows.length == 0)
                             noneFoundCB();
                         else
-                            successCB(rows)
+                            successCB(rows);
                     });
                 });
             }
@@ -120,7 +120,7 @@ module.exports = {
                         else if (rows.length == 0)
                             noneFoundCB();
                         else
-                            successCB(rows)
+                            successCB(rows);
                     });
                 });
             } else {
@@ -136,7 +136,7 @@ module.exports = {
                         else if (rows.length == 0)
                             noneFoundCB();
                         else
-                            successCB(rows)
+                            successCB(rows);
                     });
                 });
             }
@@ -145,18 +145,18 @@ module.exports = {
         selectRadnPrice: function (database1, database2, lat, lng, miles, localDB, successCB, noneFoundCB, failCB) {
             if (localDB) {
                 db.getLocalConnection(function (err, connection) {
-                    var sql = "SELECT id, lng, lat, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database1) + "  HAVING distance < ? ORDER BY id"
+                    var sql = "SELECT id, lng, lat, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database1) + "  HAVING distance < ? ORDER BY id";
                     connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                         if (error) {
                             failCB(error);
                         } else if (rows.length == 0)
                             noneFoundCB();
                         else {
-                            var ids = []
-                            for (i in rows) {
-                                ids.push(rows[i].id)
+                            var ids = [];
+                            for (var i in rows) {
+                                ids.push(rows[i].id);
                             }
-                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND duration =  1000012 ORDER BY id"
+                            sql = "SELECT id, amount AS parking_price FROM" + connection.escapeId(database2) + "WHERE id IN ? AND duration =  1000012 ORDER BY id";
                             connection.query(sql, [
                                 [ids]
                             ], function (error, price_rows) {
@@ -166,36 +166,36 @@ module.exports = {
                                 } else if (price_rows.length == 0)
                                     noneFoundCB();
                                 else {
-                                    var old_id = price_rows[0].id
-                                    var old_price = price_rows[0].parking_price
-                                    var j = 1
+                                    var old_id = price_rows[0].id;
+                                    var old_price = price_rows[0].parking_price;
+                                    var j = 1;
                                     while (price_rows.length > j) {
                                         if (price_rows[j].id == old_id && price_rows[j].parking_price > old_price) {
-                                            old_id = price_rows[j].id
-                                            old_price = price_rows[j].parking_price
-                                            price_rows.splice(j - 1, 1)
+                                            old_id = price_rows[j].id;
+                                            old_price = price_rows[j].parking_price;
+                                            price_rows.splice(j - 1, 1);
                                         } else if (price_rows[j].id == old_id && price_rows[j].parking_price < old_price) {
-                                            old_id = price_rows[j - 1].id
-                                            old_price = price_rows[j - 1].parking_price
-                                            price_rows.splice(j, 1)
+                                            old_id = price_rows[j - 1].id;
+                                            old_price = price_rows[j - 1].parking_price;
+                                            price_rows.splice(j, 1);
                                         } else {
-                                            old_id = price_rows[j].id
-                                            old_price = price_rows[j].parking_price
-                                            j++
+                                            old_id = price_rows[j].id;
+                                            old_price = price_rows[j].parking_price;
+                                            j++;
                                         }
                                     }
-                                    ids = price_rows.map(val => val.id)
-                                    rows = rows.filter(val => ids.includes(val.id))
-                                    rows = rows.map((val, i) => Object.assign({}, val, price_rows[i]))
-                                    successCB(rows)
+                                    ids = price_rows.map(val => val.id);
+                                    rows = rows.filter(val => ids.includes(val.id));
+                                    rows = rows.map((val, i) => Object.assign({}, val, price_rows[i]));
+                                    successCB(rows);
                                 }
-                            })
+                            });
                         }
                     });
                 });
             } else {
                 db.getConnection(function (err, connection) {
-                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                    var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?";
                     connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                         connection.release();
                         if (error)
@@ -203,7 +203,7 @@ module.exports = {
                         else if (rows.length == 0)
                             noneFoundCB();
                         else
-                            successCB(rows)
+                            successCB(rows);
                     });
                 });
             }
@@ -220,4 +220,4 @@ module.exports = {
             });
         });
     }
-}
+};

@@ -6,7 +6,7 @@ module.exports = {
         var minAdjacency = getAdjacencyNumber(minFeet);
         return getMostAdjacent(sortedBlockJSON, minAdjacency);
     }
-}
+};
 
 function getMostAdjacent(sortedBlockJSON, mostAdjacent) {
     var finalMatchingSpots = [];

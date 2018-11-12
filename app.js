@@ -7,14 +7,14 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var timeout = require('connect-timeout');
-var helmet = require('helmet')
+var helmet = require('helmet');
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
 var Logger = require('logdna');
-var ip = require('ip')
-var os = require('os')
+var ip = require('ip');
+var os = require('os');
 var responseTime = require('response-time');
-var morgan = require('morgan')
+var morgan = require('morgan');
 var {
     IncomingWebhook
 } = require('@slack/client');
@@ -38,10 +38,10 @@ var logger = Logger.setupDefaultLogger(process.env.LOG_DNA_API_KEY, {
 console.log = function (d) {
     process.stdout.write(d + '\n');
     logger.log(d);
-}
+};
 logger.write = function (d) {
-    console.log(d)
-}
+    console.log(d);
+};
 const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
 
 //EXPRESS THREAD COUNT SET UP
@@ -50,10 +50,10 @@ if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU"
     threadCount = require('os').cpus().length;
 } else {
     try {
-        threadCount = parseInt(process.env.THREAD_COUNT)
+        threadCount = parseInt(process.env.THREAD_COUNT);
     } catch (e) {
-        console.log("INVALID \"INSTANCE_COUNT\" environment variable. Exiting...")
-        process.exit()
+        console.log("INVALID \"INSTANCE_COUNT\" environment variable. Exiting...");
+        process.exit();
     }
 }
 
@@ -71,7 +71,7 @@ cluster(function (worker) {
     }));
     app.use(bodyParser.json());
     app.use(cors());
-    app.use(helmet())
+    app.use(helmet());
     app.use(responseTime());
     app.use(morgan(loggingFormat, {
         skip: function (req, res) {
@@ -106,7 +106,7 @@ cluster(function (worker) {
     function errorHandler(error, req, res, next) {
         var url = process.env.BASE_URL + req.originalUrl;
         if (error.message == "Response timeout") {
-            var response = errors.getResponseJSON('RESPONSE_TIMEOUT', "Please check API status at status.trya.space");
+            response = errors.getResponseJSON('RESPONSE_TIMEOUT', "Please check API status at status.trya.space");
             res.status(response.code).send(response.res);
         } else if (error == 'INVALID_BASIC_AUTH') {
             res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
@@ -115,7 +115,7 @@ cluster(function (worker) {
             if (process.env.NODE_ENV == "dev") {
                 res.status(500).send(error);
             } else {
-                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', "Please check API status at status.trya.space");
+                response = errors.getResponseJSON('GENERAL_SERVER_ERROR', "Please check API status at status.trya.space");
                 res.status(response.code).send(response.res);
             }
         }

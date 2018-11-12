@@ -22,10 +22,10 @@ getRoutingPolys();
 
 function getRoutingPolys() {
     var jsonContents = JSON.parse(fs.readFileSync(path.join(root.path, '/config/bounds.geojson'), 'utf8'));
-    var polyCoords = []
+    var polyCoords = [];
     jsonContents.features.forEach(function (currentFeature) {
-        polyCoords.push(currentFeature.geometry.coordinates)
-    })
+        polyCoords.push(currentFeature.geometry.coordinates);
+    });
     routing_poly = turf.multiPolygon(polyCoords);
 }
 
@@ -54,7 +54,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
                         var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
                         var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
                         sql.insert.addSession(last_loc_string, dest_string, null, null, 'walk', userId, function (result) {
-                            routeOptionsResponse['session_id'] = result;
+                            routeOptionsResponse.session_id = result;
                             var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             res.status(response.code).send(response.res);
                         }, function (error) {
@@ -121,7 +121,7 @@ router.post('/get_drive_bike_route', function (req, res, next) {
                         var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
                         var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
                         sql.insert.addSession(last_loc_string, dest_string, num_bikes, 0, 'bike', userId, function (result) {
-                            routeOptionsResponse['session_id'] = result;
+                            routeOptionsResponse.session_id = result;
                             var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             res.status(response.code).send(response.res);
                         }, function (error) {
@@ -168,14 +168,14 @@ router.get('/get_routing_map_constraints', function (req, res, next) {
     fs.readFile('/home/api/remote_config/prod/routing_map.geojson', "utf-8", function read(err, data) {
         var routingMapConstraints;
         if (err) {
-            var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', 'ROUTING CONSTRAINTS NOT FOUND');
+            response = errors.getResponseJSON('GENERAL_SERVER_ERROR', 'ROUTING CONSTRAINTS NOT FOUND');
             next({
                 response,
                 err
             });
         } else {
             routingMapConstraints = JSON.parse(data);
-            var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
+            response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routingMapConstraints);
             res.status(response.code).send(response.res);
         }
     });
@@ -206,7 +206,7 @@ router.post('/get_drive_direct_route', function (req, res, next) {
                         var last_loc_string = req.query.origin_lng.toString() + ',' + req.query.origin_lat.toString();
                         var dest_string = routeOptionsResponse.routes[0][0].dest.lng.toString() + ',' + routeOptionsResponse.routes[0][0].dest.lat.toString();
                         sql.insert.addSession(last_loc_string, dest_string, null, null, 'direct', userId, function (result) {
-                            routeOptionsResponse['session_id'] = result;
+                            routeOptionsResponse.session_id = result;
                             var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse);
                             res.status(response.code).send(response.res);
                         }, function (error) {
@@ -253,7 +253,7 @@ function combineSegments(formattedRoutes, responses) {
     var responseIndex = 0;
     formattedRoutes.forEach(function (currentRoute) {
         currentRoute.forEach(function (currentSegment) {
-            currentSegment['directions'] = responses[responseIndex];
+            currentSegment.directions = responses[responseIndex];
             responseIndex++;
         });
     });
@@ -264,28 +264,28 @@ function combineParkingInfo(spotInfo, bestSpots, isWithBike) {
     spotInfo.forEach(function (currentSpotInfo) {
         for (var bestSpotsIndex = 0; bestSpotsIndex < bestSpots.length; bestSpotsIndex++) {
             if (isWithBike) {
-                if (parseInt(bestSpots[bestSpotsIndex].parking_spot['id']) == parseInt(currentSpotInfo.id)) {
-                    bestSpots[bestSpotsIndex].parking_spot['name'] = currentSpotInfo.pretty_name
+                if (parseInt(bestSpots[bestSpotsIndex].parking_spot.id) == parseInt(currentSpotInfo.id)) {
+                    bestSpots[bestSpotsIndex].parking_spot.name = currentSpotInfo.pretty_name
                         .replace(/&amp;/g, '&')
                         .replace(/&quot;/g, '"')
                         .replace(/&apos;/g, '\'');
 
-                    bestSpots[bestSpotsIndex].parking_spot['payment_process'] = currentSpotInfo['payment_process'];
-                    bestSpots[bestSpotsIndex].parking_spot['address'] = currentSpotInfo['address']
-                    bestSpots[bestSpotsIndex].parking_spot['payment_types'] = currentSpotInfo['payment_types'];
-                    bestSpots[bestSpotsIndex].parking_spot['facilities'] = currentSpotInfo['facilities'];
+                    bestSpots[bestSpotsIndex].parking_spot.payment_process = currentSpotInfo.payment_process;
+                    bestSpots[bestSpotsIndex].parking_spot.address = currentSpotInfo.address;
+                    bestSpots[bestSpotsIndex].parking_spot.payment_types = currentSpotInfo.payment_types;
+                    bestSpots[bestSpotsIndex].parking_spot.facilities = currentSpotInfo.facilities;
                 }
             } else {
-                if (parseInt(bestSpots[bestSpotsIndex]['id']) == parseInt(currentSpotInfo.id)) {
-                    bestSpots[bestSpotsIndex]['name'] = currentSpotInfo.pretty_name
+                if (parseInt(bestSpots[bestSpotsIndex].id == parseInt(currentSpotInfo.id))) {
+                    bestSpots[bestSpotsIndex].name = currentSpotInfo.pretty_name
                         .replace(/&amp;/g, '&')
                         .replace(/&quot;/g, '"')
                         .replace(/&apos;/g, '\'');
 
-                    bestSpots[bestSpotsIndex]['payment_process'] = currentSpotInfo['payment_process'];
-                    bestSpots[bestSpotsIndex]['address'] = currentSpotInfo['address']
-                    bestSpots[bestSpotsIndex]['payment_types'] = currentSpotInfo['payment_types'];
-                    bestSpots[bestSpotsIndex]['facilities'] = currentSpotInfo['facilities'];
+                    bestSpots[bestSpotsIndex].payment_process = currentSpotInfo.payment_process;
+                    bestSpots[bestSpotsIndex].address = currentSpotInfo.address;
+                    bestSpots[bestSpotsIndex].payment_types = currentSpotInfo.payment_types;
+                    bestSpots[bestSpotsIndex].facilities = currentSpotInfo.facilities;
                 }
             }
         }
@@ -328,20 +328,20 @@ function getSegmentPrettyName(name) {
 }
 
 function getLots(lotIDs) {
-    var query = 'SELECT * FROM `parkopedia_parking` WHERE '
+    var query = 'SELECT * FROM `parkopedia_parking` WHERE ';
     for (var index = 0; index < lotIDs.length; index++) {
         query += '`id` = ' + lotIDs[index];
         if (index == lotIDs.length - 1)
-            query += ';'
+            query += ';';
         else
-            query += ' OR '
+            query += ' OR ';
     }
     return new Promise(function (resolve, reject) {
         sql.runRaw(query, function (response) {
             resolve(response);
         }, function (error) {
             reject(error);
-        })
+        });
     }).then(function (result) {
         return result;
     }).catch(function (error) {
@@ -402,7 +402,7 @@ function formatRegSegments(origin, dest, waypointSets, segmentNames) {
             'pretty_name': getSegmentPrettyName(segmentNames[1]),
             'origin': metaFormat(currentParkingSpot),
             'dest': dest
-        })
+        });
         formattedSegments.push(currentSegments);
     });
     return formattedSegments;
@@ -427,11 +427,11 @@ function addInstructions(routesResponse) {
 
 function metaFormat(toFormat) {
     var formatted = {};
-    formatted['meta'] = {};
+    formatted.meta = {};
     for (var key in toFormat) {
         if (toFormat.hasOwnProperty(key)) {
             if (key != 'lat' && key != 'lng') {
-                formatted['meta'][key] = toFormat[key];
+                formatted.meta[key] = toFormat[key];
             } else {
                 formatted[key] = toFormat[key];
             }
@@ -443,11 +443,11 @@ function metaFormat(toFormat) {
 function getRouteEngURL(routeMode) {
     if (typeof process.env.LOCAL != 'undefined' && process.env.LOCAL != null && process.env.LOCAL == 'TRUE') {
         if (routeMode == 'bike_route') {
-            return 'https://routing.trya.space/engine/bike/route/v1/driving/'
+            return 'https://routing.trya.space/engine/bike/route/v1/driving/';
         } else if (routeMode == 'walk_route') {
-            return 'https://routing.trya.space/engine/walk/route/v1/driving/'
+            return 'https://routing.trya.space/engine/walk/route/v1/driving/';
         } else {
-            return 'https://routing.trya.space/engine/car/route/v1/driving/'
+            return 'https://routing.trya.space/engine/car/route/v1/driving/';
         }
     } else {
         if (routeMode == 'bike_route') {
@@ -464,9 +464,9 @@ function calcRoutes(req, routeTypeConst, segmentNames, successCB, noResultCB, fa
     routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], routeTypeConst, function (bestSpots) {
         var lotIds;
         if (routeTypeConst == constants.optimize.PARK_BIKE) {
-            lotIds = [getLots(bestSpots.map(current => current.parking_spot['id']))];
+            lotIds = [getLots(bestSpots.map(current => current.parking_spot.id))];
         } else {
-            lotIds = [getLots(bestSpots.map(current => current['id']))];
+            lotIds = [getLots(bestSpots.map(current => current.id))];
         }
         Promise.all(lotIds)
             .then(function (spotInfo) {
@@ -495,7 +495,7 @@ function calcRoutes(req, routeTypeConst, segmentNames, successCB, noResultCB, fa
                 }
                 Promise.all(getRequests(formattedSegments))
                     .then(function (directionsResponses) {
-                        routeOptionsResponse['routes'] = combineSegments(formattedSegments, directionsResponses);
+                        routeOptionsResponse.routes = combineSegments(formattedSegments, directionsResponses);
                         if (typeof intermediaryFN != 'undefined' && intermediaryFN != null) {
                             intermediaryFN(req, routeOptionsResponse, num_bikes);
                         } else {

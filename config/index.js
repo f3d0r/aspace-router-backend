@@ -67,4 +67,4 @@ module.exports = {
         cluster_distance_threshold: 0.1, // miles
         bike_threshold: 0.249 // miles
     }
-}
+};

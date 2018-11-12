@@ -24,7 +24,7 @@ module.exports = {
             successCB();
         }
     }
-}
+};
 
 function defaultQueryMissingCallback(res, foundQueries, missingQueries) {
     res.status(422).send(getErrorJSONTemp('MISSING_PARAMETER', null, missingQueries[0] + " query required").res);
@@ -39,7 +39,7 @@ function getErrorJSONTemp(error, resContent, missingParameter) {
     };
     var code = ERROR_CODES[error].HTTP_CODE;
     if (error == 'MISSING_PARAMETER')
-        res.res_info['missing_parameter'] = missingParameter;
+        res.res_info.missing_parameter = missingParameter;
     else if (typeof resContent != 'undefined' && resContent != null)
         res.res_content = resContent;
     return {

@@ -74,7 +74,7 @@ cluster(function (worker) {
     app.use(responseTime());
     app.use(morgan(loggingFormat, {
         skip: function (req, res) {
-            if (req.url == '/v1/ping' || req.url == '/v1/') {
+            if ((req.url.length >= 1 && req.url.charAt(req.url.length - 1) == '/') || (req.url.length >= 1 && req.url.substring(req.url.length - 4, req.url.length) == 'ping')) {
                 return true;
             } else {
                 return false;
@@ -99,8 +99,6 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(errorHandler);
     app.use(haltOnTimedout);
-    // app.use(sendSlackError);
-    // app.use(haltOnTimedout);
 
     function errorHandler(error, req, res, next) {
         var url = process.env.BASE_URL + req.originalUrl;
@@ -112,23 +110,24 @@ cluster(function (worker) {
             res.status(401).send("aspace Authorization Required");
         } else {
             if (process.env.NODE_ENV == "dev") {
+                console.log(JSON.stringify("ERROR: " + JSON.stringify(error)));
                 res.status(500).send(error);
             } else {
                 response = errors.getResponseJSON('GENERAL_SERVER_ERROR', "Please check API status at status.trya.space");
                 res.status(response.code).send(response.res);
+                sendSlackError(error, req);
             }
         }
-        console.log(error.err);
-        next(error);
     }
 
-    // function sendSlackError(error, req) {
-    //     var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
-    //     webhook.send(message, function (error, res) {
-    //         if (error)
-    //             console.log('Error: ', error);
-    //     });
-    // }
+    function sendSlackError(error, req) {
+        console.log("HERE!");
+        var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
+        webhook.send(message, function (error, res) {
+            if (error)
+                console.log('Error: ', error);
+        });
+    }
 
     function haltOnTimedout(req, res, next) {
         if (!req.timedout)

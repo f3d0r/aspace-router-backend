@@ -14,7 +14,7 @@
         "express-cluster": "0.0.5",
         "express-toobusy": "0.0.3",
         "fs": "0.0.1-security",
-        "helmet": "^3.18.0",
+        "helmet": "^3.20.0",
         "ip": "^1.1.5",
         "logdna": "^3.2.1",
         "mathjs": "^6.0.3",

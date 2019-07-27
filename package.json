@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "aspace, Inc. - Router Backend (node.js/Express.js stack), available at https://routing.trya.space.",
     "dependencies": {
-        "@slack/client": "^5.0.1",
+        "@slack/client": "^5.0.2",
         "@turf/turf": "^5.1.6",
         "app-root-path": "^2.2.1",
         "aws-sdk": "^2.493.0",

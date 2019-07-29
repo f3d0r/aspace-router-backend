@@ -27,7 +27,7 @@
         "request": "^2.88.0",
         "request-promise": "^4.2.4",
         "response-time": "^2.3.2",
-        "sqreen": "^1.31.0",
+        "sqreen": "^1.32.0",
         "unique-string": "^2.0.0"
     },
     "scripts": {

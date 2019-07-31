@@ -1344,10 +1344,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@^2.501.0:
-  version "2.501.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.501.0.tgz#611d900fae284bfe8175fe9ee3d101e01a877f06"
-  integrity sha512-eFihkJEsDia9LPfVh8AVc7KXiL6KARRTdop/P3bwVv+sAxi2cfeX231WNeeBLCGBnITL1MmyndkG8gaCg6UgbQ==
+aws-sdk@^2.503.0:
+  version "2.503.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.503.0.tgz#983b8c03aa919060a81127cb9d94fbb1667f4cf2"
+  integrity sha512-DPwRxhPYCGNvKL9rUhpAoOVpMRyISbVMlXykLQknYo7wyOI+jYcyA7t8H7IFPAqj4ZG+R+Au9tO/KT4im+2gbg==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -1759,6 +1759,11 @@ express-cluster@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/express-cluster/-/express-cluster-0.0.5.tgz#516c881b2a8f5d73bf2e3bbc2ea9540678aadefc"
   integrity sha512-Wo0i4YFdj1341nkCxXO9zcO6ZGgiTiFEi+KMwE8bZexGg1sY2GmeDyHHEUDI+zSUJsQDSlT1EQSBnh5XaPIFVQ==
+
+express-list-endpoints@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/express-list-endpoints/-/express-list-endpoints-4.0.1.tgz#f83ec9de4df21b904cfba523bc913aee4c17e9db"
+  integrity sha512-KjY7frYk72/Jwk2VgqyvuXlTPslEkWkzjUXPUMCUguVmAWqd6fh60VHr+sEfqJgMAOE3hKhUjm/7tLASVaE2Qg==
 
 express-toobusy@0.0.3:
   version "0.0.3"
@@ -2336,10 +2341,10 @@ mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
-module-alias@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/module-alias/-/module-alias-2.2.0.tgz#a2e32275381642252bf0c51405f7a09a367479b5"
-  integrity sha512-O4bbvlZkHj2LUQhieQWWCr486ddc8X+WwRqi3QGnFKfknaxdHTOB7+xRgeyWHc6arpjgtT5SLLMMTFwUM3/x5w==
+module-alias@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/module-alias/-/module-alias-2.2.1.tgz#553aea9dc7f99cd45fd75e34a574960dc46550da"
+  integrity sha512-LTez0Eo+YtfUhgzhu/LqxkUzOpD+k5C0wXBLun0L1qE2BhHf6l09dqam8e7BnoMYA6mAlP0vSsGFQ8QHhGN/aQ==
 
 monotone-convex-hull-2d@^1.0.1:
   version "1.0.1"
@@ -2774,16 +2779,17 @@ sqlstring@2.3.1:
   resolved "https://registry.yarnpkg.com/sqlstring/-/sqlstring-2.3.1.tgz#475393ff9e91479aea62dcaf0ca3d14983a7fb40"
   integrity sha1-R1OT/56RR5rqYtyvDKPRSYOn+0A=
 
-sqreen@^1.31.0:
-  version "1.31.0"
-  resolved "https://registry.yarnpkg.com/sqreen/-/sqreen-1.31.0.tgz#a38612d4d32a708ea11e663177ea8707e593f53b"
-  integrity sha512-bhM6F2BK7a2vVPdKM9SKney5iCOR0C0Udks/SkyyrNqvViYaYGuUjfr6JkXKa9P6X83sWc96fb49H8HbfcROsg==
+sqreen@^1.32.0:
+  version "1.32.0"
+  resolved "https://registry.yarnpkg.com/sqreen/-/sqreen-1.32.0.tgz#5ed9a86767dd017e05afb9f3ff1d793706a97fc0"
+  integrity sha512-J0XluUe6QaYUvihj8kOf6+DoE327UDZc9VfYv+NJonc7LyZ/vO0OW+wQDR3kAoNK7dvco2zQ/9Dp0gT3qdPooQ==
   dependencies:
     async-listener "^0.6.0"
     cls-bluebird "^2.0.1"
     commander "^2.18.0"
     emitter-listener "^1.1.1"
     escape-html "^1.0.3"
+    express-list-endpoints "4.0.1"
     flat "^4.0.0"
     hoek "^4.2.1"
     http-proxy-agent "^2.1.0"

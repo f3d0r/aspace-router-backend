@@ -1344,10 +1344,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@^2.519.0:
-  version "2.519.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.519.0.tgz#8219ecb56c93685ed6ca360250d7f1a1f4f37bba"
-  integrity sha512-bQqHiYBpvRUhHyvxgXaz1hERF9tSG1n/i+x2jNrvDjWzxkUpNexOIaNqaGb1JanTaQTQHVxqiAKjJqfimcWzxw==
+aws-sdk@^2.521.0:
+  version "2.521.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.521.0.tgz#b7b41084fdc9e8b134520f054c06e3908df9321a"
+  integrity sha512-YRViGahZoHq0lEsy0Cq7bqaLzP8OTzjg35Hz08Rv88ltk+b5UWVpDgIWls7mXCBNTBTYjbfbeGXzNaHJBLKlpA==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -2281,10 +2281,10 @@ logdna@^3.3.0:
     object-sizeof "^1.0.10"
     valid-url "^1.0.9"
 
-mathjs@^6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-6.2.0.tgz#9f86e12b8c4eca895f98a52ecb858ae2da9279ad"
-  integrity sha512-YKMkW/Nwr8umoh+kg5d6F9IuD0MMn8MEE7bGe5+zZv0zm+2zLPVt5yAqyapfrdkD/0ufoPJ4gUzjiy8GhW5zVQ==
+mathjs@^6.2.1:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-6.2.1.tgz#f51199fe56d42dfb7efd45d7c7a69b7a1628e820"
+  integrity sha512-ySs/G6/d4FWvsnFiN7pkwO4svWVSMJnCXa57JSsE/VRBOFqUhK9ylILD9zb6i4cf6HLxTAQ4kJhQydelIsnPMA==
   dependencies:
     complex.js "2.0.11"
     decimal.js "10.2.0"
